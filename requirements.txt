@@ -17,7 +17,7 @@ tenacity>=8.2.3
 
 # --- Vision ---
 Pillow>=10.1.0
-numpy>=1.26.0
+numpy>=2.2.6
 
 # --- Database & Persistence ---
 sqlalchemy>=2.0.23
