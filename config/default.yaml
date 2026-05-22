@@ -1,0 +1,239 @@
+# ============================================================
+#  NVIDIA ShadowForge Agent - Configuração Padrão
+#  Arquivo: config/default.yaml
+#  Estilo: 1337 Cyberpunk | Modo: Production-Ready
+# ============================================================
+
+agente:
+  nome: "ShadowForge"
+  versao: "1.0.0"
+  codinome: "SH4D0WF0RG3"
+  modo: "stealth"          # stealth | agressivo | recon_only | debug
+  idioma: "pt-BR"
+  leetspeak_logs: true     # Logs em estilo 1337
+  tema: "matrix"           # matrix | cyberpunk | plain
+  log_nivel: "INFO"        # DEBUG | INFO | WARNING | ERROR | CRITICAL
+  log_arquivo: "logs/shadowforge.log"
+  log_rotacao_mb: 50
+  log_retenciao_dias: 30
+
+  #Loop OODA
+  ooda:
+    intervalo_observe_ms: 500      # Intervalo de captura de tela
+    intervalo_orient_ms: 1000      # Intervalo de análise
+    intervalo_decide_ms: 800       # Intervalo de decisão
+    intervalo_act_ms: 200          # Intervalo mínimo entre ações
+    max_iteracoes: 1000            # Limite de iterações por campanha
+    timeout_campanha_min: 480      # 8h timeout máximo
+
+  #Guardrails Éticos - NUNCA DESATIVAR EM PRODUÇÃO
+  etica:
+    exigir_autorizacao: true
+    verificar_escopo: true
+    registrar_todas_acoes: true
+    recusar_ilegal: true
+    modo_simulacao: false          # true = simula sem executar ataques reais
+    whitelist_hosts: []            # Hosts autorizados explicitamente
+    blacklist_hosts:
+      - "0.0.0.0/0"               # Bloqueia broadcast
+      - "224.0.0.0/4"             # Bloqueia multicast
+      - "127.0.0.1"               # Bloqueia loopback por padrão
+    max_severidade_exploracao: "high"  # low | medium | high | critical
+    impedir_destruicao: true       # Nunca destruir dados
+    impedir_backdoor: true         # Nunca instalar backdoors reais
+    impedir_exfiltracao_real: true  # Nunca exfiltrar dados reais
+
+nvidia:
+  api_key: "${NVIDIA_API_KEY}"     # Via env var
+  base_url: "https://integrate.api.nvidia.com/v1"
+  org_id: "${NVIDIA_ORG_ID}"
+
+  modelos:
+    planejamento:
+      modelo: "meta/llama-3.3-70b-instruct"
+      nim_endpoint: "https://integrate.api.nvidia.com/v1"
+      temperatura: 0.7
+      max_tokens: 4096
+      top_p: 0.95
+      stream: true
+
+    raciocinio:
+      modelo: "meta/llama-3.3-70b-instruct"
+      nim_endpoint: "https://integrate.api.nvidia.com/v1"
+      temperatura: 0.4
+      max_tokens: 8192
+      top_p: 0.9
+      stream: true
+
+    visao:
+      modelo: "meta/llama-3.2-90b-vision-instruct"  # Vision-Language model avancado
+      nim_endpoint: "https://integrate.api.nvidia.com/v1"
+      temperatura: 0.3
+      max_tokens: 2048
+      resolucao_capture: "1920x1080"
+      fps_adaptativo: true
+
+    codigo:
+      modelo: "meta/llama-3.3-70b-instruct"
+      temperatura: 0.2
+      max_tokens: 4096
+
+    embeddings:
+      modelo: "nvidia/embed-qa-4"  # NVIDIA NeMo Retriever Embedding QA
+      dimensoes: 1024  # Output dimension of nvidia/embed-qa-4
+      batch_size: 32
+
+  riva:
+    servidor: "localhost:50051"     # gRPC endpoint Riva
+    asr:
+      modelo: "nvidia/riva-asr"
+      idioma: "pt-BR"
+      sample_rate: 16000
+      enable_automatic_punctuation: true
+      enable_vad: true
+      vad_sensibilidade: 0.5
+      max_latencia_ms: 250
+    tts:
+      modelo: "nvidia/riva-tts"
+      idioma: "pt-BR"
+      voz: "default"
+      sample_rate: 22050
+      velocidade: 1.0
+      tom: 1.0
+
+  gpu:
+    dispositivo: 0                  # GPU ID (-1 = auto-detect)
+    multi_gpu: false
+    memoria_max_mb: 8192
+    tensorrt: true
+    fp16: true
+    int8: false                     # Ativar para GPUs com < 8GB
+
+visao:
+  captura:
+    monitor: 0                      # Monitor primário
+    fps_min: 1
+    fps_max: 30
+    formato: "PNG"                  # PNG | JPEG | BMP
+    qualidade_jpeg: 85
+    diff_threshold: 0.05            # Detecta mudanças > 5%
+    regiao_interesse: null          # null = tela inteira
+  ocr:
+    engine: "tesseract"             # tesseract | nemotron | hybrid
+    idiomas: ["por", "eng"]
+    psm: 6                          # Page segmentation mode
+    confianca_min: 60
+  detector:
+    modelo: "yolov8n"
+    confianca_min: 0.5
+    nms_threshold: 0.4
+    classes_alvo:
+      - "button"
+      - "input"
+      - "link"
+      - "text_area"
+      - " dropdown"
+      - "menu"
+      - "dialog"
+
+controle:
+  mouse:
+    velocidade_base: 0.5           # Segundos para mover
+    variacao_velocidade: 0.15      # Variação aleatória
+    bezier_pontos: 50              # Suavidade da curva
+    jitter_pixels: 3               # Jitter humano
+    clique_delay_ms: [50, 150]     # Range de delay entre cliques
+  teclado:
+    dig_delay_ms: [30, 80]         # Delay entre teclas
+    erro_probabilidade: 0.02       # 2% chance de erro de digitação
+    erro_correcao_delay_ms: [100, 300]
+  shell:
+    timeout_default_s: 300
+    timeout_longo_s: 3600
+    stream_output: true
+    encoding: "utf-8"
+  stealth:
+    anti_forensics: true
+    proxy_chain: []                # ["socks5://127.0.0.1:9050"]
+    user_agent_rotation: true
+    user_agents:
+      - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+      - "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
+      - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
+    mac_spoof: false
+    dns_over_https: true
+    limpar_historial: true
+
+hacker_ferramentas:
+  nmap:
+    caminho: "nmap"
+    argumentos_default: "-sV -sC -O --version-intensity 5"
+    max_threads: 10
+    timeout_s: 600
+  nikto:
+    caminho: "nikto"
+    timeout_s: 1800
+  sqlmap:
+    caminho: "sqlmap"
+    timeout_s: 1800
+    batch: true
+  metasploit:
+    rpc_host: "127.0.0.1"
+    rpc_porta: 55553
+    rpc_senha: "${MSF_RPC_SENHA}"
+    auto_conectar: false
+  burp:
+    api_host: "127.0.0.1"
+    api_porta: 1337
+    api_key: "${BURP_API_KEY}"
+    auto_conectar: false
+  hydra:
+    caminho: "hydra"
+    threads: 16
+    timeout_s: 3600
+    limites_eticos:
+      max_tentativas_por_minuto: 60
+      max_tentativas_total: 10000
+
+planejamento:
+  rag:
+    vector_store: "chromadb"
+    chroma_diretorio: "data/chromadb"
+    collecao_mitre: "mitre_attack"
+    collecao_owasp: "owasp_top10"
+    collecao_cve: "cve_database"
+    top_k: 5
+    score_min: 0.7
+  campanha:
+    db_diretorio: "data/campaigns"
+    auto_salvar_min: 5
+    max_campanhas_historico: 100
+
+speech:
+  microfone:
+    dispositivo: null               # null = padrão
+    sample_rate: 16000
+    canais: 1
+    chunk_size: 1024
+  speaker:
+    dispositivo: null
+    sample_rate: 22050
+    volume: 0.8
+  wake_word: "shadow"
+  always_listening: false
+  push_to_talk: true
+  barge_in: true                   # Permitir interromper TTS
+
+exemplos:
+  doom:
+    habilitado: false
+    janela_titulo: "DOOM"
+    fps_controle: 30
+  pentest_lab:
+    habilitado: true
+    alvo_default: "192.168.1.0/24"
+    modo: "simulacao"              # simulacao | real
+  bug_bounty:
+    habilitado: false
+    plataforma: "hackerone"
+    scope_arquivo: "config/scope.json"

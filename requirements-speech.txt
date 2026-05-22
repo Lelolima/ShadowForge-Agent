@@ -1,0 +1,8 @@
+# ============================================================
+# NVIDIA ShadowForge Agent - Speech Dependencies (Optional)
+# ============================================================
+
+grpcio>=1.60.0
+grpcio-tools>=1.60.0
+pyaudio>=0.2.14
+sounddevice>=0.4.6

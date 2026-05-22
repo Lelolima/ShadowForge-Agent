@@ -1,0 +1,9 @@
+# ============================================================
+# NVIDIA ShadowForge Agent - Hacker Tools Dependencies (Optional)
+# ============================================================
+
+python-nmap>=0.7.1
+shodan>=1.31.0
+censys>=2.2.12
+paramiko>=3.4.0
+scapy>=2.5.0

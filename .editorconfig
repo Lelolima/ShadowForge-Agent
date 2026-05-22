@@ -1,0 +1,48 @@
+# ============================================
+# NVIDIA ShadowForge Agent - EditorConfig
+# Consistent formatting across all editors
+# ============================================
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.py]
+max_line_length = 100
+
+[*.{yaml,yml}]
+indent_size = 2
+
+[*.{toml}]
+indent_size = 2
+
+[*.{md,txt}]
+trim_trailing_whitespace = false
+
+[*.json]
+indent_size = 2
+
+[*.sh]
+indent_size = 2
+end_of_line = lf
+
+[Dockerfile]
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+
+[*.{cfg,ini}]
+indent_size = 2
+
+[*.{bat,ps1}]
+end_of_line = crlf
+
+[.env*]
+indent_size = 2

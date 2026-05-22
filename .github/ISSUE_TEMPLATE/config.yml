@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security Vulnerability
+    url: mailto:security@shadowforge.dev
+    about: |
+      Report security vulnerabilities via email ONLY.
+      Do NOT file public issues for security vulnerabilities.
+      See SECURITY.md for responsible disclosure process.
+  - name: Documentation
+    url: https://github.com/shadowforge/NVIDIA-ShadowForge-Agent/tree/main/docs
+    about: Read the project documentation before opening an issue.

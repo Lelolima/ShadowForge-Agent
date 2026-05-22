@@ -1,0 +1,98 @@
+# ============================================
+# NVIDIA ShadowForge Agent - .gitignore
+# Professional grade - Security first
+# ============================================
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+*.whl
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+
+# --- IDEs ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# --- Secrets & Credentials (CRITICAL) ---
+.env
+.env.local
+.env.production
+.env.*.local
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+service-account.json
+
+# --- Config with sensitive data ---
+config/local.yaml
+config/production.yaml
+config/secrets.yaml
+
+# --- Data & Logs (may contain sensitive info) ---
+logs/
+data/
+*.db
+*.sqlite3
+*.sqlite
+chromadb/
+
+# --- Screenshots & Captures ---
+screenshots/
+captures/
+*.png
+*.jpg
+*.jpeg
+*.bmp
+!.github/img/*.png
+
+# --- NVIDIA / CUDA ---
+*.nvvp
+*.ncu-rep
+*.qdrep
+*.qdstrm
+nvprof*.txt
+*.cubin
+*.fatbin
+
+# --- Docker ---
+.docker/
+docker-compose.override.yaml
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# --- Temporary ---
+*.tmp
+*.bak
+*.swp
+.cache/
+*.log
+
+# --- Security scan reports ---
+bandit-report.json
+safety-report.json
