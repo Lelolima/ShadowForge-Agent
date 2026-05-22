@@ -24,7 +24,7 @@ sqlalchemy>=2.0.23
 aiosqlite>=0.19.0
 
 # --- Networking ---
-requests>=2.31.0
+requests>=2.34.2
 
 # --- Logging & Display ---
 rich>=13.7.0
