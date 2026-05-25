@@ -21,6 +21,12 @@
 </p>
 </p>
 
+<p align="center">
+  <a href="https://github.com/Lelolima/ShadowForge-Agent">
+    <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/shadowforge-dashboard.svg" width="100%" alt="SH4D0WF0RG3 Dashboard - Real-time Agent Monitoring" />
+  </a>
+</p>
+
 ---
 
 ## Overview
@@ -56,75 +62,6 @@ ShadowForge is an autonomous ethical hacking agent that combines the **NVIDIA AI
 | Riva   |     | Agent  |     |  Mouse/Keyboard  |
 | ASR/TTS|     | State  |     |  Shell/Stealth   |
 +--------+     +--------+     +------------------+
-```
-
-## Dashboard Preview
-
-ShadowForge includes a real-time HTML dashboard (`shadowforge_dashboard.html`) for live monitoring:
-
-| **Module** | **Status** |
-|-----------|----------|
-| Screen Capture | Active |
-| Nemotron Vision | Active |
-| YOLOv8 Detector | Active |
-| Mouse Control | Idle |
-| Keyboard Inject | Idle |
-| Stealth Shell | Active |
-| Network Sniffer | Active |
-| Report Generator | Offline |
-
----
-
-## OODA Loop Engine
-
-```text
-   ╔═════════╦════════╦════════╦═════╗
-   ║ OBSERVE ║ ORIENT ║ DECIDE ║ ACT ║
-   ╚═════════╩════════╩════════╩═════╝
-      |    
-      v
-  ┌────────────┐
-  | Collect   |
-  | Screen/OCR |
-  | Network   |
-  | Signals   |
-  └─────┬──────┘
-         | Cycle: ~145ms
-```
-
----
-
-## Active Modules
-
-| Module | Status | Description |
-|--------|--------|-------------|
-| **Screen Capture** | Active | Real-time screen analysis & screenshots |
-| **Nemotron Vision** | Active | NVIDIA multimodal vision-language understanding |
-| **YOLOv8 Detector** | Active | UI element & object detection |
-| **Mouse Control** | Idle | Bezier curve human-like mouse movement |
-| **Keyboard Inject** | Idle | Human-like typing simulation |
-| **Stealth Shell** | Active | Anti-forensics command execution |
-| **Network Sniffer** | Active | Passive & active network analysis |
-| **Report Generator** | Offline | PDF/HTML report generation |
-
----
-
-## Kill Chain Progress
-
-```
- [ Completed ]   [  Pending  ]   [  Pending  ]   [  Pending  ]   [  Pending  ]   [  Pending  ]
-      |||              |              |              |              |              |
-      vvv              v              v              v              v              v
- +--------+--------+--------+--------+--------+--------+
- |  RECON  |  SCAN  |  ENUM  | EXPLOIT|  POST  | REPORT |
- |   |     |        |        |        |        |        |
- | Nmap    | Port   |Service | PoC    |Privesc | PDF/HTML|
- | OSINT   | Scan   | Enum   | Gen    | Pivot  | Report  |
- | Shodan  |        |        |        |        |        |
- +--------+--------+--------+--------+--------+--------+
-      |
-      v
-   ACTIVE 
 ```
 
 ---
@@ -190,6 +127,8 @@ python scripts/validate_env.py
 | `recon_only` | Reconnaissance only, no exploitation |
 | `debug` | Verbose output, all actions logged |
 
+---
+
 ## Kill Chain Phases
 
 ```
@@ -199,6 +138,8 @@ IDLE -> RECON -> SCAN -> ENUM -> EXPLOIT -> POST -> REPORT -> COMPLETED
  Wait  Nmap/OSINT  Port   Service  PoC     Privesc  PDF/HTML
        Shodan     Scan   Enum     Gen     Pivot    Report
 ```
+
+---
 
 ## Ethical Safeguards
 
@@ -214,7 +155,9 @@ ShadowForge includes multiple ethical guardrails:
 - **Simulation Mode**: Run all phases without executing real attacks
 - **Full Audit Trail**: Every action is logged with timestamp
 
-### Audit Trail
+---
+
+## Audit Trail Example
 
 ```
 [14:49:32] [VISION] Detected input field: 'admin_login'
@@ -229,6 +172,8 @@ ShadowForge includes multiple ethical guardrails:
 [14:49:50] [SAFE] PII detected and redacted in output
 ```
 
+---
+
 ## LGPD & Privacy Compliance
 
 ShadowForge is designed with privacy-first principles:
@@ -238,6 +183,8 @@ ShadowForge is designed with privacy-first principles:
 - **Local database** — SQLite for state, ChromaDB for RAG knowledge
 - **Configurable retention** — auto-cleanup after campaign
 - **Privacy Policy** — see [PRIVACY.md](PRIVACY.md)
+
+---
 
 ## Project Structure
 
@@ -283,6 +230,8 @@ shadowforge/
 └── config/                    # YAML configuration
 ```
 
+---
+
 ## Configuration
 
 Configuration is loaded in priority order:
@@ -293,6 +242,8 @@ Configuration is loaded in priority order:
 4. **Defaults** (Pydantic models)
 
 See [.env.example](.env.example) for all available environment variables.
+
+---
 
 ## Development
 
@@ -319,13 +270,19 @@ bandit -r core/ models/ planning/ -ll --skip B101,B311
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for full contribution guidelines.
 
+---
+
 ## Security
 
 For security vulnerabilities, please see [SECURITY.md](SECURITY.md) for responsible disclosure.
 
+---
+
 ## License
 
 This project is licensed under the MIT License with an **Ethical Use Requirement** — see [LICENSE](LICENSE) for details.
+
+---
 
 ## Disclaimer
 
