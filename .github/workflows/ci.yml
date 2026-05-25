@@ -71,7 +71,7 @@ jobs:
 
       - name: Upload coverage artifact
         if: matrix.python-version == '3.13'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: coverage.xml
@@ -101,7 +101,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload security scan results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: security-reports
@@ -129,7 +129,7 @@ jobs:
 
       - name: Upload example output artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pentest-lab-output
           path: data/campaigns/*.json
