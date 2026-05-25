@@ -66,6 +66,92 @@ ShadowForge is an autonomous ethical hacking agent that combines the **NVIDIA AI
 
 ---
 
+## Step-by-Step Workflow
+
+The following animated demos walk through the entire ShadowForge workflow — from installation to final report.
+
+### Step 1 — Installation
+
+```bash
+git clone https://github.com/Lelolima/ShadowForge-Agent.git
+cd ShadowForge-Agent
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/install-shadowforge.gif" width="100%" alt="Step 1: Install ShadowForge" />
+</p>
+
+---
+
+### Step 2 — Configuration
+
+```bash
+cp .env.example .env
+# Edit .env and add your NVIDIA_API_KEY
+python scripts/validate_env.py
+python scripts/health_check.py
+```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/configure-shadowforge.gif" width="100%" alt="Step 2: Configure ShadowForge" />
+</p>
+
+---
+
+### Step 3 — Reconnaissance (RECON)
+
+```bash
+python main.py --mode recon_only --target 192.168.1.0/24
+```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/recon-shadowforge.gif" width="100%" alt="Step 3: Reconnaissance" />
+</p>
+
+---
+
+### Step 4 — Scanning & Enumeration
+
+```bash
+python main.py --mode stealth --target 192.168.1.0/24 --simulate
+```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/scan-shadowforge.gif" width="100%" alt="Step 4: Scanning and Enumeration" />
+</p>
+
+---
+
+### Step 5 — Exploitation & Post-Exploitation
+
+```bash
+python main.py --mode agressivo --target 192.168.1.10
+# Simulation mode (safe)
+python main.py --mode stealth --target 192.168.1.0/24 --simulate
+```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/exploit-shadowforge.gif" width="100%" alt="Step 5: Exploitation and Post-Exploitation" />
+</p>
+
+---
+
+### Step 6 — Report Generation
+
+```bash
+# Auto-generated after campaign completes
+ls ./reports/
+```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/report-shadowforge.gif" width="100%" alt="Step 6: Report Generation" />
+</p>
+
+---
+
 ## Quick Start
 
 ### Prerequisites
