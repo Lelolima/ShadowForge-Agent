@@ -58,6 +58,77 @@ ShadowForge is an autonomous ethical hacking agent that combines the **NVIDIA AI
 +--------+     +--------+     +------------------+
 ```
 
+## Dashboard Preview
+
+ShadowForge includes a real-time HTML dashboard (`shadowforge_dashboard.html`) for live monitoring:
+
+| **Module** | **Status** |
+|-----------|----------|
+| Screen Capture | Active |
+| Nemotron Vision | Active |
+| YOLOv8 Detector | Active |
+| Mouse Control | Idle |
+| Keyboard Inject | Idle |
+| Stealth Shell | Active |
+| Network Sniffer | Active |
+| Report Generator | Offline |
+
+---
+
+## OODA Loop Engine
+
+```text
+   ╔═════════╦════════╦════════╦═════╗
+   ║ OBSERVE ║ ORIENT ║ DECIDE ║ ACT ║
+   ╚═════════╩════════╩════════╩═════╝
+      |    
+      v
+  ┌────────────┐
+  | Collect   |
+  | Screen/OCR |
+  | Network   |
+  | Signals   |
+  └─────┬──────┘
+         | Cycle: ~145ms
+```
+
+---
+
+## Active Modules
+
+| Module | Status | Description |
+|--------|--------|-------------|
+| **Screen Capture** | Active | Real-time screen analysis & screenshots |
+| **Nemotron Vision** | Active | NVIDIA multimodal vision-language understanding |
+| **YOLOv8 Detector** | Active | UI element & object detection |
+| **Mouse Control** | Idle | Bezier curve human-like mouse movement |
+| **Keyboard Inject** | Idle | Human-like typing simulation |
+| **Stealth Shell** | Active | Anti-forensics command execution |
+| **Network Sniffer** | Active | Passive & active network analysis |
+| **Report Generator** | Offline | PDF/HTML report generation |
+
+---
+
+## Kill Chain Progress
+
+```
+ [ Completed ]   [  Pending  ]   [  Pending  ]   [  Pending  ]   [  Pending  ]   [  Pending  ]
+      |||              |              |              |              |              |
+      vvv              v              v              v              v              v
+ +--------+--------+--------+--------+--------+--------+
+ |  RECON  |  SCAN  |  ENUM  | EXPLOIT|  POST  | REPORT |
+ |   |     |        |        |        |        |        |
+ | Nmap    | Port   |Service | PoC    |Privesc | PDF/HTML|
+ | OSINT   | Scan   | Enum   | Gen    | Pivot  | Report  |
+ | Shodan  |        |        |        |        |        |
+ +--------+--------+--------+--------+--------+--------+
+      |
+      v
+   ACTIVE 
+```
+
+---
+
 ## Quick Start
 
 ### Prerequisites
@@ -70,8 +141,8 @@ ShadowForge is an autonomous ethical hacking agent that combines the **NVIDIA AI
 
 ```bash
 # Clone the repository
-git clone https://github.com/Lelolima/NVIDIA-ShadowForge-Agent.git
-cd NVIDIA-ShadowForge-Agent
+git clone https://github.com/Lelolima/ShadowForge-Agent.git
+cd ShadowForge-Agent
 
 # Create virtual environment
 python -m venv .venv
@@ -142,6 +213,21 @@ ShadowForge includes multiple ethical guardrails:
 - **Exfiltration Prevention**: Cannot exfiltrate real data
 - **Simulation Mode**: Run all phases without executing real attacks
 - **Full Audit Trail**: Every action is logged with timestamp
+
+### Audit Trail
+
+```
+[14:49:32] [VISION] Detected input field: 'admin_login'
+[14:49:34] [OCR] Extracted hash: 5d41402abc4b2a76...
+[14:49:36] [NET] Port 443 open (HTTPS/TLS1.3)
+[14:49:38] [AI] Reasoning: Potential SQLi vector identified
+[14:49:40] [GUARD] Blocked destructive command: rm -rf
+[14:49:42] [RIVA] Voice command: 'Enumerate services'
+[14:49:44] [MEM] Context window updated (14k tokens)
+[14:49:46] [STEALTH] Anti-forensics cleanup executed
+[14:49:48] [NIM] Llama-3.3 inference completed (45ms)
+[14:49:50] [SAFE] PII detected and redacted in output
+```
 
 ## LGPD & Privacy Compliance
 
