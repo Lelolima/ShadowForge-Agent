@@ -1,4 +1,5 @@
 <p align="center">
+<img src="https://github.com/Lelolima/ShadowForge-Agent/actions/workflows/ci.yml/badge.svg" alt="CI">
 <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white">
 <img src="https://img.shields.io/badge/NVIDIA-NIM-76B900?style=for-the-badge&logo=nvidia&logoColor=white">
 <img src="https://img.shields.io/badge/LGPD-Compliant-green?style=for-the-badge">
