@@ -23,7 +23,7 @@
 
 <p align="center">
   <a href="https://github.com/Lelolima/ShadowForge-Agent">
-    <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/shadowforge-dashboard.svg" width="100%" alt="SH4D0WF0RG3 Dashboard - Real-time Agent Monitoring" />
+    <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/shadowforge-dashboard.gif" width="100%" alt="SH4D0WF0RG3 Dashboard - Real-time Agent Monitoring" />
   </a>
 </p>
 
