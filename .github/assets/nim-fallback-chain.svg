@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" font-family="'Courier New', monospace">
+  <defs>
+    <style>
+      @keyframes tryModel { 0%,40%{opacity:1;stroke:#ff0} 50%,90%{opacity:0.3;stroke:#f44} 100%{opacity:0.15;stroke:#666} }
+      @keyframes modelOK { 0%{opacity:0;transform:scale(0.8)} 30%{opacity:1;transform:scale(1.1)} 100%{opacity:1;transform:scale(1)} }
+      @keyframes streamToken { 0%{opacity:0;transform:translateX(-5px)} 100%{opacity:1;transform:translateX(0)} }
+      @keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+      @keyframes slideDown { 0%{transform:translateY(-8px);opacity:0} 100%{transform:translateY(0);opacity:1} }
+      @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+      .model-try { animation: tryModel 3s ease-out forwards; }
+      .model-ok { animation: modelOK 1s ease-out 3.5s forwards; opacity:0; }
+      .stream { animation: streamToken 0.3s ease-out forwards; opacity:0; }
+      .s1 { animation-delay:4.0s } .s2 { animation-delay:4.15s } .s3 { animation-delay:4.3s }
+      .s4 { animation-delay:4.45s } .s5 { animation-delay:4.6s } .s6 { animation-delay:4.75s }
+      .s7 { animation-delay:4.9s } .s8 { animation-delay:5.05s } .s9 { animation-delay:5.2s }
+      .s10 { animation-delay:5.35s }
+      .pulse-dot { animation: pulse 2s ease-in-out infinite; }
+      .sd1 { animation: slideDown 0.5s ease-out 0.3s forwards; opacity:0; }
+      .sd2 { animation: slideDown 0.5s ease-out 0.6s forwards; opacity:0; }
+      .sd3 { animation: slideDown 0.5s ease-out 0.9s forwards; opacity:0; }
+      .sd4 { animation: slideDown 0.5s ease-out 1.2s forwards; opacity:0; }
+      .sd5 { animation: slideDown 0.5s ease-out 1.5s forwards; opacity:0; }
+      .sd6 { animation: slideDown 0.5s ease-out 1.8s forwards; opacity:0; }
+      .cursor { animation: blink 1s step-end infinite; }
+    </style>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0a0a1a"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+    <filter id="gl"><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#0f0" flood-opacity="0.4"/></filter>
+    <filter id="glR"><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#f44" flood-opacity="0.4"/></filter>
+  </defs>
+
+  <rect width="900" height="520" fill="url(#bg)"/>
+  <g opacity="0.04"><pattern id="g" width="25" height="25" patternUnits="userSpaceOnUse"><path d="M25 0L0 0 0 25" fill="none" stroke="#58a6ff" stroke-width="0.3"/></pattern><rect width="900" height="520" fill="url(#g)"/></g>
+
+  <!-- Title -->
+  <text x="450" y="30" text-anchor="middle" fill="#58a6ff" font-size="16" font-weight="bold" filter="url(#gl)">NVIDIA NIM — Multi-Model Fallback Chain</text>
+  <text x="450" y="48" text-anchor="middle" fill="#6e7681" font-size="10">API Key → Model Discovery → Fallback → Streaming Response</text>
+
+  <!-- API Key section -->
+  <g transform="translate(40,70)">
+    <rect width="200" height="60" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="1"/>
+    <text x="100" y="20" text-anchor="middle" fill="#58a6ff" font-size="10" font-weight="bold">🔑 API KEY</text>
+    <text x="100" y="38" text-anchor="middle" fill="#8b949e" font-size="9">NVIDIA_API_KEY=nvapi-****</text>
+    <text x="100" y="52" text-anchor="middle" fill="#0f0" font-size="9">✅ Key válida (72 chars)</text>
+  </g>
+
+  <!-- Arrow to Endpoint -->
+  <line x1="240" y1="100" x2="280" y2="100" stroke="#58a6ff" stroke-width="1.5" stroke-dasharray="6 3">
+    <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Endpoint -->
+  <g transform="translate(285,70)">
+    <rect width="250" height="60" rx="8" fill="#161b22" stroke="#bc8cff" stroke-width="1"/>
+    <text x="125" y="20" text-anchor="middle" fill="#bc8cff" font-size="10" font-weight="bold">🌐 ENDPOINT</text>
+    <text x="125" y="38" text-anchor="middle" fill="#8b949e" font-size="8">integrate.api.nvidia.com/v1</text>
+    <text x="125" y="52" text-anchor="middle" fill="#0f0" font-size="9">✅ /v1/ corrigido (v1.1.0 fix)</text>
+  </g>
+
+  <!-- Fallback chain -->
+  <g transform="translate(40,155)">
+    <text x="0" y="0" fill="#f0c000" font-size="11" font-weight="bold">FALLBACK CHAIN:</text>
+
+    <!-- Model 1: FAIL -->
+    <g class="sd1" transform="translate(0,15)">
+      <rect width="220" height="28" rx="5" fill="#2a1a1a" stroke="#f44" stroke-width="1" class="model-try"/>
+      <text x="10" y="18" fill="#f44" font-size="10">❌ meta/llama-3.3-70b-instruct</text>
+      <text x="200" y="18" fill="#f44" font-size="9">403</text>
+    </g>
+
+    <!-- Model 2: FAIL -->
+    <g class="sd2" transform="translate(0,48)">
+      <rect width="220" height="28" rx="5" fill="#2a1a1a" stroke="#f44" stroke-width="1" class="model-try" style="animation-delay:0.5s"/>
+      <text x="10" y="18" fill="#f44" font-size="10">❌ llama-3.2-90b-vision</text>
+      <text x="200" y="18" fill="#f44" font-size="9">403</text>
+    </g>
+
+    <!-- Model 3: FAIL -->
+    <g class="sd3" transform="translate(0,81)">
+      <rect width="220" height="28" rx="5" fill="#2a1a1a" stroke="#f44" stroke-width="1" class="model-try" style="animation-delay:1s"/>
+      <text x="10" y="18" fill="#f44" font-size="10">❌ llama-3.1-8b-instruct</text>
+      <text x="200" y="18" fill="#f44" font-size="9">404</text>
+    </g>
+
+    <!-- Model 4: SUCCESS! -->
+    <g class="model-ok" transform="translate(0,114)">
+      <rect width="220" height="32" rx="5" fill="#0a2a1a" stroke="#0f0" stroke-width="2"/>
+      <text x="10" y="20" fill="#0f0" font-size="11" font-weight="bold">✅ meta/llama-3.2-11b-vision</text>
+      <text x="205" y="20" fill="#0f0" font-size="9" class="pulse-dot">200</text>
+    </g>
+
+    <!-- Model 5+6: not tried -->
+    <g class="sd4" transform="translate(0,152)" opacity="0.3">
+      <rect width="220" height="24" rx="5" fill="#161b22" stroke="#444" stroke-width="1"/>
+      <text x="10" y="16" fill="#444" font-size="9">⏭️ llama-3.2-3b-instruct</text>
+      <text x="200" y="16" fill="#444" font-size="8">skip</text>
+    </g>
+    <g class="sd5" transform="translate(0,180)" opacity="0.2">
+      <rect width="220" height="24" rx="5" fill="#161b22" stroke="#333" stroke-width="1"/>
+      <text x="10" y="16" fill="#333" font-size="9">⏭️ google/gemma-2-2b-it</text>
+      <text x="200" y="16" fill="#333" font-size="8">skip</text>
+    </g>
+  </g>
+
+  <!-- Streaming response simulation -->
+  <g transform="translate(300,170)">
+    <rect width="570" height="160" rx="6" fill="#0d1117" stroke="#0f02"/>
+    <rect width="570" height="18" rx="6" fill="#161b22"/><rect y="10" width="570" height="8" fill="#161b22"/>
+    <circle cx="10" cy="9" r="3" fill="#ff5f56"/><circle cx="22" cy="9" r="3" fill="#ffbd2e"/><circle cx="34" cy="9" r="3" fill="#27c93f"/>
+    <text x="285" y="13" text-anchor="middle" fill="#484f58" font-size="8">NIM Streaming Response</text>
+
+    <text x="10" y="36" fill="#58a6ff" font-size="10" font-weight="bold">model: meta/llama-3.2-11b-vision-instruct</text>
+    <text x="10" y="52" fill="#6e7681" font-size="9">streaming tokens ↓</text>
+
+    <text x="10" y="70" fill="#0f0" font-size="11">
+      <tspan class="stream s1">Analisando</tspan><tspan class="stream s2"> o</tspan><tspan class="stream s3"> alvo</tspan><tspan class="stream s4"> 192.168.1.0/24...</tspan>
+    </text>
+    <text x="10" y="86" fill="#0f0" font-size="11">
+      <tspan class="stream s5">Portas</tspan><tspan class="stream s6"> abertas:</tspan><tspan class="stream s7"> 22(SSH),</tspan><tspan class="stream s8"> 80(HTTP),</tspan><tspan class="stream s9"> 443(HTTPS).</tspan>
+    </text>
+    <text x="10" y="102" fill="#ff0" font-size="11">
+      <tspan class="stream s10">Recomendação: testar SQLi no param 'id' do endpoint /search.</tspan>
+    </text>
+  </g>
+
+  <!-- Simulação mode -->
+  <g transform="translate(300,345)">
+    <rect width="570" height="140" rx="6" fill="#1a1a0a" stroke="#f0c0003"/>
+    <text x="285" y="22" text-anchor="middle" fill="#f0c000" font-size="12" font-weight="bold">⚠️ MODO SIMULAÇÃO (sem API Key)</text>
+    <line x1="20" y1="32" x2="550" y2="32" stroke="#f0c002"/>
+
+    <text x="15" y="52" fill="#f0c000" font-size="10">$ export NVIDIA_API_KEY=""</text>
+    <text x="15" y="70" fill="#8b949e" font-size="10">[NIM] API Key não configurada — Modo simulação ativado</text>
+    <text x="15" y="88" fill="#0a8" font-size="10">[SIMULAÇÃO NIM] Reconhecimento simulado - Modelo: llama-3.3-70b</text>
+    <text x="15" y="106" fill="#0a8" font-size="10">Portas comuns detectadas: 22, 80, 443, 3306, 8080</text>
+    <text x="15" y="124" fill="#6e7681" font-size="9">Para IA real, ative modelos em https://build.nvidia.com/ <tspan class="cursor">█</tspan></text>
+  </g>
+
+  <!-- Right sidebar: stats -->
+  <g transform="translate(40,380)">
+    <rect width="220" height="105" rx="6" fill="#161b22" stroke="#0f02"/>
+    <text x="110" y="18" text-anchor="middle" fill="#58a6ff" font-size="10" font-weight="bold">NIM STATS</text>
+    <text x="12" y="36" fill="#8b949e" font-size="9">Modelo ativo:</text><text x="120" y="36" fill="#0f0" font-size="9" class="pulse-dot">llama-3.2-11b-vision</text>
+    <text x="12" y="50" fill="#8b949e" font-size="9">Requisições:</text><text x="120" y="50" fill="#58a6ff" font-size="9">47</text>
+    <text x="12" y="64" fill="#8b949e" font-size="9">Tokens usados:</text><text x="120" y="64" fill="#58a6ff" font-size="9">12,847</text>
+    <text x="12" y="78" fill="#8b949e" font-size="9">Fallbacks:</text><text x="120" y="78" fill="#f0c000" font-size="9">3 (403→403→404)</text>
+    <text x="12" y="92" fill="#8b949e" font-size="9">Sessão HTTP:</text><text x="120" y="92" fill="#0f0" font-size="9">aiohttp (reuse) ✅</text>
+    <text x="12" y="100" fill="#333" font-size="7">v1.1.0 fix: Unclosed session resolvido</text>
+  </g>
+
+  <text x="450" y="510" text-anchor="middle" fill="#333" font-size="8">ShadowForge Agent v1.1.0 | NIM Client com graceful degradation + multi-model fallback</text>
+</svg>

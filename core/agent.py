@@ -21,8 +21,10 @@ from typing import Any
 from rich.console import Console
 
 from core.config import ModoOperacao, ShadowForgeConfig
-from core.memory import MemoriaCurtoPrazo, MemoriLongoPrazo
+from core.memory import MemoriaCurtoPrazo, MemoriaLongoPrazo
 from core.state import EstadoAgente, FaseOperacao
+from core.event_bus import EventBus, EventoShadowForge, TipoEvento, PrioridadeEvento
+from core.plugins import PluginManager
 
 console = Console()
 logger = logging.getLogger("shadowforge.core")
@@ -73,7 +75,7 @@ class ShadowForgeAgent:
             self.estado.campanha_id = campaign
 
         self.memoria_cp = MemoriaCurtoPrazo(capacidade=500)
-        self.memoria_lp = MemoriLongoPrazo(
+        self.memoria_lp = MemoriaLongoPrazo(
             db_path=self.config.data_dir / "memory" / "long_term.db"
         )
 
@@ -85,6 +87,12 @@ class ShadowForgeAgent:
         self._iteracao = 0
         self._shutdown_event = asyncio.Event()
 
+        # Event Bus (comunicação pub/sub entre módulos)
+        self.event_bus = EventBus()
+
+        # Plugin Manager (extensibilidade dinâmica)
+        self.plugin_manager = PluginManager(self.event_bus)
+
         # Subsistemas (lazy init)
         self._vision = None
         self._speech = None
@@ -92,6 +100,7 @@ class ShadowForgeAgent:
         self._hacker_tools = None
         self._planning = None
         self._models = None
+        self._dashboard = None
 
         # Callbacks de progresso
         self._on_fase_change: list[Callable] = []
@@ -106,6 +115,29 @@ class ShadowForgeAgent:
     async def inicializar_subsistemas(self) -> None:
         """Inicializa todos os subsistemas de forma assíncrona."""
         logger.info("Inicializando subsistemas...")
+
+        # Event Bus (deve ser o primeiro — todos os módulos dependem dele)
+        await self.event_bus.start()
+        logger.info("[OK] Event Bus inicializado")
+
+        # Plugin Manager
+        try:
+            await self.plugin_manager.load_all()
+            logger.info("[OK] Plugin Manager inicializado (%d plugins)", len(self.plugin_manager.list_plugins()))
+        except Exception as e:
+            logger.warning("Plugin Manager falhou: %s", e)
+
+        # Dashboard API (FastAPI + WebSocket)
+        try:
+            from api.dashboard import app, update_dashboard_state
+            self._dashboard = app
+            update_dashboard_state("agente_online", True)
+            update_dashboard_state("fase_atual", self.estado.fase_atual.value)
+            update_dashboard_state("alvo", self.estado.alvo_principal or "")
+            logger.info("[OK] Dashboard API inicializado")
+        except ImportError:
+            logger.debug("Dashboard API não disponível (FastAPI não instalado)")
+            self._dashboard = None
 
         # Models (NVIDIA NIM/Riva)
         try:
@@ -351,7 +383,7 @@ class ShadowForgeAgent:
             except Exception:
                 pass
 
-        # Lices aprendidas
+        # Lições aprendidas
         try:
             licoes = await self.memoria_lp.recuperar_licoes(limite=5)
             orientacao["licoes"] = [licao.conteudo for licao in licoes]
@@ -404,27 +436,63 @@ class ShadowForgeAgent:
     async def _decidir_recon(self, orientacao: dict) -> dict[str, Any]:
         """Decisão para fase RECON — scanning e enumeration."""
         if self._hacker_tools and self._hacker_tools.get("recon"):
-            return {"acao": "executar_recon", "alvo": self.estado.alvo_principal}
+            tecnicas = orientacao.get("tecnicas_sugeridas", [])
+            return {
+                "acao": "executar_recon",
+                "alvo": self.estado.alvo_principal,
+                "tecnicas_rag": len(tecnicas),
+            }
         return {"acao": "avancar_fase", "proxima": "scan"}
 
     async def _decidir_scan(self, orientacao: dict) -> dict[str, Any]:
-        """Decisão para fase SCAN."""
-        return {"acao": "executar_scan", "alvo": self.estado.alvo_principal}
+        """Decisão para fase SCAN — usa técnicas RAG se disponíveis."""
+        tecnicas = orientacao.get("tecnicas_sugeridas", [])
+        tipo_scan = "syn"
+        if tecnicas:
+            # Seleciona técnica mais relevante do RAG
+            for t in tecnicas:
+                if isinstance(t, dict) and t.get("tipo_scan"):
+                    tipo_scan = t["tipo_scan"]
+                    break
+        return {
+            "acao": "executar_scan",
+            "alvo": self.estado.alvo_principal,
+            "tipo_scan": tipo_scan,
+            "tecnicas_rag": len(tecnicas),
+        }
 
     async def _decidir_enum(self, orientacao: dict) -> dict[str, Any]:
-        """Decisão para fase ENUM."""
-        return {"acao": "executar_enum", "alvo": self.estado.alvo_principal}
+        """Decisão para fase ENUM — enumera serviços e vulnerabilidades."""
+        tecnicas = orientacao.get("tecnicas_sugeridas", [])
+        licoes = orientacao.get("licoes", [])
+        return {
+            "acao": "executar_enum",
+            "alvo": self.estado.alvo_principal,
+            "tecnicas_rag": len(tecnicas),
+            "licoes": len(licoes),
+        }
 
     async def _decidir_exploit(self, orientacao: dict) -> dict[str, Any]:
-        """Decisão para fase EXPLOIT."""
+        """Decisão para fase EXPLOIT — prioriza vulnerabilidades por severidade."""
         if self.estado.vulnerabilidades:
-            vuln = self.estado.vulnerabilidades[0]
+            # Ordena por severidade para explorar a mais crítica primeiro
+            ordem_severidade = {"critical": 0, "high": 1, "medium": 2, "low": 3, "info": 4}
+            vulns_ordenadas = sorted(
+                self.estado.vulnerabilidades,
+                key=lambda v: ordem_severidade.get(v.severidade.value, 5),
+            )
+            vuln = vulns_ordenadas[0]
             return {"acao": "gerar_poc", "vulnerabilidade": vuln.id}
         return {"acao": "avancar_fase", "proxima": "post"}
 
     async def _decidir_post(self, orientacao: dict) -> dict[str, Any]:
-        """Decisão para fase POST-EXPLOITATION."""
-        return {"acao": "analisar_privesc", "alvo": self.estado.alvo_principal}
+        """Decisão para fase POST-EXPLOITATION — usa lições do RAG."""
+        licoes = orientacao.get("licoes", [])
+        return {
+            "acao": "analisar_privesc",
+            "alvo": self.estado.alvo_principal,
+            "licoes_rag": len(licoes),
+        }
 
     async def _decidir_report(self, orientacao: dict) -> dict[str, Any]:
         """Decisão para fase REPORT."""
@@ -543,9 +611,12 @@ class ShadowForgeAgent:
             console.print("[cyan]Ethics first, hack second. >>[/cyan]\n")
             self.running = False
 
-        # Registra acao no audit trail
+        # M-06 FIX: Usar fase_anterior (se disponível) para registrar ação na fase correta.
+        # registrar_acao acontece DEPOIS de avancar_fase(), então fase_atual já avançou.
+        # Usamos fase_anterior para registrar a ação na fase em que foi executada.
+        fase_registro = self.estado.fase_anterior.value if self.estado.fase_anterior else self.estado.fase_atual.value
         self.estado.registrar_acao(
-            fase=self.estado.fase_atual.value,
+            fase=fase_registro,
             tipo=acao,
             descricao=f"Executou {acao}",
             alvo=decisao.get("alvo", ""),

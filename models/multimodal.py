@@ -1,10 +1,10 @@
 """
 ============================================================
- NVIDIA ShadowForge Agent - Nemotron Multimodal
- Arquivo: models/multimodal.py
+NVIDIA ShadowForge Agent - Nemotron Multimodal
+Arquivo: models/multimodal.py
 ============================================================
- Wrapper para Nemotron 3 Nano Omni com processamento
- de imagens de tela e chain-of-thought visual-tático.
+Wrapper para Nemotron 3 Nano Omni com processamento
+de imagens de tela e chain-of-thought visual-tático.
 ============================================================
 """
 
@@ -22,6 +22,8 @@ class NemotronVision:
     Análise de screenshots, detecção de elementos UI,
     chain-of-thought visual-tático para decisões de pentest.
     Integração com NIM para inferência otimizada.
+
+    H-09 FIX: Agora inicializa NIMClient via lazy init (como ScreenUnderstanding).
     """
 
     # Prompt base para análise visual de pentest
@@ -40,7 +42,18 @@ class NemotronVision:
     def __init__(self, config: Any = None) -> None:
         self._config = config
         self._modelo = "nvidia/nemotron-3-nano-omni-vl"
-        self._nim_client = None
+        self._nim_client = None  # Será inicializado via lazy init
+
+    def _get_nim_client(self) -> Any:
+        """H-09 FIX: Inicialização lazy do NIMClient (como ScreenUnderstanding faz)."""
+        if self._nim_client is None:
+            try:
+                from models.nim_client import NIMClient
+                self._nim_client = NIMClient(config=self._config)
+                logger.info("NIMClient inicializado para NemotronVision")
+            except Exception as e:
+                logger.warning("Falha ao inicializar NIMClient para NemotronVision: %s", e)
+        return self._nim_client
 
     async def analisar_tela(self, imagem_base64: str, contexto: str = "") -> dict[str, Any]:
         """Análise completa de screenshot.
@@ -56,9 +69,10 @@ class NemotronVision:
         if contexto:
             prompt += f"\n\nCONTEXTO DA CAMPANHA: {contexto}"
 
-        if self._nim_client:
+        nim = self._get_nim_client()  # H-09 FIX: usar lazy init
+        if nim:
             try:
-                resposta = await self._nim_client.chamada_multimodal(
+                resposta = await nim.chamada_multimodal(
                     modelo=self._modelo,
                     texto=prompt,
                     imagem_base64=imagem_base64,
@@ -94,8 +108,9 @@ class NemotronVision:
             "Para cada passo, forneça detalhes específicos e acionáveis."
         )
 
-        if self._nim_client:
-            resposta = await self._nim_client.chamada_multimodal(
+        nim = self._get_nim_client()  # H-09 FIX: usar lazy init
+        if nim:
+            resposta = await nim.chamada_multimodal(
                 modelo=self._modelo,
                 texto=prompt,
                 imagem_base64=imagem_base64,
@@ -130,8 +145,9 @@ class NemotronVision:
             "Retorne em JSON: {\"anomalias\": [{\"tipo\": \"\", \"descricao\": \"\", \"posicao\": \"\"}]}"
         )
 
-        if self._nim_client:
-            resposta = await self._nim_client.chamada_multimodal(
+        nim = self._get_nim_client()  # H-09 FIX: usar lazy init
+        if nim:
+            resposta = await nim.chamada_multimodal(
                 modelo=self._modelo, texto=prompt, imagem_base64=imagem_base64,
             )
             try:

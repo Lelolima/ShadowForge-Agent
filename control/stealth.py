@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import logging
 import random
+import shlex
 import time
 from typing import Any
 
@@ -144,13 +145,15 @@ class StealthManager:
         try:
             import subprocess
             if self._is_linux():
+                safe_iface = shlex.quote(interface)
+                safe_mac = shlex.quote(mac_original)
                 cmds = [
-                    f"ip link set dev {interface} down",
-                    f"ip link set dev {interface} address {mac_original}",
-                    f"ip link set dev {interface} up",
+                    ["ip", "link", "set", "dev", interface, "down"],
+                    ["ip", "link", "set", "dev", interface, "address", mac_original],
+                    ["ip", "link", "set", "dev", interface, "up"],
                 ]
                 for cmd in cmds:
-                    subprocess.run(cmd, shell=True, check=True, timeout=10)
+                    subprocess.run(cmd, check=True, timeout=10)
                 logger.info("MAC spoofed: %s → %s", interface, mac_original)
                 return True
             else:
@@ -161,8 +164,12 @@ class StealthManager:
             return False
 
     def _gerar_mac_aleatorio(self) -> str:
-        """Gera MAC address aleatório com OUI local."""
-        return f"02:{random.randint(0,255):02x}:{random.randint(0,255):02x}:" \
+        """Gera MAC address aleatorio com OUI local.
+        L-06 FIX: Usa secrets.randbelow() em vez de random.randint()
+        para criptografia segura (MAC previsivel pode ser detectado).
+        """
+        import secrets
+        return f"02:{secrets.randbelow(256):02x}:{secrets.randbelow(256):02x}:"                f"{secrets.randbelow(256):02x}:{secrets.randbelow(256):02x}:{secrets.randbelow(256):02x}" \
                f"{random.randint(0,255):02x}:{random.randint(0,255):02x}:{random.randint(0,255):02x}"
 
     @staticmethod
@@ -211,5 +218,3 @@ class StealthManager:
 
         logger.info("OPSEC cleanup: %d itens processados", len(resultado))
         return resultado
-
-    import os

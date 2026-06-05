@@ -1,10 +1,10 @@
 """
 ============================================================
- NVIDIA ShadowForge Agent - NVIDIA Embeddings
- Arquivo: models/embeddings.py
+NVIDIA ShadowForge Agent - NVIDIA Embeddings
+Arquivo: models/embeddings.py
 ============================================================
- Geração de embeddings via NVIDIA NeMo Retriever
- para RAG com busca semântica e similaridade cosseno.
+Geração de embeddings via NVIDIA NeMo Retriever
+para RAG com busca semântica e similaridade cosseno.
 ============================================================
 """
 
@@ -54,8 +54,8 @@ class NVIDIAEmbeddings:
         Returns:
             Lista de floats (vetor embedding)
         """
-        # Verifica cache
-        cache_key = hashlib.md5(texto.encode()).hexdigest()
+        # M-02 FIX: Usar blake2b em vez de MD5 (sem colisões conhecidas, mais rápido)
+        cache_key = hashlib.blake2b(texto.encode()).hexdigest()
         if cache_key in self._cache:
             return self._cache[cache_key]
 
@@ -122,7 +122,15 @@ class NVIDIAEmbeddings:
         return dot / (norm_a * norm_b)
 
     def _embedding_fallback(self, texto: str) -> list[float]:
-        """Embedding fallback simples baseado em hash."""
-        import hashlib
+        """Embedding fallback simples baseado em hash.
+
+        M-03 FIX: Trunca o vetor para exatamente _dimensoes dimensões.
+        Antes produzia dim incorreta (1056 em vez de 1024).
+        """
         h = hashlib.sha256(texto.encode()).digest()
-        return [b / 255.0 for b in h] * (self._dimensoes // 32 + 1)
+        # Expande o hash para cobrir as dimensões necessárias
+        raw = [b / 255.0 for b in h]
+        repeats = (self._dimensoes // 32) + (1 if self._dimensoes % 32 else 0)
+        vetor = raw * repeats
+        # Trunca para exatamente _dimensoes dimensões
+        return vetor[:self._dimensoes]

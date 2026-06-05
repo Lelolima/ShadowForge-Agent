@@ -1,10 +1,10 @@
 """
 ============================================================
- NVIDIA ShadowForge Agent - Captura de Tela
- Arquivo: vision/screen.py
+NVIDIA ShadowForge Agent - Captura de Tela
+Arquivo: vision/screen.py
 ============================================================
- Captura contínua e inteligente da tela com diff detection,
- região de interesse e integração DeepStream.
+Captura contínua e inteligente da tela com diff detection,
+região de interesse e integração DeepStream.
 ============================================================
 """
 
@@ -12,13 +12,15 @@ from __future__ import annotations
 
 import asyncio
 import io
+import logging
 import time
 from typing import Any
 
 import numpy as np
 from PIL import Image
 
-logger_mod = __import__("logging").getLogger("shadowforge.vision.screen")
+# L-05 FIX: Usar import logging padrão em vez de __import__
+logger = logging.getLogger("shadowforge.vision.screen")
 
 
 class FrameData:
@@ -30,6 +32,7 @@ class FrameData:
         self.monitor = monitor
         self.array: np.ndarray | None = None
         self.hash_diff: float = 0.0
+        self.mudanca_minima: bool = False  # H-07 FIX: flag para distinguir "sem mudança" de "erro"
         self.regiao_interesse: tuple[int, int, int, int] | None = None
 
     def to_array(self) -> np.ndarray:
@@ -51,6 +54,7 @@ class FrameData:
         """Redimensiona mantendo aspect ratio."""
         resized = self.imagem.resize((largura, altura), Image.Resampling.LANCZOS)
         novo = FrameData(resized, self.timestamp, self.monitor)
+        novo.mudanca_minima = self.mudanca_minima
         return novo
 
 
@@ -90,11 +94,14 @@ class ScreenCapture:
     async def capturar(self, monitor: int | None = None) -> FrameData | None:
         """Captura um frame da tela.
 
+        H-07 FIX: Retorna FrameData com flag mudanca_minima=True em vez de None,
+        permitindo que o chamador distinga entre "sem mudança" e "erro na captura".
+
         Args:
             monitor: ID do monitor (None = usar config padrão)
 
         Returns:
-            FrameData com a imagem capturada ou None se falhar
+            FrameData com a imagem capturada, ou None apenas em caso de erro real
         """
         try:
             import mss
@@ -126,9 +133,10 @@ class ScreenCapture:
                     )) / 255.0
                     frame.hash_diff = diff
 
-                    # Pula se mudança muito pequena
+                    # H-07 FIX: Retorna frame com flag em vez de None
                     if diff < self._diff_threshold:
-                        return None  # Frame sem mudança significativa
+                        frame.mudanca_minima = True
+                        return frame
 
                 self._ultimo_frame = frame
                 self._ultimo_array = frame.to_array().copy()
@@ -137,10 +145,10 @@ class ScreenCapture:
                 return frame
 
         except ImportError:
-            logger_mod.warning("mss não disponível, usando fallback PIL")
+            logger.warning("mss não disponível, usando fallback PIL")
             return await self._captura_fallback_pil(monitor)
         except Exception as e:
-            logger_mod.error("Erro na captura de tela: %s", e)
+            logger.error("Erro na captura de tela: %s", e)
             return None
 
     async def _captura_fallback_pil(self, monitor: int | None = None) -> FrameData | None:
@@ -150,7 +158,7 @@ class ScreenCapture:
             img = ImageGrab.grab()
             return FrameData(imagem=img, timestamp=time.time(), monitor=monitor or 0)
         except Exception as e:
-            logger_mod.error("Fallback PIL falhou: %s", e)
+            logger.error("Fallback PIL falhou: %s", e)
             return None
 
     async def capturar_regiao(self, x: int, y: int, w: int, h: int) -> FrameData | None:
@@ -165,10 +173,14 @@ class ScreenCapture:
         frame = await self.capturar()
         if frame is None:
             return None
+        # H-07 FIX: Se frame sem mudança, propagar mas permitindo corte
+        if frame.mudanca_minima:
+            return frame  # Retornar frame original com flag (sem cortar imagem estática)
 
         cortada = frame.imagem.crop((x, y, x + w, y + h))
         roi_frame = FrameData(imagem=cortada, timestamp=frame.timestamp, monitor=frame.monitor)
         roi_frame.regiao_interesse = (x, y, w, h)
+        roi_frame.mudanca_minima = frame.mudanca_minima
         return roi_frame
 
     async def capturar_continuo(
@@ -193,11 +205,12 @@ class ScreenCapture:
 
             frame = await self.capturar()
 
-            if frame is not None and (not apenas_diff or frame.hash_diff >= self._diff_threshold):
-                    try:
-                        await callback(frame)
-                    except Exception as e:
-                        logger_mod.error("Erro no callback de frame: %s", e)
+            # H-07 FIX: Verificar flag mudanca_minima em vez de None
+            if frame is not None and (not apenas_diff or not frame.mudanca_minima):
+                try:
+                    await callback(frame)
+                except Exception as e:
+                    logger.error("Erro no callback de frame: %s", e)
 
             # FPS adaptativo
             elapsed = time.time() - inicio

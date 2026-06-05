@@ -1,23 +1,33 @@
 """
 ============================================================
- NVIDIA ShadowForge Agent - Recon Scanner
- Arquivo: hacker_tools/recon/scanner.py
+NVIDIA ShadowForge Agent - Recon Scanner
+Arquivo: hacker_tools/recon/scanner.py
 ============================================================
- Reconhecimento automatizado com Nmap, service enumeration,
- web crawling com visão e DNS enumeration.
- VERIFICAÇÃO DE AUTORIZAÇÃO antes de cada scan.
+Reconhecimento automatizado com Nmap, service enumeration,
+web crawling com visão e DNS enumeration.
+VERIFICAÇÃO DE AUTORIZAÇÃO antes de cada scan.
 ============================================================
 """
 
 from __future__ import annotations
 
+import ipaddress
 import logging
 import re
+import shlex
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from typing import Any
 
 logger = logging.getLogger("shadowforge.hacker_tools.recon.scanner")
+
+# M-09 FIX: Redes internas bloqueadas para prevenir SSRF
+_SSRF_BLOCKED_NETWORKS = [
+    ipaddress.ip_network("169.254.0.0/16"),  # Link-local / AWS metadata
+    ipaddress.ip_network("127.0.0.0/8"),     # Loopback
+    ipaddress.ip_network("::1/128"),          # IPv6 loopback
+    ipaddress.ip_network("fe80::/10"),        # IPv6 link-local
+]
 
 
 @dataclass
@@ -94,6 +104,25 @@ class ReconScanner:
                 self._max_threads = getattr(nmap_cfg, "max_threads", 10)
                 self._timeout_s = getattr(nmap_cfg, "timeout_s", 600)
 
+    @staticmethod
+    def _is_private_ip(alvo: str) -> bool:
+        """M-13 FIX: Verifica se o IP é privado usando ipaddress (RFC 1918 correto).
+
+        Antes usava prefixos de string que eram imprecisos
+        (ex: '172.2' matchava 172.200.x.x que é público).
+        """
+        try:
+            # Tenta como IP único
+            ip = ipaddress.ip_address(alvo.split("/")[0])
+            return ip.is_private
+        except ValueError:
+            # Tenta como rede (CIDR)
+            try:
+                network = ipaddress.ip_network(alvo, strict=False)
+                return network.is_private
+            except ValueError:
+                return False
+
     def verificar_autorizacao(self, alvo: str) -> tuple[bool, str]:
         """Verifica se o alvo está autorizado para scanning.
 
@@ -109,21 +138,18 @@ class ReconScanner:
         if alvo in blacklist:
             return False, f"Alvo {alvo} está na blacklist - não escanear"
 
-        # Verifica se é range privado (geralmente seguro para labs)
-        ranges_privados = ["192.168.", "10.", "172.16.", "172.17.", "172.18.",
-                          "172.19.", "172.2", "172.3"]
-        for rp in ranges_privados:
-            if alvo.startswith(rp):
-                self._autorizado = True
-                self._alvo_autorizado = alvo
-                return True, f"Range privado detectado: {alvo} (geralmente lab)"
+        # M-13 FIX: Usa ipaddress para verificação correta de ranges privados
+        if self._is_private_ip(alvo):
+            self._autorizado = True
+            self._alvo_autorizado = alvo
+            return True, f"Range privado detectado: {alvo} (geralmente lab)"
 
         # Para IPs públicos, exige confirmação explícita
         if self._alvo_autorizado and alvo == self._alvo_autorizado:
             return True, "Alvo previamente autorizado nesta sessão"
 
         logger.warning("ALVO NÃO VERIFICADO: %s — Requer autorização explícita!", alvo)
-        return True, "REQUER CONFIRMAÇÃO DO OPERADOR — IP público detectado"
+        return False, "ALVO PÚBLICO NÃO AUTORIZADO — Requer confirmação explícita do operador"
 
     async def executar_full_recon(
         self,
@@ -198,7 +224,7 @@ class ReconScanner:
         Args:
             alvo: IP/range/hostname
             tipo: Tipo de scan (syn, tcp_connect, udp, etc.)
-            arg_extra: Argumentos adicionais
+            argumentos_extra: Argumentos adicionais
 
         Returns:
             Lista de ResultadoHost
@@ -216,9 +242,22 @@ class ReconScanner:
         ]
 
         if argumentos_extra:
-            cmd_parts.append(argumentos_extra)
+            # C-01 FIX: whitelist de flags Nmap permitidas
+            flags_permitidas = {
+                "-p", "-T", "--min-rate", "--max-rate", "-Pn", "-O",
+                "-sV", "-sC", "-A", "-6", "--version-intensity",
+                "--script", "--open", "--top-ports", "-f",
+            }
+            tokens = shlex.split(argumentos_extra)
+            tokens_seguros = []
+            for token in tokens:
+                if token.startswith("-") and token.split("=")[0] not in flags_permitidas:
+                    logger.warning("[NMAP] Flag não permitida ignorada: %s", token)
+                    continue
+                tokens_seguros.append(shlex.quote(token))
+            cmd_parts.extend(tokens_seguros)
 
-        cmd_parts.append(alvo)
+        cmd_parts.append(shlex.quote(alvo))
         comando = " ".join(cmd_parts)
 
         logger.info("[NMAP] %s", comando)
@@ -340,24 +379,26 @@ class ReconScanner:
         }
 
         # DNS lookup básico
-        res = await shell.executar(f"nslookup {dominio}", timeout=15)
+        safe_dominio = shlex.quote(dominio)
+        res = await shell.executar(f"nslookup {safe_dominio}", timeout=15)
         if res.sucesso:
             ips = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", res.stdout)
             resultado_dns["records"]["A"] = list(set(ips))
 
         # MX records
-        res = await shell.executar(f"nslookup -type=MX {dominio}", timeout=15)
+        res = await shell.executar(f"nslookup -type=MX {safe_dominio}", timeout=15)
         if res.sucesso:
             resultado_dns["records"]["MX"] = res.stdout.strip()
 
         # TXT records
-        res = await shell.executar(f"nslookup -type=TXT {dominio}", timeout=15)
+        res = await shell.executar(f"nslookup -type=TXT {safe_dominio}", timeout=15)
         if res.sucesso:
             resultado_dns["records"]["TXT"] = res.stdout.strip()
 
         # Reverse DNS
         for ip in resultado_dns["records"].get("A", [])[:3]:
-            res = await shell.executar(f"nslookup {ip}", timeout=10)
+            safe_ip = shlex.quote(ip)
+            res = await shell.executar(f"nslookup {safe_ip}", timeout=10)
             if res.sucesso and "name =" in res.stdout:
                 match = re.search(r"name = (.+)", res.stdout)
                 if match:
@@ -366,7 +407,27 @@ class ReconScanner:
         return resultado_dns
 
     async def web_fingerprint(self, url: str) -> dict[str, Any]:
-        """Fingerprinting de serviço web."""
+        """Fingerprinting de serviço web.
+
+        M-09 FIX: Valida URL contra SSRF (metadata endpoints, redes internas).
+        """
+        # M-09 FIX: Verificar se o host da URL não é um endpoint de metadata/internal
+        try:
+            from urllib.parse import urlparse
+            parsed = urlparse(url)
+            hostname = parsed.hostname
+            if hostname:
+                try:
+                    ip = ipaddress.ip_address(hostname)
+                    for blocked_net in _SSRF_BLOCKED_NETWORKS:
+                        if ip in blocked_net:
+                            logger.warning("[SSRF] URL bloqueada: %s (host em rede bloqueada: %s)", url, blocked_net)
+                            return {"url": url, "erro": f"Host em rede bloqueada (SSRF protection): {blocked_net}"}
+                except ValueError:
+                    pass  # hostname não é IP direto (pode ser DNS), permitir
+        except Exception:
+            pass
+
         resultado: dict[str, Any] = {"url": url, "tecnologias": [], "headers": {}}
 
         try:

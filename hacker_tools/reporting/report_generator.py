@@ -1,21 +1,35 @@
 """
 ============================================================
- NVIDIA ShadowForge Agent - Gerador de Relatórios
+ NVIDIA ShadowForge Agent - Gerador de Relatórios (Elite)
  Arquivo: hacker_tools/reporting/report_generator.py
 ============================================================
  Relatório profissional de pentest com CVSS, PoCs,
- recomendações de remediação e export multi-formato.
- Estilo visual cyberpunk/hacker nos templates.
+ recomendações de remediação, gráficos e export multi-formato.
+ Agora inclui: radar de severidade, timeline, heatmap CVSS
+ e export PDF nativo.
 ============================================================
 """
 
 from __future__ import annotations
 
+import html
 import json
 import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+try:
+    from hacker_tools.reporting.charts import ChartEngine
+    _HAS_CHARTS = True
+except ImportError:
+    _HAS_CHARTS = False
+
+try:
+    from hacker_tools.reporting.pdf_exporter import PDFExporter
+    _HAS_PDF = True
+except ImportError:
+    _HAS_PDF = False
 
 logger = logging.getLogger("shadowforge.tools.reporting")
 
@@ -313,13 +327,13 @@ class ReportGenerator:
         md += f"**Campanha:** {relatorio['meta']['campanha_id']}\n\n"
 
         # Resumo executivo
-        re = relatorio["resumo_executivo"]
+        resumo_exec = relatorio["resumo_executivo"]  # M-12 FIX: Renomeado de 're' para não sombrear módulo re
         md += "## Resumo Executivo\n\n"
-        md += f"{re['conclusao']}\n\n"
-        md += f"- **Total de vulnerabilidades:** {re['total_vulnerabilidades']}\n"
-        md += f"- **Críticas:** {re['criticas']}\n"
-        md += f"- **Altas:** {re['altas']}\n"
-        md += f"- **Nível de risco:** {re['nivel_risco']}\n"
+        md += f"{resumo_exec['conclusao']}\n\n"
+        md += f"- **Total de vulnerabilidades:** {resumo_exec['total_vulnerabilidades']}\n"
+        md += f"- **Críticas:** {resumo_exec['criticas']}\n"
+        md += f"- **Altas:** {resumo_exec['altas']}\n"
+        md += f"- **Nível de risco:** {resumo_exec['nivel_risco']}\n"
         md += f"- **Score geral:** {relatorio['score_geral']}/10\n\n"
 
         # Vulnerabilidades
@@ -350,6 +364,11 @@ class ReportGenerator:
     def exportar_json(self, relatorio: dict[str, Any]) -> str:
         """Exporta relatório em JSON formatado."""
         return json.dumps(relatorio, indent=2, ensure_ascii=False, default=str)
+
+    @staticmethod
+    def _esc(text: Any) -> str:
+        """Escapa HTML para prevenir XSS em dados do usuário."""
+        return html.escape(str(text), quote=True)
 
     def exportar_html(self, relatorio: dict[str, Any]) -> str:
         """Exporta relatório em HTML com estilo cyberpunk."""
@@ -390,40 +409,40 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #333; color:
 <h1>&#x1F4CB; Relatório de Teste de Intrusão</h1>
 """
         # Resumo
-        re = relatorio["resumo_executivo"]
+        resumo_exec = relatorio["resumo_executivo"]  # M-12 FIX: Renomeado de 're' para não sombrear módulo re
         html += f"""<div class="card">
 <h2>Resumo Executivo</h2>
-<p>{re['conclusao']}</p>
-<p><span class="label">Vulnerabilidades:</span> <span class="value">{re['total_vulnerabilidades']}</span> |
-<span class="label">Críticas:</span> <span class="value" style="color:var(--red)">{re['criticas']}</span> |
-<span class="label">Altas:</span> <span class="value" style="color:#ff6600">{re['altas']}</span></p>
-<p><span class="label">Nível de Risco:</span> <span class="value" style="color:var(--red);font-weight:bold">{re['nivel_risco']}</span></p>
-<div class="score">{relatorio['score_geral']}/10</div>
+<p>{self._esc(re['conclusao'])}</p>
+<p><span class="label">Vulnerabilidades:</span> <span class="value">{self._esc(re['total_vulnerabilidades'])}</span> |
+<span class="label">Críticas:</span> <span class="value" style="color:var(--red)">{self._esc(re['criticas'])}</span> |
+<span class="label">Altas:</span> <span class="value" style="color:#ff6600">{self._esc(re['altas'])}</span></p>
+<p><span class="label">Nível de Risco:</span> <span class="value" style="color:var(--red);font-weight:bold">{self._esc(re['nivel_risco'])}</span></p>
+<div class="score">{self._esc(relatorio['score_geral'])}/10</div>
 </div>
 """
 
         # Vulnerabilidades
         html += "<h2>Vulnerabilidades</h2>\n"
         for v in relatorio.get("vulnerabilidades", []):
-            html += f"""<div class="card {v['severidade']}">
-<h3>[{v['severidade'].upper()}] {v['titulo']}</h3>
-<p><span class="label">CVSS:</span> <span class="cvss {v['severidade']}">{v['cvss_score']}</span> |
-<span class="label">Tipo:</span> <span class="value">{v['tipo']}</span> |
-<span class="label">Localização:</span> <span class="value">{v['localizacao']}</span></p>
-<p><span class="label">Impacto:</span> C={v['impacto']['c']} | I={v['impacto']['i']} | D={v['impacto']['d']}</p>
-<p><strong>Descrição:</strong> {v['descricao']}</p>
-<pre><code>{v['remediacao']}</code></pre>
-<p><span class="label">Referências:</span> <span class="ref">{', '.join(v['referencias'])}</span></p>
+            html += f"""<div class="card {self._esc(v['severidade'])}">
+<h3>[{v['severidade'].upper()}] {self._esc(v['titulo'])}</h3>
+<p><span class="label">CVSS:</span> <span class="cvss {self._esc(v['severidade'])}">{self._esc(v['cvss_score'])}</span> |
+<span class="label">Tipo:</span> <span class="value">{self._esc(v['tipo'])}</span> |
+<span class="label">Localização:</span> <span class="value">{self._esc(v['localizacao'])}</span></p>
+<p><span class="label">Impacto:</span> C={self._esc(v['impacto']['c'])} | I={self._esc(v['impacto']['i'])} | D={self._esc(v['impacto']['d'])}</p>
+<p><strong>Descrição:</strong> {self._esc(v['descricao'])}</p>
+<pre><code>{self._esc(v['remediacao'])}</code></pre>
+<p><span class="label">Referências:</span> <span class="ref">{', '.join(self._esc(r) for r in v['referencias'])}</span></p>
 </div>\n"""
 
         # Recomendações
         html += "<div class='card'><h2>Recomendações</h2><ol>\n"
         for rec in relatorio.get("recomendacoes", []):
-            html += f"<li>{rec}</li>\n"
+            html += f"<li>{self._esc(rec)}</li>\n"
         html += "</ol></div>\n"
 
         html += f"""<footer>
-Gerado por SH4D0WF0RG3 | {relatorio['meta']['data']} | Campanha: {relatorio['meta']['campanha_id']}
+Gerado por SH4D0WF0RG3 | {self._esc(relatorio['meta']['data'])} | Campanha: {self._esc(relatorio['meta']['campanha_id'])}
 <br>Ethics first, hack second.
 </footer>
 </div></body></html>"""
@@ -445,7 +464,7 @@ Gerado por SH4D0WF0RG3 | {relatorio['meta']['data']} | Campanha: {relatorio['met
         Returns:
             Dicionário {formato: caminho_arquivo}
         """
-        formatos = formatos or ["md", "json", "html"]
+        formatos = formatos or ["md", "json", "html", "pdf"]
         dir_path = Path(diretorio)
         dir_path.mkdir(parents=True, exist_ok=True)
 
@@ -463,9 +482,38 @@ Gerado por SH4D0WF0RG3 | {relatorio['meta']['data']} | Campanha: {relatorio['met
             arquivos["json"] = str(path)
 
         if "html" in formatos:
+            # Gera gráficos para embutir no HTML
+            charts_b64: dict[str, str] = {}
+            if _HAS_CHARTS and "vulnerabilidades" in relatorio:
+                vulns_raw = relatorio.get("vulnerabilidades", [])
+                try:
+                    charts_b64["radar"] = ChartEngine.radar_severidade(vulns_raw)
+                    charts_b64["timeline"] = ChartEngine.timeline_eventos(vulns_raw)
+                    charts_b64["heatmap"] = ChartEngine.heatmap_cvss(vulns_raw)
+                except Exception as e:
+                    logger.debug("Erro gerando charts: %s", e)
+
             path = dir_path / f"report_{cam_id}.html"
-            path.write_text(self.exportar_html(relatorio), encoding="utf-8")
+            html_content = self.exportar_html(relatorio)
+
+            # Embute charts como imagens base64
+            if charts_b64:
+                charts_section = '<div class="card"><h2>Análise Visual</h2>'
+                for chart_name, b64_data in charts_b64.items():
+                    if b64_data:
+                        charts_section += f'<h3>{chart_name.title()}</h3><img src="data:image/png;base64,{b64_data}" style="max-width:100%;border:1px solid #333;border-radius:4px;margin:1rem 0;">'
+                charts_section += '</div>'
+                # Insere antes do footer
+                html_content = html_content.replace("<footer>", charts_section + "\n<footer>")
+
+            path.write_text(html_content, encoding="utf-8")
             arquivos["html"] = str(path)
+
+        if "pdf" in formatos and _HAS_PDF:
+            path = dir_path / f"report_{cam_id}.pdf"
+            pdf_path = PDFExporter.export(relatorio, str(path))
+            if pdf_path:
+                arquivos["pdf"] = pdf_path
 
         logger.info("Relatório salvo: %d formatos em %s", len(arquivos), diretorio)
         return arquivos

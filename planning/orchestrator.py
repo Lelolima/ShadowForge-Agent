@@ -91,7 +91,7 @@ class CampaignOrchestrator:
     TEMPLATES_DECOMPOSICAO = {
         "pentest_completo": [
             {"titulo": "Reconhecimento Passivo", "tipo": TipoAgente.RECON, "dependencias": [], "prioridade": 1},
-            {"titulo": "Reconhecimento Ativo", "tipo": TipoAgente.RECON, "dependencias": [" Reconhecimento Passivo"], "prioridade": 2},
+            {"titulo": "Reconhecimento Ativo", "tipo": TipoAgente.RECON, "dependencias": ["Reconhecimento Passivo"], "prioridade": 2},
             {"titulo": "Scanning de Portas", "tipo": TipoAgente.RECON, "dependencias": ["Reconhecimento Ativo"], "prioridade": 2},
             {"titulo": "Enumeration de Serviços", "tipo": TipoAgente.RECON, "dependencias": ["Scanning de Portas"], "prioridade": 3},
             {"titulo": "Análise de Vulnerabilidades", "tipo": TipoAgente.EXPLOIT, "dependencias": ["Enumeration de Serviços"], "prioridade": 3},

@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" font-family="'Courier New', monospace">
+  <defs>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#0a0a0f"/><stop offset="100%" style="stop-color:#0d1117"/></linearGradient>
+  </defs>
+
+  <style>
+    @keyframes typing { from{width:0} to{width:100%} }
+    @keyframes cursor { 0%,100%{opacity:1} 50%{opacity:0} }
+    @keyframes scanLine { from{transform:translateY(0)} to{transform:translateY(600px)} }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes progressBar { from{width:0%} to{width:100%} }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .bg { fill:url(#bgGrad) }
+    .terminal-bg { fill:#0a0a0f; stroke:#00ff4133; stroke-width:1; }
+    .terminal-text { fill:#00ff41; font-size:11px; }
+    .terminal-prompt { fill:#0ff; font-size:11px; }
+    .terminal-output { fill:#00ff4188; font-size:10px; }
+    .cursor { animation:cursor 1s infinite; }
+    .scanline { stroke:#00ff4110; stroke-width:1; animation:scanLine 4s linear infinite; }
+    .title { fill:#0ff; font-size:18px; font-weight:bold; text-anchor:middle; filter:url(#glow); }
+    .fade-in { animation:fadeIn .5s ease-out forwards; }
+    .pulse { animation:pulse 2s ease-in-out infinite; }
+  </style>
+
+  <rect class="bg" width="800" height="600"/>
+  <line x1="0" y1="0" x2="800" y2="0" class="scanline"/>
+
+  <text x="400" y="25" class="title">🖥️ SH4D0WF0RG3 — REAL USAGE SIMULATION</text>
+  <text x="400" y="43" fill="#00ff4188" font-size="9" text-anchor="middle">Live terminal simulation — Autonomous PT Campaign</text>
+
+  <!-- TERMINAL 1: Installation -->
+  <rect x="15" y="55" width="375" height="200" class="terminal-bg" rx="4"/>
+  <text x="25" y="72" fill="#00ff4166" font-size="8">┌─ TERMINAL: Installation ──────────────────────────┐</text>
+  <text x="25" y="90" class="terminal-prompt" style="animation:fadeIn .5s 0s both">user@shadowforge:~$</text><text x="190" y="90" class="terminal-text" style="animation:fadeIn .5s 0.2s both"> git clone git@github.com:Lelolima/ShadowForge-Agent.git</text>
+  <text x="25" y="107" class="terminal-output" style="animation:fadeIn .5s 0.5s both">Cloning into 'ShadowForge-Agent'... <tspan fill="#00ff41">✓</tspan></text>
+  <text x="25" y="122" class="terminal-prompt" style="animation:fadeIn .5s 0.8s both">user@shadowforge:~$</text><text x="190" y="122" class="terminal-text" style="animation:fadeIn .5s 1s both"> cd ShadowForge-Agent &amp;&amp; python -m venv .venv</text>
+  <text x="25" y="137" class="terminal-prompt" style="animation:fadeIn .5s 1.3s both">user@shadowforge:~$</text><text x="190" y="137" class="terminal-text" style="animation:fadeIn .5s 1.5s both"> pip install -r requirements.txt</text>
+  <text x="25" y="154" class="terminal-output" style="animation:fadeIn .5s 1.8s both">Installing aiohttp, numpy, Pillow... <tspan fill="#00ff41">✓</tspan></text>
+  <text x="25" y="169" class="terminal-output" style="animation:fadeIn .5s 2.1s both">Installing torch, ultralytics, chromadb... <tspan fill="#00ff41">✓</tspan></text>
+  <text x="25" y="184" class="terminal-prompt" style="animation:fadeIn .5s 2.4s both">user@shadowforge:~$</text><text x="190" y="184" class="terminal-text" style="animation:fadeIn .5s 2.6s both"> python scripts/validate_env.py</text>
+  <text x="25" y="201" class="terminal-output" style="animation:fadeIn .5s 2.9s both">✓ NVIDIA_API_KEY: configured | ✓ GPU: NVIDIA RTX 4090 | ✓ Python 3.11</text>
+  <text x="25" y="218" class="terminal-output" style="animation:fadeIn .5s 3.2s both"><tspan fill="#0ff">All checks passed! ShadowForge ready.</tspan></text>
+  <text x="25" y="238" fill="#00ff4188" font-size="8" style="animation:fadeIn .5s 3.5s both">Setup complete in 45s — 0 critical errors</text>
+
+  <!-- TERMINAL 2: Run -->
+  <rect x="410" y="55" width="375" height="200" class="terminal-bg" rx="4"/>
+  <text x="420" y="72" fill="#00ff4166" font-size="8">┌─ TERMINAL: Running Campaign ───────────────────────┐</text>
+  <text x="420" y="90" class="terminal-prompt" style="animation:fadeIn .5s 1s both">SH4D0WF0RG3:~$</text><text x="530" y="90" class="terminal-text" style="animation:fadeIn .5s 1.2s both"> python main.py --mode stealth --target 192.168.1.0/24 --simulate</text>
+  <text x="420" y="110" class="terminal-output" style="animation:fadeIn .5s 1.5s both">╔═ SH4D0WF0RG3 v1.1.0 ═════════════════════════╗</text>
+  <text x="420" y="125" class="terminal-output" style="animation:fadeIn .5s 1.8s both">║ GPU: NVIDIA RTX 4090 (24GB)      ║</text>
+  <text x="420" y="140" class="terminal-output" fill="#0ff" style="animation:fadeIn .5s 2.1s both">║ MODE: STEALTH | SIMULATE: True    ║</text>
+  <text x="420" y="155" class="terminal-output" style="animation:fadeIn .5s 2.3s both">╚════════════════════════════════════╝</text>
+  <text x="420" y="175" class="terminal-output" fill="#0ff" style="animation:fadeIn .5s 2.5s both">[OODA #1] OBSERVE → 3 observations</text>
+  <text x="420" y="190" class="terminal-output" fill="#0ff" style="animation:fadeIn .5s 2.7s both">[OODA #1] ORIENT → Phase: recon</text>
+  <text x="420" y="205" class="terminal-output" fill="#ffd700" style="animation:fadeIn .5s 2.9s both">[OODA #1] DECIDE → RECON scan</text>
+  <text x="420" y="220" class="terminal-output" fill="#ff0040" style="animation:fadeIn .5s 3.1s both">[OODA #1] ACT → Port scan OK (22,80,443,3306)</text>
+  <text x="420" y="238" fill="#00ff4188" font-size="8" style="animation:fadeIn .5s 3.4s both">Campaign SF-20260603 active — 42 iterations so far</text>
+
+  <!-- AUDIT TRAIL PANEL -->
+  <rect x="15" y="270" width="770" height="130" class="terminal-bg" rx="4"/>
+  <text x="25" y="288" fill="#00ff4166" font-size="8">┌─ AUDIT TRAIL ────────────────────────────────────────────────────────────┐</text>
+  <text x="25" y="306" fill="#00ff4188" font-size="9" style="animation:fadeIn .5s 1s both">[14:49:32] <tspan fill="#00ff41">[VISION]</tspan> Detected input field: 'admin_login' <tspan fill="#00ff4166"> | Screen: 1920x1080 | FPS: 30</tspan></text>
+  <text x="25" y="321" fill="#00ff4188" font-size="9" style="animation:fadeIn .5s 1.3s both">[14:49:34] <tspan fill="#0ff">[OCR]</tspan>   Extracted hash: 5d41402abc4b2a76... <tspan fill="#00ff4166"> | Tesseract | PSM: 6 | Conf: 0.95</tspan></text>
+  <text x="25" y="336" fill="#00ff4188" font-size="9" style="animation:fadeIn .5s 1.6s both">[14:49:36] <tspan fill="#ffd700">[NET]</tspan>   Port 443 open (HTTPS/TLS1.3) <tspan fill="#00ff4166"> | Fingerprint: Apache 2.4.54</tspan></text>
+  <text x="25" y="351" fill="#00ff4188" font-size="9" style="animation:fadeIn .5s 1.9s both">[14:49:38] <tspan fill="#0ff">[AI]</tspan>    Reasoning: Potential SQLi vector identified <tspan fill="#00ff4166"> | Llama-3.3-70B | Lat: 45ms</tspan></text>
+  <text x="25" y="366" fill="#00ff4188" font-size="9" style="animation:fadeIn .5s 2.2s both">[14:49:40] <tspan fill="#ff0040">[GUARD]</tspan> Blocked destructive command: rm -rf <tspan fill="#00ff4166"> | Policy: ETHICAL | Action: DENIED ✓</tspan></text>
+  <text x="25" y="381" fill="#00ff4188" font-size="9" style="animation:fadeIn .5s 2.5s both">[14:49:42] <tspan fill="#76B900">[NIM]</tspan>   Llama-3.3 inference completed (45ms) <tspan fill="#00ff4166"> | Tokens: 2048 | Temp: 0.5</tspan></text>
+  <text x="25" y="396" fill="#00ff4188" font-size="9" style="animation:fadeIn .5s 2.8s both">[14:49:50] <tspan fill="#ffd700">[SAFE]</tspan>  PII detected and redacted in output <tspan fill="#00ff4166"> | Pattern: email | Action: masked ✓</tspan></text>
+
+  <!-- BOTTOM PANELS -->
+  <rect x="15" y="415" width="375" height="170" class="terminal-bg" rx="4"/>
+  <text x="25" y="432" fill="#00ff4166" font-size="8">┌─ METRICS DASHBOARD ───────────────────────────────┐</text>
+  <text x="25" y="455" fill="#00ff41" font-size="12" style="animation:fadeIn 1s 0.5s both">📊 Campaign: <tspan fill="#0ff">SF-20260603-143032</tspan></text>
+  <text x="25" y="478" fill="#00ff41" font-size="12" style="animation:fadeIn 1s 1s both">🎯 Target:   <tspan fill="#0ff">192.168.1.0/24</tspan></text>
+  <text x="25" y="501" fill="#00ff41" font-size="12" style="animation:fadeIn 1s 1.5s both">⚡ Phase:    <tspan fill="#ffd700">EXPLOIT (5/7)</tspan></text>
+  <text x="25" y="524" fill="#00ff41" font-size="12" style="animation:fadeIn 1s 2s both">🔍 Vulns:    <tspan fill="#ff0040">3 CRITICAL</tspan><tspan fill="#ffd700"> · 5 HIGH</tspan><tspan fill="#00ff41"> · 12 MEDIUM</tspan></text>
+  <text x="25" y="547" fill="#00ff41" font-size="12" style="animation:fadeIn 1s 2.5s both">⏱ Duration:  <tspan fill="#0ff">4min 32s</tspan> | <tspan fill="#00ff41">Iterations: 142</tspan></text>
+  <text x="25" y="570" fill="#00ff41" font-size="12" style="animation:fadeIn 1s 3s both">🧠 Memory:   <tspan fill="#0ff">14,327 tokens</tspan> | <tspan fill="#00ff41">LTM: 89 lessons</tspan></text>
+
+  <rect x="410" y="415" width="375" height="170" class="terminal-bg" rx="4"/>
+  <text x="420" y="432" fill="#00ff4166" font-size="8">┌─ REPORT PREVIEW ──────────────────────────────────┐</text>
+  <text x="420" y="455" fill="#0ff" font-size="10" style="animation:fadeIn 1s 0.8s both">│ RESULTADO DA CAMPANHA</text>
+  <text x="420" y="475" fill="#00ff41" font-size="10" style="animation:fadeIn 1s 1.3s both">│</text>
+  <text x="420" y="495" fill="#ff0040" font-size="10" style="animation:fadeIn 1s 1.8s both">│ 🔴 SQL Injection (CVSS 9.8) → admin_login</text>
+  <text x="420" y="515" fill="#ff6600" font-size="10" style="animation:fadeIn 1s 2.3s both">│ 🟠 Path Traversal (CVSS 7.5) → /download?file=</text>
+  <text x="420" y="535" fill="#ffd700" font-size="10" style="animation:fadeIn 1s 2.8s both">│ 🟡 Info Disclosure (CVSS 5.3) → /api/version</text>
+  <text x="420" y="555" fill="#00ff41" font-size="10" style="animation:fadeIn 1s 3.3s both">│</text>
+  <text x="420" y="575" fill="#0ff" font-size="10" style="animation:fadeIn 1s 3.8s both">│ 📄 Report saved: 4 formats (md/json/html/pdf)</text>
+</svg>

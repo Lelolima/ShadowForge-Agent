@@ -30,14 +30,21 @@ class RivaClient:
         self._connected = False
 
     async def conectar(self) -> bool:
-        """Estabelece conexão gRPC com Riva server."""
+        """Estabelece conexão gRPC com Riva server.
+
+        M-10 FIX: Usa asyncio.to_thread() para evitar bloqueio síncrono
+        do event loop por até 10 segundos.
+        """
         try:
+            import asyncio as _asyncio
             import grpc
 
             self._channel = grpc.insecure_channel(self._servidor)
 
-            # Testa conexão
-            grpc.channel_ready_future(self._channel).result(timeout=10)
+            # M-10 FIX: Executar verificação bloqueante em thread separada
+            await _asyncio.to_thread(
+                grpc.channel_ready_future(self._channel).result, 10
+            )
             self._connected = True
 
             # Inicializa stubs

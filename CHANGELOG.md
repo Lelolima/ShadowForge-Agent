@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-06-03
+
+### Fixed
+- Typo crítico: `MemoriLongoPrazo` → `MemoriaLongoPrazo` (classe inacessível)
+- Typo crítico: dependência com espaço `" Reconhecimento Passivo"` no orchestrator quebrava resolução
+- SQLite connection leaks: `_init_db`, `_salvar_vulnerabilidade_db`, `_salvar_acao_db`, `_atualizar_fase_db` agora usam context managers
+- EventBus `stop()` agora faz flush dos eventos pendentes antes de parar
+- Lógica IDOR: avaliação agora é feita após coletar TODAS as respostas (antes avaliava a cada iteração)
+- `shlex.quote` no Windows: substituído por `_safe_quote()` com escaping adequado para CMD/PowerShell
+- Typo: `estatisicas()` → `estatisticas()` em MemoriaLongoPrazo
+- Typo: `log_retenciao_dias` → `log_retencao_dias` em ShadowForgeConfig
+
+### Changed
+- Decisores OODA (`_decidir_scan`, `_decidir_enum`, `_decidir_post`) agora utilizam dados de orientação/RAG
+- `_decidir_exploit` agora prioriza vulnerabilidades por severidade (critical → high → medium → low)
+- `_decidir_recon` inclui contagem de técnicas RAG na decisão
+
 ## [1.0.0] - 2025-05-19
 
 ### Added

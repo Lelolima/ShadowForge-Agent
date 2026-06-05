@@ -1,10 +1,10 @@
 """
 ============================================================
- NVIDIA ShadowForge Agent - NIM Client
- Arquivo: models/nim_client.py
+NVIDIA ShadowForge Agent - NIM Client
+Arquivo: models/nim_client.py
 ============================================================
- Client para NVIDIA Inference Manager (NIM) com streaming,
- multi-GPU, rate limiting, quantizacao e fallback.
+Client para NVIDIA Inference Manager (NIM) com streaming,
+multi-GPU, rate limiting, quantizacao e fallback.
 ============================================================
 """
 
@@ -62,14 +62,14 @@ class NIMClient:
             self._base_url = getattr(config, "base_url", self._base_url)
             self._org_id = getattr(config, "org_id", "")
 
-        # Resolve env vars
-        if self._api_key.startswith("${"):
-            var = self._api_key[2:-1]
-            self._api_key = os.environ.get(var, "")
+            # Resolve env vars
+            if self._api_key.startswith("${"):
+                var = self._api_key[2:-1]
+                self._api_key = os.environ.get(var, "")
 
-        # Tambem checa env direto se config nao forneceu
-        if not self._api_key:
-            self._api_key = os.environ.get("NVIDIA_API_KEY", "")
+            # Tambem checa env direto se config nao forneceu
+            if not self._api_key:
+                self._api_key = os.environ.get("NVIDIA_API_KEY", "")
 
         # Verifica se API key esta configurada
         self._disponivel = bool(self._api_key and not self._api_key.startswith("nvapi-xxxxx"))
@@ -253,50 +253,6 @@ class NIMClient:
 
         logger.warning("Nenhum modelo NIM respondeu - modo simulacao")
         return None
-        """Verifica quais modelos respondem a chamadas com a API key atual."""
-        if self._modelos_verificados:
-            return self._modelos_disponiveis
-
-        if not self._disponivel:
-            self._modelos_verificados = True
-            return []
-
-        session = await self._get_session()
-        modelos_ok = []
-
-        for modelo in self.MODELOS_FALLBACK:
-            try:
-                payload = {
-                    "model": modelo,
-                    "messages": [{"role": "user", "content": "OK"}],
-                    "max_tokens": 5,
-                    "temperature": 0.1,
-                }
-                async with session.post(
-                    f"{self._base_url}/chat/completions", json=payload
-                ) as resp:
-                    if resp.status == 200:
-                        modelos_ok.append(modelo)
-                        logger.info("Modelo NIM disponivel: %s", modelo)
-                        break  # Achou um, suficiente
-                    elif resp.status == 403:
-                        logger.debug("Modelo %s: 403 Forbidden (precisa ativacao em build.nvidia.com)", modelo)
-                    else:
-                        logger.debug("Modelo %s: erro %d", modelo, resp.status)
-            except Exception as e:
-                logger.debug("Modelo %s: excecao %s", modelo, str(e)[:80])
-
-        self._modelos_disponiveis = modelos_ok
-        self._modelos_verificados = True
-
-        if modelos_ok:
-            self._modelo_ativo = modelos_ok[0]
-            logger.info("Modelo NIM ativo: %s", self._modelo_ativo)
-        else:
-            logger.warning("Nenhum modelo NIM respondeu - modo simulacao ativado")
-            logger.warning("Ative modelos em: https://build.nvidia.com/ (clique Try > Get API Key)")
-
-        return modelos_ok
 
     async def _executar_requisicao(self, payload: dict) -> str:
         """Executa requisicao ao NIM com retry e fallback inteligente."""
@@ -340,9 +296,7 @@ class NIMClient:
                         continue
 
                     elif resp.status in (403, 404):
-                        # Modelo nao disponivel para esta key - tenta proximo
                         logger.warning("Modelo %s: erro %d, tentando fallback", payload["model"], resp.status)
-                        # Remove modelo que falhou e tenta proximo
                         if payload["model"] in self._modelos_disponiveis:
                             self._modelos_disponiveis.remove(payload["model"])
                         self._modelo_ativo = None
@@ -409,12 +363,12 @@ class NIMClient:
                     "Para IA real, ative modelos em https://build.nvidia.com/")
 
         else:
-            return ("[SIMULACAO NIM] Modelo {modelo}\n"
-                    "Prompt: {prompt}\n"
+            # M-11 FIX: Usar f-string consistentemente (como os outros ramos)
+            prompt_preview = user_msg[:50] if user_msg else "N/A"
+            return (f"[SIMULACAO NIM] Modelo: {modelo}\n"
+                    f"Prompt: {prompt_preview}\n"
                     "Resposta gerada em modo simulacao.\n"
-                    "Para IA real, ative modelos em https://build.nvidia.com/").format(
-                        modelo=modelo, prompt=user_msg[:50] if user_msg else "N/A"
-                    )
+                    "Para IA real, ative modelos em https://build.nvidia.com/")
 
     async def verificar_saude(self) -> dict[str, Any]:
         """Verifica saude do NIM e retorna detalhes."""
@@ -432,12 +386,10 @@ class NIMClient:
 
         try:
             session = await self._get_session()
-            # Testa endpoint /v1/models (com /v1/)
             url = f"{self._base_url}/models"
             async with session.get(url) as resp:
                 resultado["endpoint_acessivel"] = resp.status == 200
 
-            # Busca modelo ativo
             ativo = await self._procurar_modelo_ativo()
             if ativo:
                 resultado["status"] = "online"

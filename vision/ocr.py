@@ -243,23 +243,50 @@ class OCRExtractor:
         return estrutura
 
     def _parsear_nmap_output(self, texto: str) -> dict[str, Any]:
-        """Parseia output do Nmap."""
+        """Parseia output do Nmap.
+
+        M-04 FIX: Agrupa portas por host em vez de criar um único host.
+        Parseia por seção de host ("Nmap scan report for X").
+        """
         resultado: dict[str, Any] = {"hosts": []}
 
-        # Portas abertas
+        # Padrão para detectar novo host no output
+        host_pattern = re.compile(r"Nmap scan report for\s+(.+?)(?:\s|\n)")
         porta_pattern = re.compile(
             r"(\d+)/tcp\s+open\s+(\S+)(?:\s+(.+))?"
         )
-        portas = []
-        for match in porta_pattern.findall(texto):
-            portas.append({
-                "porta": int(match[0]),
-                "estado": "open",
-                "servico": match[1],
-                "versao": match[2] if match[2] else "",
-            })
 
-        if portas:
-            resultado["hosts"].append({"portas": portas})
+        # M-04 FIX: Dividir texto por seções de host
+        host_sections = re.split(r"Nmap scan report for\s+", texto)
+
+        for section in host_sections[1:]:  # Pula o texto antes do primeiro host
+            # Extrair hostname/IP da seção
+            host_match = re.match(r"(\S+)", section)
+            host_addr = host_match.group(1) if host_match else "unknown"
+
+            portas = []
+            for match in porta_pattern.findall(section):
+                portas.append({
+                    "porta": int(match[0]),
+                    "estado": "open",
+                    "servico": match[1],
+                    "versao": match[2] if match[2] else "",
+                })
+
+            if portas:
+                resultado["hosts"].append({"endereco": host_addr, "portas": portas})
+
+        # Fallback: se não encontrou seções de host, agrupa todas as portas
+        if not resultado["hosts"]:
+            portas = []
+            for match in porta_pattern.findall(texto):
+                portas.append({
+                    "porta": int(match[0]),
+                    "estado": "open",
+                    "servico": match[1],
+                    "versao": match[2] if match[2] else "",
+                })
+            if portas:
+                resultado["hosts"].append({"portas": portas})
 
         return resultado

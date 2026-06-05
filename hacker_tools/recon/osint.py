@@ -50,9 +50,11 @@ class OSINTGatherer:
 
         try:
             import aiohttp
-            url = f"https://api.shodan.io/shodan/host/{alvo}?key={self._shodan_key}"
+            # Segurança: API key via header em vez de query param (não vaza em logs/proxy)
+            url = f"https://api.shodan.io/shodan/host/{alvo}"
+            headers = {"X-Shodan-Api-Key": self._shodan_key}
 
-            async with aiohttp.ClientSession() as session, session.get(url, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+            async with aiohttp.ClientSession() as session, session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=15)) as resp:
                     if resp.status == 200:
                         data = await resp.json()
                         return {
@@ -148,7 +150,7 @@ class OSINTGatherer:
             async with aiohttp.ClientSession() as session, session.get(
                 f"https://{dominio}",
                 timeout=aiohttp.ClientTimeout(total=10),
-                ssl=False,
+                ssl=True,
             ) as resp:
                 if resp.status == 200:
                     text = await resp.text()
@@ -170,7 +172,7 @@ class OSINTGatherer:
             import aiohttp
             async with aiohttp.ClientSession() as session, session.head(
                 url, timeout=aiohttp.ClientTimeout(total=10),
-                ssl=False,
+                ssl=True,
             ) as resp:
                 resultado["metadata"]["content_type"] = resp.headers.get("Content-Type", "")
                 resultado["metadata"]["server"] = resp.headers.get("Server", "")

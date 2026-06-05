@@ -1,22 +1,26 @@
 """
 ============================================================
- NVIDIA ShadowForge Agent - Sistema de Memória
- Arquivo: core/memory.py
+NVIDIA ShadowForge Agent - Sistema de Memória
+Arquivo: core/memory.py
 ============================================================
- Memória de curto e longo prazo com integração NVIDIA
- Embeddings para busca semântica de experiências passadas.
+Memória de curto e longo prazo com integração NVIDIA
+Embeddings para busca semântica de experiências passadas.
 ============================================================
 """
 
 from __future__ import annotations
 
 import json
+import logging
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import aiosqlite
+
+logger = logging.getLogger("shadowforge.core.memory")
 
 
 @dataclass
@@ -48,18 +52,24 @@ class MemoriaCurtoPrazo:
 
     Armazena observações, ações e resultados recentes
     num buffer circular com limite de tamanho.
+
+    M-01 FIX: Usa OrderedDict com LRU para evict O(1) em vez de O(n²).
     """
 
     def __init__(self, capacidade: int = 500) -> None:
         self.capacidade = capacidade
-        self._entradas: list[EntradaMemoria] = []
-        self._indice_por_tipo: dict[str, list[int]] = {}
+        self._entradas: OrderedDict[str, EntradaMemoria] = OrderedDict()
+        self._indice_por_tipo: dict[str, list[str]] = {}
+        self._counter = 0
 
     def adicionar(self, tipo: str, conteudo: str, contexto: str = "",
                   importancia: float = 0.5, tags: list[str] | None = None) -> EntradaMemoria:
         """Adiciona entrada à memória de curto prazo."""
+        self._counter += 1
+        entry_id = f"MCP-{self._counter:06d}"
+
         entrada = EntradaMemoria(
-            id=f"MCP-{len(self._entradas):06d}",
+            id=entry_id,
             tipo=tipo,
             conteudo=conteudo,
             contexto=contexto,
@@ -67,62 +77,59 @@ class MemoriaCurtoPrazo:
             tags=tags or [],
         )
 
-        self._entradas.append(entrada)
+        self._entradas[entry_id] = entrada
 
         # Índice por tipo
         if tipo not in self._indice_por_tipo:
             self._indice_por_tipo[tipo] = []
-        self._indice_por_tipo[tipo].append(len(self._entradas) - 1)
+        self._indice_por_tipo[tipo].append(entry_id)
 
-        # Evict se exceder capacidade (remove menos importantes)
+        # Evict se exceder capacidade (remove menos importantes — LRU)
         if len(self._entradas) > self.capacidade:
             self._evict()
 
         return entrada
 
     def _evict(self) -> None:
-        """Remove entradas menos importantes quando buffer está cheio."""
-        # Ordena por importância e remove as 10% menos importantes
+        """Remove entradas menos importantes quando buffer está cheio.
+
+        M-01 FIX: Usa OrderedDict para evict O(1) em vez de O(n²).
+        A cada evict, remove as 10% entradas com menor importância.
+        """
         n_remover = max(1, len(self._entradas) // 10)
-        entradas_ordenadas = sorted(
-            range(len(self._entradas)),
-            key=lambda i: self._entradas[i].importancia,
+        # Ordena por importância e identifica as menos importantes
+        items_by_importance = sorted(
+            self._entradas.items(),
+            key=lambda x: x[1].importancia,
         )
-        indices_remover = set(entradas_ordenadas[:n_remover])
-
-        novas_entradas = [
-            e for i, e in enumerate(self._entradas)
-            if i not in indices_remover
-        ]
-        self._entradas = novas_entradas
-        self._reconstruir_indice()
-
-    def _reconstruir_indice(self) -> None:
-        """Reconstrói índice de tipo após evict."""
-        self._indice_por_tipo = {}
-        for i, entrada in enumerate(self._entradas):
-            if entrada.tipo not in self._indice_por_tipo:
-                self._indice_por_tipo[entrada.tipo] = []
-            self._indice_por_tipo[entrada.tipo].append(i)
+        for entry_id, _ in items_by_importance[:n_remover]:
+            # Remove do índice de tipo
+            entrada = self._entradas[entry_id]
+            tipo_idx = self._indice_por_tipo.get(entrada.tipo, [])
+            if entry_id in tipo_idx:
+                tipo_idx.remove(entry_id)
+            del self._entradas[entry_id]
 
     def buscar_por_tipo(self, tipo: str, limite: int = 50) -> list[EntradaMemoria]:
         """Busca entradas do tipo especificado."""
-        indices = self._indice_por_tipo.get(tipo, [])
-        return [self._entradas[i] for i in indices[-limite:]]
+        ids = self._indice_por_tipo.get(tipo, [])
+        result = [self._entradas[eid] for eid in ids[-limite:] if eid in self._entradas]
+        return result
 
     def buscar_recentes(self, limite: int = 20) -> list[EntradaMemoria]:
         """Retorna N entradas mais recentes."""
-        return self._entradas[-limite:]
+        all_entries = list(self._entradas.values())
+        return all_entries[-limite:]
 
     def buscar_por_tags(self, tags: list[str], limite: int = 20) -> list[EntradaMemoria]:
         """Busca entradas que contenham qualquer das tags."""
         resultados = []
         tags_set = set(tags)
-        for entrada in reversed(self._entradas):
+        for entrada in reversed(list(self._entradas.values())):
             if tags_set & set(entrada.tags):
                 resultados.append(entrada)
-                if len(resultados) >= limite:
-                    break
+            if len(resultados) >= limite:
+                break
         return resultados
 
     def contexto_recente(self, n_entradas: int = 10) -> str:
@@ -146,66 +153,82 @@ class MemoriaCurtoPrazo:
         return len(self._entradas)
 
 
-class MemoriLongoPrazo:
+class MemoriaLongoPrazo:
     """Memória de longo prazo — persistida em SQLite + embeddings.
 
     Armazena lições aprendidas, técnicas bem-sucedidas,
     resultados de campanhas anteriores e conhecimento acumulado.
+
+    H-03 FIX: Mantém conexão persistente aiosqlite em vez de abrir
+    uma nova conexão a cada operação.
     """
 
     def __init__(self, db_path: str | Path = "data/memory/long_term.db") -> None:
         self._db_path = Path(db_path)
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._initialized = False
+        self._db: aiosqlite.Connection | None = None
 
-    async def _ensure_db(self) -> None:
-        """Garante que o banco está inicializado."""
-        if self._initialized:
-            return
+    async def _ensure_db(self) -> aiosqlite.Connection:
+        """Garante que o banco está inicializado e retorna conexão persistente.
 
-        async with aiosqlite.connect(str(self._db_path)) as db:
-            await db.execute("""
-                CREATE TABLE IF NOT EXISTS memoria_longo_prazo (
-                    id TEXT PRIMARY KEY,
-                    tipo TEXT NOT NULL,
-                    conteudo TEXT NOT NULL,
-                    contexto TEXT,
-                    campanha_id TEXT,
-                    fase TEXT,
-                    importancia REAL DEFAULT 0.5,
-                    tags TEXT,
-                    timestamp TEXT NOT NULL,
-                    embedding_id TEXT
-                )
-            """)
-            await db.execute("""
-                CREATE INDEX IF NOT EXISTS idx_tipo ON memoria_longo_prazo(tipo)
-            """)
-            await db.execute("""
-                CREATE INDEX IF NOT EXISTS idx_campanha ON memoria_longo_prazo(campanha_id)
-            """)
-            await db.execute("""
-                CREATE INDEX IF NOT EXISTS idx_importancia ON memoria_longo_prazo(importancia DESC)
-            """)
-            await db.commit()
+        H-03 FIX: Retorna conexão persistente em vez de criar nova cada vez.
+        """
+        if self._db is not None and self._initialized:
+            return self._db
+
+        self._db = await aiosqlite.connect(str(self._db_path))
+        self._db.row_factory = aiosqlite.Row
+
+        await self._db.execute("""
+            CREATE TABLE IF NOT EXISTS memoria_longo_prazo (
+                id TEXT PRIMARY KEY,
+                tipo TEXT NOT NULL,
+                conteudo TEXT NOT NULL,
+                contexto TEXT,
+                campanha_id TEXT,
+                fase TEXT,
+                importancia REAL DEFAULT 0.5,
+                tags TEXT,
+                timestamp TEXT NOT NULL,
+                embedding_id TEXT
+            )
+        """)
+        await self._db.execute("""
+            CREATE INDEX IF NOT EXISTS idx_tipo ON memoria_longo_prazo(tipo)
+        """)
+        await self._db.execute("""
+            CREATE INDEX IF NOT EXISTS idx_campanha ON memoria_longo_prazo(campanha_id)
+        """)
+        await self._db.execute("""
+            CREATE INDEX IF NOT EXISTS idx_importancia ON memoria_longo_prazo(importancia DESC)
+        """)
+        await self._db.commit()
 
         self._initialized = True
+        return self._db
+
+    async def close(self) -> None:
+        """Fecha a conexão persistente com o banco."""
+        if self._db is not None:
+            await self._db.close()
+            self._db = None
+            self._initialized = False
 
     async def armazenar(self, entrada: EntradaMemoria) -> str:
         """Armazena uma entrada na memória de longo prazo."""
-        await self._ensure_db()
+        db = await self._ensure_db()
 
-        async with aiosqlite.connect(str(self._db_path)) as db:
-            await db.execute(
-                """INSERT OR REPLACE INTO memoria_longo_prazo
-                (id, tipo, conteudo, contexto, campanha_id, fase, importancia, tags, timestamp, embedding_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (entrada.id, entrada.tipo, entrada.conteudo, entrada.contexto,
-                 entrada.campanha_id, entrada.fase, entrada.importancia,
-                 json.dumps(entrada.tags), entrada.timestamp,
-                 str(hash(entrada.conteudo) % (10**9))),
-            )
-            await db.commit()
+        await db.execute(
+            """INSERT OR REPLACE INTO memoria_longo_prazo
+            (id, tipo, conteudo, contexto, campanha_id, fase, importancia, tags, timestamp, embedding_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (entrada.id, entrada.tipo, entrada.conteudo, entrada.contexto,
+            entrada.campanha_id, entrada.fase, entrada.importancia,
+            json.dumps(entrada.tags), entrada.timestamp,
+            str(hash(entrada.conteudo) % (10**9))),
+        )
+        await db.commit()
 
         return entrada.id
 
@@ -214,97 +237,90 @@ class MemoriLongoPrazo:
 
         Na ausência de embeddings calculados, faz busca por texto.
         """
-        await self._ensure_db()
-
+        db = await self._ensure_db()
         resultados = []
         query_lower = query.lower()
 
-        async with aiosqlite.connect(str(self._db_path)) as db:
-            db.row_factory = aiosqlite.Row
-
-            # Busca por texto (fallback quando embeddings não disponíveis)
-            async with db.execute(
-                """SELECT * FROM memoria_longo_prazo
-                WHERE conteudo LIKE ? OR contexto LIKE ?
-                ORDER BY importancia DESC LIMIT ?""",
-                (f"%{query_lower}%", f"%{query_lower}%", limite),
-            ) as cursor:
-                async for row in cursor:
-                    resultados.append(EntradaMemoria(
-                        id=row["id"],
-                        tipo=row["tipo"],
-                        conteudo=row["conteudo"],
-                        contexto=row["contexto"] or "",
-                        campanha_id=row["campanha_id"] or "",
-                        fase=row["fase"] or "",
-                        importancia=row["importancia"],
-                        tags=json.loads(row["tags"]) if row["tags"] else [],
-                        timestamp=row["timestamp"],
-                    ))
+        # Busca por texto (fallback quando embeddings não disponíveis)
+        async with db.execute(
+            """SELECT * FROM memoria_longo_prazo
+            WHERE conteudo LIKE ? OR contexto LIKE ?
+            ORDER BY importancia DESC LIMIT ?""",
+            (f"%{query_lower}%", f"%{query_lower}%", limite),
+        ) as cursor:
+            async for row in cursor:
+                resultados.append(EntradaMemoria(
+                    id=row["id"],
+                    tipo=row["tipo"],
+                    conteudo=row["conteudo"],
+                    contexto=row["contexto"] or "",
+                    campanha_id=row["campanha_id"] or "",
+                    fase=row["fase"] or "",
+                    importancia=row["importancia"],
+                    tags=json.loads(row["tags"]) if row["tags"] else [],
+                    timestamp=row["timestamp"],
+                ))
 
         return resultados
 
     async def buscar_por_campanha(self, campanha_id: str) -> list[EntradaMemoria]:
         """Recupera todas as entradas de uma campanha."""
-        await self._ensure_db()
-
+        db = await self._ensure_db()
         resultados = []
-        async with aiosqlite.connect(str(self._db_path)) as db:
-            db.row_factory = aiosqlite.Row
-            async with db.execute(
-                "SELECT * FROM memoria_longo_prazo WHERE campanha_id=? ORDER BY timestamp",
-                (campanha_id,),
-            ) as cursor:
-                async for row in cursor:
-                    resultados.append(EntradaMemoria(
-                        id=row["id"], tipo=row["tipo"],
-                        conteudo=row["conteudo"], contexto=row["contexto"] or "",
-                        campanha_id=row["campanha_id"] or "",
-                        fase=row["fase"] or "",
-                        importancia=row["importancia"],
-                        tags=json.loads(row["tags"]) if row["tags"] else [],
-                        timestamp=row["timestamp"],
-                    ))
+        async with db.execute(
+            "SELECT * FROM memoria_longo_prazo WHERE campanha_id=? ORDER BY timestamp",
+            (campanha_id,),
+        ) as cursor:
+            async for row in cursor:
+                resultados.append(EntradaMemoria(
+                    id=row["id"], tipo=row["tipo"],
+                    conteudo=row["conteudo"], contexto=row["contexto"] or "",
+                    campanha_id=row["campanha_id"] or "",
+                    fase=row["fase"] or "",
+                    importancia=row["importancia"],
+                    tags=json.loads(row["tags"]) if row["tags"] else [],
+                    timestamp=row["timestamp"],
+                ))
 
         return resultados
 
     async def recuperar_licoes(self, tipo_vuln: str = "", limite: int = 20) -> list[EntradaMemoria]:
-        """Recupera lições aprendidas relevantes."""
-        await self._ensure_db()
+        """Recupera lições aprendidas relevantes.
 
+        H-06 FIX: Inclui campanha_id e fase na desserialização (antes faltavam).
+        """
+        db = await self._ensure_db()
         resultados = []
-        async with aiosqlite.connect(str(self._db_path)) as db:
-            db.row_factory = aiosqlite.Row
 
-            query = "SELECT * FROM memoria_longo_prazo WHERE tipo='licao'"
-            params: list[Any] = []
+        query = "SELECT * FROM memoria_longo_prazo WHERE tipo='licao'"
+        params: list[Any] = []
 
-            if tipo_vuln:
-                query += " AND (conteudo LIKE ? OR tags LIKE ?)"
-                params.extend([f"%{tipo_vuln}%", f"%{tipo_vuln}%"])
+        if tipo_vuln:
+            query += " AND (conteudo LIKE ? OR tags LIKE ?)"
+            params.extend([f"%{tipo_vuln}%", f"%{tipo_vuln}%"])
 
-            query += " ORDER BY importancia DESC LIMIT ?"
-            params.append(limite)
+        query += " ORDER BY importancia DESC LIMIT ?"
+        params.append(limite)
 
-            async with db.execute(query, params) as cursor:
-                async for row in cursor:
-                    resultados.append(EntradaMemoria(
-                        id=row["id"], tipo=row["tipo"],
-                        conteudo=row["conteudo"], contexto=row["contexto"] or "",
-                        importancia=row["importancia"],
-                        tags=json.loads(row["tags"]) if row["tags"] else [],
-                        timestamp=row["timestamp"],
-                    ))
+        async with db.execute(query, params) as cursor:
+            async for row in cursor:
+                resultados.append(EntradaMemoria(
+                    id=row["id"], tipo=row["tipo"],
+                    conteudo=row["conteudo"], contexto=row["contexto"] or "",
+                    campanha_id=row["campanha_id"] or "",  # H-06 FIX: campo estava faltando
+                    fase=row["fase"] or "",                  # H-06 FIX: campo estava faltando
+                    importancia=row["importancia"],
+                    tags=json.loads(row["tags"]) if row["tags"] else [],
+                    timestamp=row["timestamp"],
+                ))
 
         return resultados
 
-    async def estatisicas(self) -> dict[str, Any]:
+    async def estatisticas(self) -> dict[str, Any]:
         """Retorna estatísticas da memória de longo prazo."""
-        await self._ensure_db()
-
-        async with aiosqlite.connect(str(self._db_path)) as db:
-            total = await db.execute_fetchall("SELECT COUNT(*) as c FROM memoria_longo_prazo")
-            tipos = await db.execute_fetchall("SELECT tipo, COUNT(*) as c FROM memoria_longo_prazo GROUP BY tipo")
+        db = await self._ensure_db()
+        total = await db.execute_fetchall("SELECT COUNT(*) as c FROM memoria_longo_prazo")
+        tipos = await db.execute_fetchall("SELECT tipo, COUNT(*) as c FROM memoria_longo_prazo GROUP BY tipo")
 
         return {
             "total_entradas": total[0][0] if total else 0,

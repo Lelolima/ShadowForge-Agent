@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import ipaddress
 import os
 from enum import Enum
 from pathlib import Path
@@ -137,7 +138,7 @@ class ConfigEtica(BaseModel):
     modo_simulacao: bool = False
     whitelist_hosts: list[str] = Field(default_factory=list)
     blacklist_hosts: list[str] = Field(
-        default_factory=lambda: ["0.0.0.0/0", "224.0.0.0/4", "127.0.0.1"]
+        default_factory=lambda: ["224.0.0.0/4", "127.0.0.0/8", "169.254.0.0/16"]
     )
     max_severidade_exploracao: str = "high"
     impedir_destruicao: bool = True
@@ -195,7 +196,7 @@ class ShadowForgeConfig(BaseModel):
 
     # Identidade
     nome: str = "ShadowForge"
-    versao: str = "1.0.0"
+    versao: str = "1.1.0"
     codinome: str = "SH4D0WF0RG3"
     modo: ModoOperacao = ModoOperacao.STEALTH
     idioma: str = "pt-BR"
@@ -204,7 +205,7 @@ class ShadowForgeConfig(BaseModel):
     log_nivel: NivelLog = NivelLog.INFO
     log_arquivo: str = "logs/shadowforge.log"
     log_rotacao_mb: int = 50
-    log_retenciao_dias: int = 30
+    log_retencao_dias: int = 30
 
     # Subsistemas
     ooda: ConfigOODA = Field(default_factory=ConfigOODA)
@@ -282,8 +283,24 @@ class ShadowForgeConfig(BaseModel):
         # Verifica blacklist
         if alvo:
             for bloqueado in self.etica.blacklist_hosts:
-                if alvo == bloqueado or alvo.startswith(bloqueado.split("/")[0]):
-                    return False, f"Alvo {alvo} esta na blacklist: {bloqueado}"
+                try:
+                    # Suporta tanto IPs simples quanto ranges CIDR
+                    if "/" in bloqueado:
+                        # Verifica se alvo cai dentro da rede CIDR
+                        rede = ipaddress.ip_network(bloqueado, strict=False)
+                        try:
+                            alvo_ip = ipaddress.ip_address(alvo)
+                            if alvo_ip in rede:
+                                return False, f"Alvo {alvo} está na blacklist: {bloqueado}"
+                        except ValueError:
+                            # alvo não é um IP válido (hostname), ignora verificação CIDR
+                            pass
+                    else:
+                        if alvo == bloqueado:
+                            return False, f"Alvo {alvo} está na blacklist: {bloqueado}"
+                except ValueError:
+                    # Entrada de blacklist inválida, pula
+                    continue
 
         # Verifica whitelist (se definida)
         if self.etica.whitelist_hosts and alvo:

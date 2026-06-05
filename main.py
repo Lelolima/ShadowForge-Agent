@@ -74,7 +74,7 @@ BANNER = r"""
   ║   ███████║██║     ╚██████╗██║  ██║██║  ██║███████╗            ║
   ║   ╚══════╝╚═╝      ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝            ║
   ║                                                               ║
-  ║   [ SH4D0WF0RG3 v1.0.0 | 1337 Mode ]                         ║
+  ║   [ SH4D0WF0RG3 v1.1.0 | 1337 Mode ]                         ║
   ║   Autonomous Ethical Hacking AI | NVIDIA Powered              ║
   ║                                                               ║
   ╚═══════════════════════════════════════════════════════════════╝
@@ -190,7 +190,7 @@ class ShadowForgeLauncher:
 
             console.print(table)
         else:
-            print("SH4D0WF0RG3 v1.0.0 | Autonomous Ethical Hacking AI")
+            print("SH4D0WF0RG3 v1.1.0 | Autonomous Ethical Hacking AI")
             print("=" * 50)
 
     def detect_gpu(self) -> dict:
