@@ -19,6 +19,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from core.state import EstadoAgente  # L-08 FIX: Tipo específico em vez de Any
+
 try:
     from hacker_tools.reporting.charts import ChartEngine
     _HAS_CHARTS = True
@@ -47,7 +49,7 @@ class ReportGenerator:
     def __init__(self) -> None:
         self._template_dir = Path(__file__).parent / "templates"
 
-    async def gerar(self, estado: Any) -> dict[str, Any]:
+    async def gerar(self, estado: EstadoAgente) -> dict[str, Any]:
         """Gera relatório completo a partir do EstadoAgente.
 
         Args:
@@ -84,7 +86,7 @@ class ReportGenerator:
 
         return relatorio
 
-    def _gerar_resumo_executivo(self, estado: Any) -> dict[str, Any]:
+    def _gerar_resumo_executivo(self, estado: EstadoAgente) -> dict[str, Any]:
         """Gera resumo executivo."""
         _resumo = estado.resumo()  # noqa: F841
         vulns = estado.vulnerabilidades
@@ -115,7 +117,7 @@ class ReportGenerator:
             ),
         }
 
-    def _gerar_escopo(self, estado: Any) -> dict[str, Any]:
+    def _gerar_escopo(self, estado: EstadoAgente) -> dict[str, Any]:
         """Gera descrição do escopo."""
         return {
             "alvo_principal": estado.alvo_principal,
@@ -159,7 +161,7 @@ class ReportGenerator:
             ],
         }
 
-    def _detalhar_vulnerabilidades(self, estado: Any) -> list[dict[str, Any]]:
+    def _detalhar_vulnerabilidades(self, estado: EstadoAgente) -> list[dict[str, Any]]:
         """Detalha cada vulnerabilidade encontrada."""
         detalhes = []
         for vuln in estado.vulnerabilidades:
@@ -292,7 +294,7 @@ class ReportGenerator:
         score_medio = score_total / peso_total
         return round(min(10.0, score_medio), 1)
 
-    def _gerar_recomendacoes_gerais(self, estado: Any) -> list[str]:
+    def _gerar_recomendacoes_gerais(self, estado: EstadoAgente) -> list[str]:
         """Gera recomendações gerais de segurança."""
         recs = [
             "Implementar programa de segurança contínuo (não apenas pentest puntual)",
@@ -305,7 +307,7 @@ class ReportGenerator:
             recs.insert(0, "PRIORIDADE MÁXIMA: Corrigir vulnerabilidades CRÍTICAS imediatamente")
         return recs
 
-    def _avaliar_risco_residual(self, estado: Any) -> dict[str, Any]:
+    def _avaliar_risco_residual(self, estado: EstadoAgente) -> dict[str, Any]:
         """Avalia risco residual após remediação."""
         return {
             "pos_remediacao": "MÉDIO - Algumas vulnerabilidades requerem mudanças arquiteturais",

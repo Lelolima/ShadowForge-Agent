@@ -16,7 +16,10 @@ import platform
 import shlex
 import time
 from collections.abc import AsyncIterator
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from core.config import ShadowForgeConfig
 
 logger = logging.getLogger("shadowforge.control.shell")
 
@@ -76,7 +79,7 @@ class StealthShell:
     automático, e histórico OPSEC para audit trail.
     """
 
-    def __init__(self, config: Any = None) -> None:
+    def __init__(self, config: ShadowForgeConfig | None = None) -> None:
         self._config = config
         self._timeout_default = 300
         self._stream_output = True
@@ -99,8 +102,12 @@ class StealthShell:
     ) -> ResultadoComando:
         """Executa comando shell com timeout e output streaming.
 
+        L-04 FIX: O caller é responsável por escapar argumentos via _safe_quote().
+        Strings dinâmicas devem usar _safe_quote() para cada argumento antes de
+        concatenar. Comandos com shell metacharacters são executados via bash.
+
         Args:
-            comando: Comando para executar
+            comando: Comando para executar (caller deve escapar argumentos)
             timeout: Timeout em segundos (None = default 300s)
             shell: Shell específico (None = auto-detect)
             cwd: Diretório de trabalho

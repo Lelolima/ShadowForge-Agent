@@ -14,7 +14,7 @@ import asyncio
 import io
 import logging
 import time
-from typing import Any
+from typing import TYPE_CHECKING
 
 import numpy as np
 from PIL import Image
@@ -67,7 +67,7 @@ class ScreenCapture:
     FPS adaptativo para otimizar recursos.
     """
 
-    def __init__(self, config: Any = None) -> None:
+    def __init__(self, config: ShadowForgeConfig | None = None) -> None:
         self._config = config
         self._running = False
         self._ultimo_frame: FrameData | None = None

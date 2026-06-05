@@ -12,7 +12,10 @@ from __future__ import annotations
 
 import hashlib
 import logging
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from core.config import ShadowForgeConfig
 
 logger = logging.getLogger("shadowforge.models.embeddings")
 
@@ -25,7 +28,7 @@ class NVIDIAEmbeddings:
     Com caching para evitar recálculo.
     """
 
-    def __init__(self, config: Any = None) -> None:
+    def __init__(self, config: ShadowForgeConfig | None = None) -> None:
         self._config = config
         self._modelo = "nvidia/nv-embed-v1"
         self._dimensoes = 1024

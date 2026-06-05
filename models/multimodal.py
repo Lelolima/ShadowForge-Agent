@@ -11,7 +11,10 @@ de imagens de tela e chain-of-thought visual-tático.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from core.config import ShadowForgeConfig
 
 logger = logging.getLogger("shadowforge.models.multimodal")
 
@@ -39,7 +42,7 @@ class NemotronVision:
         "Seja preciso, técnico e direto. Formate como JSON."
     )
 
-    def __init__(self, config: Any = None) -> None:
+    def __init__(self, config: ShadowForgeConfig | None = None) -> None:
         self._config = config
         self._modelo = "nvidia/nemotron-3-nano-omni-vl"
         self._nim_client = None  # Será inicializado via lazy init

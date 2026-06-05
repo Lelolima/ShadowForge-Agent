@@ -24,7 +24,10 @@ import platform
 import random
 import shlex
 import time
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from core.config import ShadowForgeConfig
 
 import logging
 
@@ -56,7 +59,7 @@ class StealthElite:
         "Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36",
     ]
 
-    def __init__(self, config: Any = None) -> None:
+    def __init__(self, config: ShadowForgeConfig | None = None) -> None:
         self._config = config
         self._proxy_chain: list[str] = []
         self._ua_rotacao = True

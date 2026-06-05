@@ -14,7 +14,10 @@ import logging
 import random
 import shlex
 import time
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from core.config import ShadowForgeConfig
 
 logger = logging.getLogger("shadowforge.control.stealth")
 
@@ -42,7 +45,7 @@ class StealthManager:
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15",
     ]
 
-    def __init__(self, config: Any = None) -> None:
+    def __init__(self, config: ShadowForgeConfig | None = None) -> None:
         self._config = config
         self._proxy_chain: list[str] = []
         self._ua_rotacao = True
