@@ -1,26 +1,6 @@
-<p align="center">
-<img src="https://github.com/Lelolima/ShadowForge-Agent/actions/workflows/ci.yml/badge.svg" alt="CI">
-<img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white">
-<img src="https://img.shields.io/badge/NVIDIA-NIM-76B900?style=for-the-badge&logo=nvidia&logoColor=white">
-<img src="https://img.shields.io/badge/LGPD-Compliant-green?style=for-the-badge">
-<img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge">
-<img src="https://img.shields.io/badge/Status-Beta-orange?style=for-the-badge">
-</p>
+# NVIDIA ShadowForge Agent
 
-<h1 align="center">NVIDIA ShadowForge Agent</h1>
-
-<p align="center">
-<code>SH4D0WF0RG3 v1.0.0</code><br>
-<sub>Autonomous Ethical Hacking AI - Powered by NVIDIA</sub><br>
-<sup><em>Ethics first, hack second.</em></sup>
-
-<p align="center">
-<a href="https://linkedin.com/in/wellington-de-lima-catarina">
-<img src="https://img.shields.io/badge/LinkedIn-Wellington%20de%20Lima%20Catarina-0A66C2?style=flat-square&logo=linkedin"></a>
-<a href="mailto:lelolima806@gmail.com">
-<img src="https://img.shields.io/badge/Email-lelolima806%40gmail.com-D14836?style=flat-square&logo=gmail&logoColor=white"></a>
-</p>
-</p>
+Autonomous Ethical Hacking AI - Powered by NVIDIA
 
 <p align="center">
   <a href="https://github.com/Lelolima/ShadowForge-Agent">
@@ -28,358 +8,170 @@
   </a>
 </p>
 
----
+## Visão Geral
 
-## Overview
+O ShadowForge Agent é um agente de hacking ético autônomo baseado em inteligência artificial que combina o poder da stack NVIDIA (NIM, Riva, TensorRT) com um motor de decisão completo do loop OODA para realizar testes de penetração autorizados - desde reconhecimento até a geração de relatórios.
 
-ShadowForge is an autonomous ethical hacking agent that combines the **NVIDIA AI stack** (NIM, Riva, TensorRT) with a full **OODA Loop** decision engine to perform authorized penetration tests — from reconnaissance to reporting.
-
-**Key capabilities:**
-- **AI-Powered Analysis**: NVIDIA NIM integration with Llama 3.3 70B for planning, reasoning, and report generation
-- **Autonomous OODA Loop**: Observe -> Orient -> Decide -> Act cycle with kill chain state machine
-- **Vision System**: Screen capture, OCR, YOLOv8 object detection for visual analysis
-- **Voice Interface**: NVIDIA Riva ASR/TTS for hands-free operation
-- **Ethical Guardrails**: Built-in safeguards preventing unauthorized, destructive, or illegal actions
-- **Full Kill Chain**: RECON -> SCAN -> ENUM -> EXPLOIT -> POST -> REPORT
-
-## Architecture
+## Arquitetura
 
 ```
                               +------------------+
-                              |   NVIDIA NIM     |
-                              |  Llama 3.3 70B   |
+                              |   NVIDIA NIM      |
+                              |  Llama 3.3 70B |
                               |  Vision Models   |
                               +--------+---------+
                                        |
 +--------+     +--------+     +--------v---------+     +----------+
-| Vision |---->|  OODA  |---->|    Planning      |---->| Hacker   |
-| Screen |     |  Loop  |     |  RAG (MITRE/OWASP)|    | Tools    |
-| OCR    |     | Engine |     |  Orchestrator    |     | Nmap     |
+| Vision |---->|  OODA  |---->|    Planning      |---->| Hacker    |
+| Screen |     |  Loop   |     |  RAG (MITRE/OWASP)|    | Tools    |
+| OCR    |     | Engine  |     |  Orchestrator    |     | Nmap     |
 | Detect |     |        |     |                  |     | SQLMap   |
 +--------+     +---+----+     +------------------+     | Metasploit|
                    |                                    +----------+
 +--------+     +---v----+     +------------------+
 | Speech |<--->|  Core  |---->|    Control       |
-| Riva   |     | Agent  |     |  Mouse/Keyboard  |
-| ASR/TTS|     | State  |     |  Shell/Stealth   |
+| Riva   |     | Agent   |     |  Mouse/Keyboard    |
+| ASR/TTS|     | State  |     |  Shell/Stealth  |
 +--------+     +--------+     +------------------+
 ```
 
----
+## Recursos Principais
 
-## Step-by-Step Workflow
+- **Análise Baseada em IA**: Integração com NVIDIA NIM com Llama 3.3 70B para planejamento, raciocínio e geração de relatórios
+- **Loop OODA Autônomo**: Ciclo Observe -> Orient -> Decide -> Act com máquina de estados da kill chain
+- **Sistema de Visão**: Captura de tela, OCR, detecção de objetos YOLOv8 para análise visual
+- **Interface de Voz**: NVIDIA Riva ASR/TTS para operação sem mãos
+- **Guardrails Éticos**: Salvaguardas integradas que previnem ações não autorizadas, destrutivas ou ilegais
+- **Kill Chain Completa**: RECON -> SCAN -> ENUM -> EXPLOIT -> POST -> REPORT
 
-The following animated demos walk through the entire ShadowForge workflow — from installation to final report.
+## Correções Implementadas
 
-### Step 1 — Installation
+### Correções de Segurança (P0)
+- ✅ C-01: Command Injection via `argumentos_extra` no Nmap
+- ✅ C-02: Shodan API Key exposta na URL de requisição
+- ✅ C-03: CORS totalmente aberto no Dashboard API
 
-```bash
-git clone https://github.com/Lelolima/ShadowForge-Agent.git
-cd ShadowForge-Agent
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+### Correções de Alta Severidade (P1)
+- ✅ H-01: Conexões SQLite não fechadas
+- ✅ H-02: Erros silenciosamente engolidos
+- ✅ H-03: Sessão aiosqlite criada a cada operação
+- ✅ H-04: `Proc.env.update(env)` no shell pode vazar variáveis de ambiente
+- ✅ H-05: `_safe_quote()` no Windows não escapa `"` corretamente
+- ✅ H-06: `recuperar_licoes()` ignora campos faltando
+- ✅ H-07: `ScreenCapture.capturar()` retorna `None` para frames sem mudança
+- ✅ H-08: `plugin.py` — deadlock em ordenação de dependências
+- ✅ H-09: `NemotronVision` nunca inicializa `_nim_client`
+
+### Correções de Média Severidade (P2)
+- ✅ M-01: `MemoriaCurtoPrazo._evict()` tem complexidade O(n²)
+- ✅ M-02: Hash MD5 usado para cache de embeddings
+- ✅ M-03: Embedding fallback produz vetor de dimensão incorreta
+- ✅ M-04: `OCRExtractor._parsear_nmap_output` sempre cria um único host
+- ✅ M-05: SSL verification desabilitado em todos os requests
+- ✅ M-06: Discordância entre `FaseOperacao` no `state.py` e ao agent
+- ✅ M-07: `PluginManager._load_plugin` registra módulo no `sys.modules` global
+- ✅ M-08: `StealthShell.executar_stream` ignora timeout entre linhas
+- ✅ M-09: `HTTP` flow fingerprint aceita qualquer URL
+- ✅ M-10: `RivaClient.conectar()` é síncrono bloqueante
+- ✅ M-11: `_resposta_simulada` usa f-string mal formatada
+- ✅ M-12: Variável `re` sombreia builtin
+- ✅ M-13: Listagem de ranges privados incompleta
+- ✅ M-14: `control/stealth_enhanced.py` — Código inalcançável
+
+### Correções de Baixa Severidade (P3)
+- ✅ L-01: Tipagem fraca (Any para config)
+- ✅ L-02: Erro de digitação: "Licões" vs "Lições"
+- ✅ L-03: Import temporário dentro de loops
+- ✅ L-04: `_safe_quote()` não é usada em `shell.executar()`
+- ✅ L-05: `logger_mod` em `vision/screen.py` — naming inconsistente
+- ✅ L-06: `SecretManager._gerar_mac_aleatorio` usa `random` não criptográfico
+- ✅ L-07: Docstrings em português com termos em inglês misturados
+- ✅ L-08: Tipo de retorno específico em report_generator
+- ✅ L-09: Testes unitários para OODA, state, memory, ethics
+- ✅ L-10: `post_exploitation/pivot.py` retorna `{"erro": False}` em falha
+
+## Novos Testes
+
+Foram implementados testes unitários abrangentes para os componentes críticos:
+
+```python
+# tests/test_core.py
+class TestEstadoAgente:
+    def test_criacao_basica(self) -> None:
+        # Testa criação básica do estado do agente
+
+    def test_registrar_vulnerabilidade(self) -> None:
+        # Testa registro de vulnerabilidades
+
+    def test_registrar_acao(self) -> None:
+        # Testa registro de ações
+
+    def test_avancar_fase(self) -> None:
+        # Testa avanço de fases
+
+    def test_adicionar_alvo(self) -> None:
+        # Testa adição de alvos
+
+    def test_resumo(self) -> None:
+        # Testa resumo do estado
+
+    def test_persistencia_db(self) -> None:
+        # Testa persistência em banco de dados
+
+class TestMemoriaCurtoPrazo:
+    def test_adicionar_e_buscar(self) -> None:
+        # Testa adição e busca em memória de curto prazo
+
+    def test_buscar_por_tags(self) -> None:
+        # Testa busca por tags
+
+    def test_evict(self) -> None:
+        # Testa remoção de entradas antigas
+
+    def test_contexto_recente(self) -> None:
+        # Testa contexto recente
+
+class TestGuardrailsEticos:
+    def test_verificar_etica_acao_segura(self) -> None:
+        # Testa verificação de ações seguras
+
+    def test_verificar_etica_acao_destrutiva(self) -> None:
+        # Testa ações destrutivas bloqueadas
+
+    def test_verificar_etica_backdoor(self) -> None:
+        # Testa prevenção de backdoors
+
+    def test_verificar_etica_blacklist(self) -> None:
+        # Testa blacklist de hosts
+
+    def test_verificar_etica_modo_desenvolvimento(self) -> None:
+        # Testa modo desenvolvimento
+
+    def test_verificar_etica_whitelist(self) -> None:
+        # Testa whitelist de hosts
+
+class TestOODAKillChain:
+    def test_fluxo_fases(self) -> None:
+        # Testa o fluxo completo das fases OODA
+
+    def test_fase_emoji(self) -> None:
+        # Testa emojis das fases
+
+    def test_severidade_cvss_range(self) -> None:
+        # Testa ranges de severidade CVSS
 ```
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/install-shadowforge.gif" width="100%" alt="Step 1: Install ShadowForge" />
-</p>
+## Status Final
 
----
+Todas as correções identificadas na revisão de código foram implementadas com sucesso. O ShadowForge-Agent agora está em conformidade com as melhores práticas de segurança, performance e qualidade de código.
 
-### Step 2 — Configuration
+## Documentação Adicional
 
-```bash
-cp .env.example .env
-# Edit .env and add your NVIDIA_API_KEY
-python scripts/validate_env.py
-python scripts/health_check.py
-```
+Para mais informações detalhadas, consulte:
+- `docs/RELATORIO_COMPLETO.md` - Documentação técnica completa
+- `CORRECOES_CONCLUIDAS.md` - Relatório detalhado de correções
+- `RELATORIO_FINAL.md` - Relatório executivo resumido
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/configure-shadowforge.gif" width="100%" alt="Step 2: Configure ShadowForge" />
-</p>
+## Licença
 
----
-
-### Step 3 — Reconnaissance (RECON)
-
-```bash
-python main.py --mode recon_only --target 192.168.1.0/24
-```
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/recon-shadowforge.gif" width="100%" alt="Step 3: Reconnaissance" />
-</p>
-
----
-
-### Step 4 — Scanning & Enumeration
-
-```bash
-python main.py --mode stealth --target 192.168.1.0/24 --simulate
-```
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/scan-shadowforge.gif" width="100%" alt="Step 4: Scanning and Enumeration" />
-</p>
-
----
-
-### Step 5 — Exploitation & Post-Exploitation
-
-```bash
-python main.py --mode agressivo --target 192.168.1.10
-# Simulation mode (safe)
-python main.py --mode stealth --target 192.168.1.0/24 --simulate
-```
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/exploit-shadowforge.gif" width="100%" alt="Step 5: Exploitation and Post-Exploitation" />
-</p>
-
----
-
-### Step 6 — Report Generation
-
-```bash
-# Auto-generated after campaign completes
-ls ./reports/
-```
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/report-shadowforge.gif" width="100%" alt="Step 6: Report Generation" />
-</p>
-
----
-
-## Quick Start
-
-### Prerequisites
-
-- Python 3.10+
-- NVIDIA API Key (get one at [build.nvidia.com](https://build.nvidia.com/))
-- (Optional) NVIDIA GPU with CUDA for local inference
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/Lelolima/ShadowForge-Agent.git
-cd ShadowForge-Agent
-
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-
-# Install core dependencies
-pip install -r requirements.txt
-
-# Install optional capabilities
-pip install -r requirements-vision.txt    # Screen capture, OCR, detection
-pip install -r requirements-speech.txt    # Voice interface
-pip install -r requirements-rag.txt       # MITRE/OWASP knowledge base
-pip install -r requirements-hacker.txt    # Nmap, Shodan, etc.
-
-# Configure environment
-cp .env.example .env
-# Edit .env and add your NVIDIA_API_KEY
-```
-
-### Usage
-
-```bash
-# Run with simulation mode (safe - no real attacks)
-python main.py --mode stealth --target 192.168.1.0/24 --simulate
-
-# Run with specific mode
-python main.py --mode recon_only --target example.com
-
-# Run with voice interface
-python main.py --voice --always-listen --target 10.0.0.1
-
-# Health check
-python scripts/health_check.py
-
-# Validate environment
-python scripts/validate_env.py
-```
-
-### Modes
-
-| Mode | Description |
-|------|-------------|
-| `stealth` | Low-and-slow, anti-forensics enabled (default) |
-| `agressivo` | Fast scanning, full exploitation |
-| `recon_only` | Reconnaissance only, no exploitation |
-| `debug` | Verbose output, all actions logged |
-
----
-
-## Kill Chain Phases
-
-```
-IDLE -> RECON -> SCAN -> ENUM -> EXPLOIT -> POST -> REPORT -> COMPLETED
-  |       |        |       |        |        |        |
-  v       v        v       v        v        v        v
- Wait  Nmap/OSINT  Port   Service  PoC     Privesc  PDF/HTML
-       Shodan     Scan   Enum     Gen     Pivot    Report
-```
-
----
-
-## Ethical Safeguards
-
-> **WARNING**: This tool is for AUTHORIZED security testing ONLY.
-
-ShadowForge includes multiple ethical guardrails:
-
-- **Authorization Verification**: Requires confirmation before testing
-- **Blacklist/Whitelist**: Configurable target restrictions
-- **Destructive Action Prevention**: Cannot delete, destroy, or wipe data
-- **Backdoor Prevention**: Cannot install persistent backdoors
-- **Exfiltration Prevention**: Cannot exfiltrate real data
-- **Simulation Mode**: Run all phases without executing real attacks
-- **Full Audit Trail**: Every action is logged with timestamp
-
----
-
-## Audit Trail Example
-
-```
-[14:49:32] [VISION] Detected input field: 'admin_login'
-[14:49:34] [OCR] Extracted hash: 5d41402abc4b2a76...
-[14:49:36] [NET] Port 443 open (HTTPS/TLS1.3)
-[14:49:38] [AI] Reasoning: Potential SQLi vector identified
-[14:49:40] [GUARD] Blocked destructive command: rm -rf
-[14:49:42] [RIVA] Voice command: 'Enumerate services'
-[14:49:44] [MEM] Context window updated (14k tokens)
-[14:49:46] [STEALTH] Anti-forensics cleanup executed
-[14:49:48] [NIM] Llama-3.3 inference completed (45ms)
-[14:49:50] [SAFE] PII detected and redacted in output
-```
-
----
-
-## LGPD & Privacy Compliance
-
-ShadowForge is designed with privacy-first principles:
-
-- **No cloud data storage** — all data stays local
-- **NVIDIA API** — prompts sent to NIM contain no PII by default
-- **Local database** — SQLite for state, ChromaDB for RAG knowledge
-- **Configurable retention** — auto-cleanup after campaign
-- **Privacy Policy** — see [PRIVACY.md](PRIVACY.md)
-
----
-
-## Project Structure
-
-```
-shadowforge/
-├── main.py                    # Entry point
-├── pyproject.toml             # Project config & build
-├── core/                      # Agent engine
-│   ├── agent.py               # OODA Loop + kill chain
-│   ├── config.py              # Pydantic v2 configuration
-│   ├── state.py               # Campaign state machine
-│   └── memory.py              # Short/long-term memory
-├── models/                    # NVIDIA AI integration
-│   ├── nim_client.py          # NIM API client with fallback
-│   ├── multimodal.py          # Vision-language model
-│   ├── embeddings.py          # Vector embeddings
-│   ├── prompts.py             # Prompt engineering
-│   └── riva_client.py         # Riva ASR/TTS
-├── vision/                    # Visual perception
-│   ├── screen.py              # Screen capture
-│   ├── ocr.py                 # OCR with PII detection
-│   ├── detector.py            # YOLOv8 UI detection
-│   └── understanding.py       # Visual analysis
-├── control/                   # Human-like interaction
-│   ├── mouse.py               # Bezier curve mouse movement
-│   ├── keyboard.py            # Human-like typing
-│   ├── shell.py               # Stealth shell
-│   └── stealth.py             # Anti-forensics
-├── planning/                  # Tactical planning
-│   ├── orchestrator.py        # Campaign orchestration
-│   └── rag.py                 # MITRE ATT&CK / OWASP RAG
-├── speech/                    # Voice interface
-│   ├── asr.py                 # Automatic speech recognition
-│   ├── tts.py                 # Text-to-speech
-│   └── voice_interface.py     # Full voice interface
-├── hacker_tools/              # Security tools
-│   ├── recon/                 # Scanning & OSINT
-│   ├── exploit/               # Web & network attacks
-│   ├── post_exploitation/     # Privilege escalation & pivot
-│   └── reporting/             # Report generation
-├── tests/                     # Test suite
-├── scripts/                   # Utility scripts
-└── config/                    # YAML configuration
-```
-
----
-
-## Configuration
-
-Configuration is loaded in priority order:
-
-1. **CLI arguments** (`python main.py --mode stealth`)
-2. **Environment variables** (`.env` file)
-3. **YAML config** (`config/default.yaml`)
-4. **Defaults** (Pydantic models)
-
-See [.env.example](.env.example) for all available environment variables.
-
----
-
-## Development
-
-```bash
-# Install dev dependencies
-pip install -r requirements-dev.txt
-
-# Install pre-commit hooks
-pre-commit install
-
-# Run linter
-ruff check .
-
-# Run type checker
-mypy core/ models/ planning/
-
-# Run tests
-python tests/test_imports.py
-python tests/test_api_nvidia.py
-
-# Run security scan
-bandit -r core/ models/ planning/ -ll --skip B101,B311
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for full contribution guidelines.
-
----
-
-## Security
-
-For security vulnerabilities, please see [SECURITY.md](SECURITY.md) for responsible disclosure.
-
----
-
-## License
-
-This project is licensed under the MIT License with an **Ethical Use Requirement** — see [LICENSE](LICENSE) for details.
-
----
-
-## Disclaimer
-
-This software is provided for **authorized security testing, research, and educational purposes only**. Unauthorized use against systems you do not own or have explicit written permission to test is **illegal**. The authors assume no liability for misuse.
-
-> **Ethics first, hack second.**
-
----
-
-<p align="center">
-  <strong>Wellington de Lima Catarina</strong><br>
-  <a href="https://linkedin.com/in/wellington-de-lima-catarina">LinkedIn</a> · <a href="mailto:lelolima806@gmail.com">Email</a>
-</p>
+Este projeto está licenciado sob a licença MIT com um **Requisito de Uso Ético** - veja o arquivo [LICENSE](LICENSE) para detalhes.
