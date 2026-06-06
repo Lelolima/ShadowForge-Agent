@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 350" style="max-width:100%;height:auto;background:#050505;" role="img" aria-label="ShadowForge Recon Simulation">
+  <rect width="900" height="350" fill="#050505"/>
+  <pattern id="scl" width="4" height="4" patternUnits="userSpaceOnUse">
+    <rect width="4" height="1" fill="#0f0" opacity="0.04"/>
+  </pattern>
+  <rect width="900" height="350" fill="url(#scl)"/>
+  <rect x="20" y="15" width="860" height="28" fill="#0a0a0a" stroke="#0f0" stroke-width="0.8"/>
+  <text x="40" y="34" fill="#0f0" font-family="monospace" font-size="12" font-weight="bold">[RECON] Mode: STEALTH | Target: 10.0.0.0/24</text>
+  <circle cx="840" cy="29" r="4" fill="#0f0" opacity="0.6">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <g font-family="monospace" font-size="10">
+    <text x="40" y="65" fill="#0f0">$ nmap -sV -sC --top-ports 100 10.0.0.15</  animate</text>
+    <text x="40" y="82" fill="#0f0">Host is up (0.0032s latency).    </text>
+    <text x="40" y="99" fill="#0f0">PORT    STATE    SERVICE     VERSION</text>
+    <text x="40" y="116" fill="#0f0">22/tcp  open     ssh         OpenSSH 8.9p1</text>
+    <text x="40" y="133" fill="#fbbf24">80/tcp  open     http        Apache httpd 2.4.52</text>
+    <text x="40" y="150" fill="#fbbf24">443/tcp open     ssl/http    Apache httpd 2.4.52</text>
+    <text x="40" y="167" fill="#0f0">3306/tcp open    mysql       MySQL 8.0.32</text>
+    <text x="40" y="184" fill="#0f0">8080/tcp open    http-proxy  Burp Suite</text>
+    <text x="40" y="201" fill="#60a5fa">Nmap done: 1 IP (1 host up) in 12.34s</text>
+  </g>
+  <text x="520" y="65" fill="#a855f7" font-family="monospace" font-size="10" font-weight="bold">[SHODAN] IP: 10.0.0.15</text>
+  <text x="520" y="82" fill="#a855f7" font-family="monospace" font-size="10">ISP: Example Cloud Services</text>
+  <text x="520" y="99" fill="#a855f7" font-family="monospace" font-size="10">Hostname: web-prod-15.internal</text>
+  <text x="520" y="116" fill="#a855f7" font-family="monospace" font-size="10">Open Ports: 22,80,443,3306,8080</text>
+  <text x="520" y="133" fill="#ef4444" font-family="monospace" font-size="10">CVEs Found: CVE-2023-1234 (CRIT)</text>
+  <rect x="40" y="260" width="400" height="10" fill="none" stroke="#0f0" stroke-width="0.5" opacity="0.4"/>
+  <rect x="40" y="260" width="0" height="10" fill="#0f0" opacity="0.35">
+    <animate attributeName="width" values="0;400;0" dur="5s" repeatCount="indefinite"/>
+  </rect>
+  <text x="450" y="269" fill="#0f0" font-family="monospace" font-size="9">OSINT ENRICHMENT ACTIVE...</text>
+  <rect x="520" y="230" width="360" height="50" fill="#0a0a0a" stroke="#0f0" stroke-width="0.5" opacity="0.7"/>
+  <text x="540" y="250" fill="#0f0" font-family="monospace" font-size="11" font-weight="bold">OODA PHASE: OBSERVE</text>
+  <text x="540" y="270" fill="#60a5fa" font-family="monospace" font-size="9">[PASSIVE RECON] --&gt; [ACTIVE SCAN]</text>
+  <circle cx="840" cy="255" r="5" fill="#0f0">
+    <animate attributeName="r" values="3;7;3" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+  <rect x="20" y="325" width="860" height="16" fill="#0a0a0a" stroke="#0f0" stroke-width="0.3"/>
+  <text x="30" y="337" fill="#0f0" font-family="monospace" font-size="9">root@shadowforge:~/campaign/recon | Threads: 10 | Packets: 43,201</text>
+  <rect x="0" y="0" width="900" height="2" fill="#0f0" opacity="0.15">
+    <animate attributeName="y" values="0;350;0" dur="4s" repeatCount="indefinite"/>
+  </rect>
+</svg>
