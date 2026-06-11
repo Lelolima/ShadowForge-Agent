@@ -640,6 +640,10 @@ class ShadowForgeAgent:
         except Exception as e:
             logger.error("Erro ao salvar memória: %s", e)
 
+        # Q-03 FIX: Fecha conexão persistente com banco de memória de longo prazo
+        with contextlib.suppress(Exception):
+            await self.memoria_lp.close()
+
         # Fecha NIM client (evita "Unclosed client session")
         if self._models and self._models.get("nim"):
             with contextlib.suppress(Exception):

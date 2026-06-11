@@ -68,7 +68,8 @@ class StealthElite:
         self._ua_ultimo_troca = 0.0
         self._dns_over_https = True
         self._anti_forensics = True
-        self._sessao_id = f"SF-{random.randint(10000, 99999)}"
+        import secrets
+        self._sessao_id = f"SF-{secrets.token_hex(4)}"
         self._jitter_hist: list[float] = []
         self._is_windows = platform.system() == "Windows"
 
@@ -222,8 +223,15 @@ class StealthElite:
     # === Network Fingerprint Spoofing ===
 
     def gerar_mac_aleatorio(self) -> str:
-        """Gera MAC address aleatório com OUI local."""
-        return f"02:{random.randint(0,255):02x}:{random.randint(0,255):02x}:{random.randint(0,255):02x}:{random.randint(0,255):02x}:{random.randint(0,255):02x}"
+        """Gera MAC address aleatório com OUI local.
+        C-05 FIX: Usa secrets.randbelow() para criptografia segura.
+        """
+        import secrets
+        return (
+            f"02:{secrets.randbelow(256):02x}:{secrets.randbelow(256):02x}:"
+            f"{secrets.randbelow(256):02x}:{secrets.randbelow(256):02x}:"
+            f"{secrets.randbelow(256):02x}"
+        )
 
     async def spoof_network_fingerprint(self, interface: str = "eth0") -> bool:
         """Altera fingerprint da interface de rede (quando autorizado)."""
@@ -283,12 +291,22 @@ class StealthElite:
         except Exception:
             pass
 
-        # 3. Clear system logs (Linux)
+        # 3. Clear system logs (Linux) — H-13 FIX: protegido por guardrail ético
         if platform.system() == "Linux":
             import subprocess
             try:
-                subprocess.run(["truncate", "-s", "0", "/var/log/syslog"], check=False, timeout=5)
-                resultado["syslog"] = True
+                # H-13 FIX: Truncar syslogs é destrutivo — requer confirmação
+                if self._config:
+                    etica = getattr(self._config, "etica", None)
+                    if etica and getattr(etica, "impedir_destruicao", True):
+                        logger.warning("[OPSEC] Truncagem de syslog bloqueada por guardrail ético (impedir_destruicao=True)")
+                        resultado["syslog"] = False
+                    else:
+                        subprocess.run(["truncate", "-s", "0", "/var/log/syslog"], check=False, timeout=5)
+                        resultado["syslog"] = True
+                else:
+                    logger.warning("[OPSEC] Sem config — truncagem de syslog bloqueada por segurança")
+                    resultado["syslog"] = False
             except Exception:
                 pass
 

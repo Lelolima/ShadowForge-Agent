@@ -1,10 +1,10 @@
 """
 ============================================================
- NVIDIA ShadowForge Agent - Dashboard API
- Arquivo: api/dashboard.py
+NVIDIA ShadowForge Agent - Dashboard API
+Arquivo: api/dashboard.py
 ============================================================
- API FastAPI com WebSocket para monitoramento real-time
- de campanhas, visão da kill chain, eventos e métricas.
+API FastAPI com WebSocket para monitoramento real-time
+de campanhas, visão da kill chain, eventos e métricas.
 ============================================================
 """
 
@@ -32,6 +32,8 @@ if HAS_FASTAPI:
         "DASHBOARD_ORIGINS",
         "http://localhost:3000,http://localhost:8000,http://127.0.0.1:3000",
     ).split(",")
+    # H-12 FIX: Token de autenticação para WebSocket (via env var)
+    _ws_auth_token = os.environ.get("DASHBOARD_WS_TOKEN", "")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=_allowed_origins,
@@ -100,7 +102,16 @@ if HAS_FASTAPI:
 
     @app.websocket("/ws")
     async def websocket_endpoint(websocket: WebSocket) -> None:  # type: ignore
-        """WebSocket para streaming tempo real."""
+        """WebSocket para streaming tempo real.
+        H-12 FIX: Requer token de autenticação via query param ?token=XXX
+        ou header Sec-WebSocket-Protocol. Sem token, conexão é rejeitada.
+        """
+        # H-12 FIX: Verificar token de autenticação
+        if _ws_auth_token:
+            token = websocket.query_params.get("token", "")
+            if token != _ws_auth_token:
+                await websocket.close(code=4001, reason="Autenticação necessária — forneça ?token=XXX")
+                return
         await websocket.accept()
         _dashboard_state["clients"].add(websocket)
         try:
@@ -121,35 +132,35 @@ if HAS_FASTAPI:
     async def dashboard_ui() -> str:
         """UI básica do dashboard."""
         return """
-        <!DOCTYPE html>
-        <html>
-        <head><title>ShadowForge Dashboard</title>
-        <style>
-            body { background: #0a0a0f; color: #00ff41; font-family: monospace; padding: 2rem; }
-            h1 { color: #0ff; }
-            .metric { display: inline-block; margin: 1rem; padding: 1rem; border: 1px solid #333; }
-            .phase { font-size: 2rem; color: #ffd700; }
-            #log { background: #111; padding: 1rem; height: 300px; overflow-y: auto; border: 1px solid #333; }
-        </style></head>
-        <body>
-        <h1>SH4D0WF0RG3 Dashboard</h1>
-        <div id="status"></div>
-        <div id="log"><div class="metric">Aguardando conexão...</div></div>
-        <script>
-            const ws = new WebSocket("ws://localhost:8000/ws");
-            const log = document.getElementById("log");
-            const status = document.getElementById("status");
-            ws.onmessage = e => {
-                const msg = JSON.parse(e.data);
-                if (msg.type === "init") {
-                    status.innerHTML = `<div class=metric>Phase: <span class=phase>${msg.data.fase}</span></div>`;
-                }
-                if (msg.data) {
-                    const div = document.createElement("div");
-                    div.textContent = `> ${msg.data.fase} | ${msg.data.alvo || "No target"} | Iter: ${msg.data.iteracoes}`;
-                    log.prepend(div);
-                }
-            };
-        </script>
-        </body></html>
-        """
+    <!DOCTYPE html>
+    <html>
+    <head><title>ShadowForge Dashboard</title>
+    <style>
+    body { background: #0a0a0f; color: #00ff41; font-family: monospace; padding: 2rem; }
+    h1 { color: #0ff; }
+    .metric { display: inline-block; margin: 1rem; padding: 1rem; border: 1px solid #333; }
+    .phase { font-size: 2rem; color: #ffd700; }
+    #log { background: #111; padding: 1rem; height: 300px; overflow-y: auto; border: 1px solid #333; }
+    </style></head>
+    <body>
+    <h1>SH4D0WF0RG3 Dashboard</h1>
+    <div id="status"></div>
+    <div id="log"><div class="metric">Aguardando conexão...</div></div>
+    <script>
+    const ws = new WebSocket("ws://localhost:8000/ws");
+    const log = document.getElementById("log");
+    const status = document.getElementById("status");
+    ws.onmessage = e => {
+        const msg = JSON.parse(e.data);
+        if (msg.type === "init") {
+            status.innerHTML = `<div class=metric>Phase: <span class=phase>${msg.data.fase}</span></div>`;
+        }
+        if (msg.data) {
+            const div = document.createElement("div");
+            div.textContent = `> ${msg.data.fase} | ${msg.data.alvo || "No target"} | Iter: ${msg.data.iteracoes}`;
+            log.prepend(div);
+        }
+    };
+    </script>
+    </body></html>
+    """

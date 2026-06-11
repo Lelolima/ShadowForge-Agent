@@ -145,7 +145,7 @@ class NemotronVision:
             "- Stack traces\n"
             "- Access denied / Forbidden\n"
             "- Qualquer indicação de falha ou bloqueio\n\n"
-            "Retorne em JSON: {\"anomalias\": [{\"tipo\": \"\", \"descricao\": \"\", \"posicao\": \"\"}]}"
+            'Retorne em JSON: {"anomalias": [{"tipo": "", "descricao": "", "posicao": ""}]}'
         )
 
         nim = self._get_nim_client()  # H-09 FIX: usar lazy init
@@ -155,19 +155,27 @@ class NemotronVision:
             )
             try:
                 import json
-                if "{" in resposta:
-                    return json.loads(resposta[resposta.index("{"):resposta.rindex("}") + 1]).get("anomalias", [])
-            except Exception:
+                # H-14 FIX: Extrair JSON de forma segura usando regex
+                import re
+                json_match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', resposta, re.DOTALL)
+                if json_match:
+                    return json.loads(json_match.group()).get("anomalias", [])
+            except (json.JSONDecodeError, ValueError):
                 pass
 
         return []
 
     def _parsear_analise(self, resposta: str) -> dict[str, Any]:
-        """Parseia resposta da análise em estrutura."""
+        """Parseia resposta da análise em estrutura.
+        H-14 FIX: Usa regex para extrair JSON de forma segura, evitando
+        captura incorreta de chaves aninhadas.
+        """
         import json
+        import re
         try:
-            if "{" in resposta and "}" in resposta:
-                return json.loads(resposta[resposta.index("{"):resposta.rindex("}") + 1])
+            json_match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', resposta, re.DOTALL)
+            if json_match:
+                return json.loads(json_match.group())
         except (json.JSONDecodeError, ValueError):
             pass
         return {"resposta_bruta": resposta}

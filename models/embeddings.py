@@ -36,6 +36,7 @@ class NVIDIAEmbeddings:
         self._api_key = ""
         self._base_url = "https://integrate.api.nvidia.com/v1"
         self._cache: dict[str, list[float]] = {}
+        self._cache_max = 500  # M-19 FIX: Limitar cache de embeddings
 
         if config:
             import os
@@ -86,6 +87,11 @@ class NVIDIAEmbeddings:
                         data = await resp.json()
                         embedding = data.get("data", [{}])[0].get("embedding", [])
                         self._cache[cache_key] = embedding
+                        # M-19 FIX: Evict se cache exceder limite
+                        if len(self._cache) > self._cache_max:
+                            oldest_keys = list(self._cache.keys())[:len(self._cache) - self._cache_max]
+                            for k in oldest_keys:
+                                del self._cache[k]
                         return embedding
                     else:
                         logger.error("Embeddings API erro: %d", resp.status)

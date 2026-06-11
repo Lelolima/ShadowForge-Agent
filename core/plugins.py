@@ -33,6 +33,10 @@ logger = logging.getLogger("shadowforge.core.plugins")
 # M-07 FIX: Prefixo de namespace para evitar conflito com builtins
 _PLUGIN_NAMESPACE_PREFIX = "shadowforge.plugins."
 
+# H-10 FIX: Plugins permitidos (hash SHA256 do conteúdo do arquivo).
+# Vazio = aceita qualquer plugin (EM PRODUÇÃO: preencher com hashes conhecidos).
+_TRUSTED_PLUGIN_HASHES: set[str] = set()
+
 
 class ShadowForgePlugin(ABC):
     """Interface base para todos os plugins."""
@@ -81,7 +85,12 @@ class PluginInfo:
 
 
 class PluginManager:
-    """Gerenciador de plugins do ShadowForge."""
+    """Gerenciador de plugins do ShadowForge.
+    # H-10 FIX: AVISO DE SEGURANÇA — plugins executam código arbitrário
+    # sem sandboxing. Em produção: (1) preencha _TRUSTED_PLUGIN_HASHES
+    # com hashes SHA256 dos plugins aprovados, (2) rode plugins em
+    # subprocess isolado, ou (3) use RestrictedPython para compilá-los.
+    """
 
     PLUGIN_DIRS = ["plugins", "shadowforge_plugins"]
 
@@ -126,6 +135,16 @@ class PluginManager:
             spec = importlib.util.spec_from_file_location(path.stem, str(path))
             if not spec or not spec.loader:
                 return None
+            # H-10 FIX: Verificar hash do plugin contra lista de trust (se configurada)
+            if _TRUSTED_PLUGIN_HASHES:
+                import hashlib
+                file_hash = hashlib.sha256(path.read_bytes()).hexdigest()
+                if file_hash not in _TRUSTED_PLUGIN_HASHES:
+                    logger.warning("[PLUGIN] Hash não confiável para %s: %s (requer registro em _TRUSTED_PLUGIN_HASHES)", path.name, file_hash[:16])
+                    return None
+                logger.debug("Plugin %s: hash verificado OK (%s...)", path.name, file_hash[:16])
+            else:
+                logger.warning("[PLUGIN] Carregando %s SEM verificação de hash — configure _TRUSTED_PLUGIN_HASHES em produção", path.name)
             module = importlib.util.module_from_spec(spec)
 
             # M-07 FIX: Usar namespace prefixado para evitar conflito com builtins

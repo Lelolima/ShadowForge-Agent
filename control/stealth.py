@@ -1,10 +1,10 @@
 """
 ============================================================
- NVIDIA ShadowForge Agent - Modo Stealth
- Arquivo: control/stealth.py
+NVIDIA ShadowForge Agent - Modo Stealth
+Arquivo: control/stealth.py
 ============================================================
- Anti-detecção, OPSEC, proxy chains, User-Agent rotation,
- MAC spoofing assistido e traffic analysis evasion.
+Anti-detecção, OPSEC, proxy chains, User-Agent rotation,
+MAC spoofing assistido e traffic analysis evasion.
 ============================================================
 """
 
@@ -54,7 +54,8 @@ class StealthManager:
         self._dns_over_https = True
         self._limpar_historial = True
         self._anti_forensics = True
-        self._sessao_id = f"SF-{random.randint(10000, 99999)}"
+        import secrets
+        self._sessao_id = f"SF-{secrets.token_hex(4)}"
 
         if config:
             st = getattr(config, "stealth", None)
@@ -70,9 +71,9 @@ class StealthManager:
         """User-Agent atual com rotação automática."""
         if self._ua_rotacao and time.time() - self._ua_ultimo_troca > random.uniform(30, 120):
             # Troca a cada 30-120 segundos
-                self._ua_atual = random.choice(self.USER_AGENTS)
-                self._ua_ultimo_troca = time.time()
-                logger.debug("UA rotacionado: %s", self._ua_atual[:30])
+            self._ua_atual = random.choice(self.USER_AGENTS)
+            self._ua_ultimo_troca = time.time()
+            logger.debug("UA rotacionado: %s", self._ua_atual[:30])
         return self._ua_atual
 
     @property
@@ -168,12 +169,15 @@ class StealthManager:
 
     def _gerar_mac_aleatorio(self) -> str:
         """Gera MAC address aleatorio com OUI local.
-        L-06 FIX: Usa secrets.randbelow() em vez de random.randint()
-        para criptografia segura (MAC previsivel pode ser detectado).
+        C-05 FIX: Usa secrets.randbelow() exclusivamente para todos 6 octetos.
+        Antes tinha bug: gerava 9 octetos (misturava secrets + random).
         """
         import secrets
-        return f"02:{secrets.randbelow(256):02x}:{secrets.randbelow(256):02x}:"                f"{secrets.randbelow(256):02x}:{secrets.randbelow(256):02x}:{secrets.randbelow(256):02x}" \
-               f"{random.randint(0,255):02x}:{random.randint(0,255):02x}:{random.randint(0,255):02x}"
+        return (
+            f"02:{secrets.randbelow(256):02x}:{secrets.randbelow(256):02x}:"
+            f"{secrets.randbelow(256):02x}:{secrets.randbelow(256):02x}:"
+            f"{secrets.randbelow(256):02x}"
+        )
 
     @staticmethod
     def _is_linux() -> bool:

@@ -93,22 +93,23 @@ class MemoriaCurtoPrazo:
     def _evict(self) -> None:
         """Remove entradas menos importantes quando buffer está cheio.
 
-        M-01 FIX: Usa OrderedDict para evict O(1) em vez de O(n²).
-        A cada evict, remove as 10% entradas com menor importância.
+        M-20 FIX: Usa min-heap selection (O(n)) em vez de sort completo (O(n log n)).
+        Remove as 10% entradas com menor importância.
         """
+        import heapq
         n_remover = max(1, len(self._entradas) // 10)
-        # Ordena por importância e identifica as menos importantes
-        items_by_importance = sorted(
+        # M-20 FIX: Usa nsmallest (heap-based, O(n)) em vez de sorted (O(n log n))
+        least_important = heapq.nsmallest(
+            n_remover,
             self._entradas.items(),
             key=lambda x: x[1].importancia,
         )
-        for entry_id, _ in items_by_importance[:n_remover]:
-            # Remove do índice de tipo
-            entrada = self._entradas[entry_id]
-            tipo_idx = self._indice_por_tipo.get(entrada.tipo, [])
-            if entry_id in tipo_idx:
-                tipo_idx.remove(entry_id)
-            del self._entradas[entry_id]
+        for entry_id, _ in least_important:
+            entrada = self._entradas.pop(entry_id, None)
+            if entrada:
+                tipo_idx = self._indice_por_tipo.get(entrada.tipo, [])
+                if entry_id in tipo_idx:
+                    tipo_idx.remove(entry_id)
 
     def buscar_por_tipo(self, tipo: str, limite: int = 50) -> list[EntradaMemoria]:
         """Busca entradas do tipo especificado."""

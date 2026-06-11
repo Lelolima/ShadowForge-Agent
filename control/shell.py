@@ -30,6 +30,14 @@ _ENV_VAR_WHITELIST = frozenset({
     "PYTHONIOENCODING", "NMAP_ARGS", "NIKTO_ARGS",
 })
 
+# H-11 FIX: Blacklist de comandos perigosos — rejeitados antes da execução
+_DANGEROUS_COMMANDS = frozenset({
+    "rm ", "rmdir", "del ", "format", "shutdown", "reboot", "mkfs",
+    "dd if=", "wipe", "shred", "> /dev/", "chmod 777", "chown",
+    "passwd", "useradd", "userdel", "crontab -r", "iptables -F",
+    "systemctl stop", "truncate -s 0 /var/log",
+})
+
 
 def _safe_quote(text: str, is_windows: bool = False) -> str:
     """Escaping seguro de argumentos shell — POSIX e Windows.
@@ -102,6 +110,11 @@ class StealthShell:
     ) -> ResultadoComando:
         """Executa comando shell com timeout e output streaming.
 
+        # Q-08 TODO: Migrar de create_subprocess_shell() para create_subprocess_exec()
+        # com lista de argumentos para eliminar riscos de shell metacharacter injection.
+        # Shell é necessário atualmente para pipes (|) e encadeamentos (;).
+        # Para comandos simples (sem pipes), preferir exec em vez de shell.
+
         L-04 FIX: O caller é responsável por escapar argumentos via _safe_quote().
         Strings dinâmicas devem usar _safe_quote() para cada argumento antes de
         concatenar. Comandos com shell metacharacters são executados via bash.
@@ -119,6 +132,17 @@ class StealthShell:
         inicio = time.time()
 
         timeout_s = timeout or self._timeout_default
+
+        # H-11 FIX: Rejeitar comandos perigosos da blacklist
+        cmd_lower = comando.lower().strip()
+        for dangerous in _DANGEROUS_COMMANDS:
+            if dangerous in cmd_lower:
+                logger.error("[SHELL] Comando bloqueado (blacklist): %s", comando[:80])
+                resultado = ResultadoComando(comando=comando)
+                resultado.returncode = -1
+                resultado.stderr = f"Comando bloqueado por política de segurança: contém '{dangerous.strip()}'"
+                return resultado
+
         resultado = ResultadoComando(comando=comando)
 
         # Seleciona shell
@@ -239,7 +263,21 @@ class StealthShell:
         return await self.executar(cmd, timeout=1800)
 
     async def executar_sqlmap(self, url: str, opcoes: str = "--batch --random-agent") -> ResultadoComando:
-        """Executa SQLMap com opções éticas (batch mode)."""
+        """Executa SQLMap com opções éticas (batch mode).
+
+        M-15 FIX: Rejeita opções que bypassam rate limiting ético.
+        """
+        # M-15 FIX: Bloquear opções de threading agressivas
+        opcoes_lower = opcoes.lower()
+        aggressive_flags = ["--threads", "--level=5", "--risk=3"]
+        for flag in aggressive_flags:
+            if flag in opcoes_lower:
+                logger.warning("[SHELL] SQLMap flag agressiva bloqueada: %s", flag)
+                resultado = ResultadoComando(comando=f"sqlmap -u {url}")
+                resultado.stderr = f"Flag '{flag}' bloqueada por rate limiting ético"
+                resultado.returncode = -1
+                return resultado
+
         safe_url = _safe_quote(url, self._is_windows)
         safe_opcoes = _safe_quote(opcoes, self._is_windows)
         cmd = f"sqlmap -u {safe_url} {safe_opcoes}"

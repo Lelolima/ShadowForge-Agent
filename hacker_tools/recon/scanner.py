@@ -138,11 +138,12 @@ class ReconScanner:
         if alvo in blacklist:
             return False, f"Alvo {alvo} está na blacklist - não escanear"
 
-        # M-13 FIX: Usa ipaddress para verificação correta de ranges privados
+        # M-16 FIX: IPs privados requerem confirmação explícita (não auto-autorizam)
         if self._is_private_ip(alvo):
-            self._autorizado = True
-            self._alvo_autorizado = alvo
-            return True, f"Range privado detectado: {alvo} (geralmente lab)"
+            if self._autorizado and self._alvo_autorizado == alvo:
+                return True, "Alvo privado previamente autorizado nesta sessão"
+            logger.info("[RECON] Range privado detectado: %s — requer autorização explícita", alvo)
+            return False, f"Range privado detectado: {alvo} — requisite autorização explícita do operador"
 
         # Para IPs públicos, exige confirmação explícita
         if self._alvo_autorizado and alvo == self._alvo_autorizado:
