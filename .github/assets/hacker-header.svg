@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 200" style="max-width:100%;height:auto;" role="img" aria-label="ShadowForge Header">
+  <defs>
+    <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#0f0" stroke-width="0.3" opacity="0.15"/></pattern>
+  </defs>
+  <rect width="1200" height="200" fill="#000"/>
+  <rect width="1200" height="200" fill="url(#grid)"/>
+
+  <!-- Matrix rain background -->
+  <g font-family="monospace" font-size="10" fill="#0f0" opacity="0.15">
+    <text x="50" y="20">A</text><text x="50" y="35">B</text><text x="50" y="50">C</text><text x="50" y="65">D</text>
+    <animate attributeName="opacity" values="0.15;0.3;0.15" dur="4s" repeatCount="indefinite"/>
+    <animateTransform attributeName="transform" type="translate" values="0,0;0,15;0,0" dur="3s" repeatCount="indefinite"/>
+  </g>
+  <g font-family="monospace" font-size="10" fill="#0f0" opacity="0.12">
+    <text x="1100" y="20">1</text><text x="1100" y="35">0</text><text x="1100" y="50">1</text><text x="1100" y="65">1</text>
+    <animate attributeName="opacity" values="0.12;0.28;0.12" dur="5s" repeatCount="indefinite"/>
+  </g>
+
+  <!-- Title -->
+  <text x="600" y="80" font-family="monospace" font-size="42" font-weight="bold" fill="#0f0" text-anchor="middle" filter="url(#glow)" letter-spacing="4">SH4D0WF0RG3</text>
+  <text x="600" y="110" font-family="monospace" font-size="16" fill="#0a0" text-anchor="middle" letter-spacing="6">AUTONOMOUS ETHICAL HACKING AI</text>
+
+  <!-- NVIDIA badge -->
+  <rect x="480" y="130" width="240" height="30" rx="4" fill="#0f0" fill-opacity="0.08" stroke="#0f0" stroke-width="1" filter="url(#glow)"/>
+  <text x="600" y="150" font-family="monospace" font-size="14" fill="#0f0" text-anchor="middle" font-weight="bold">POWERED BY NVIDIA NIM</text>
+
+  <!-- Animated scanning line -->
+  <rect x="0" y="0" width="1200" height="2" fill="#0f0" opacity="0.3">
+    <animate attributeName="y" values="0;200;0" dur="6s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Bottom bar -->
+  <line x1="100" y1="180" x2="1100" y2="180" stroke="#0f0" stroke-width="0.5" opacity="0.3"/>
+  <text x="600" y="195" font-family="monospace" font-size="9" fill="#0a0" text-anchor="middle" letter-spacing="2">ETHICS FIRST, HACK SECOND  //  v1.2.0 REVIEWED  //  49 FIXES APPLIED</text>
+
+  <!-- Corner decorations -->
+  <path d="M 20 20 L 20 50 M 20 20 L 50 20" fill="none" stroke="#0f0" stroke-width="1.5" opacity="0.5" filter="url(#glow)"/>
+  <path d="M 1180 20 L 1150 20 M 1180 20 L 1180 50" fill="none" stroke="#0f0" stroke-width="1.5" opacity="0.5" filter="url(#glow)"/>
+  <path d="M 20 180 L 20 150 M 20 180 L 50 180" fill="none" stroke="#0f0" stroke-width="1.5" opacity="0.5" filter="url(#glow)"/>
+  <path d="M 1180 180 L 1150 180 M 1180 180 L 1180 150" fill="none" stroke="#0f0" stroke-width="1.5" opacity="0.5" filter="url(#glow)"/>
+</svg>

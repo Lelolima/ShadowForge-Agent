@@ -1,0 +1,356 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" width="100%">
+  <defs>
+    <style>
+      @keyframes scanMove {
+        0% { transform: translateY(-10px); opacity: 0; }
+        5% { opacity: 0.8; }
+        95% { opacity: 0.8; }
+        100% { transform: translateY(500px); opacity: 0; }
+      }
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+      @keyframes pulseGlow {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 1; }
+      }
+      @keyframes glowText {
+        0%, 100% { text-shadow: 0 0 5px #76B900, 0 0 10px #76B900; }
+        50% { text-shadow: 0 0 2px #76B900, 0 0 5px #76B900; }
+      }
+      @keyframes matrixRain {
+        0% { opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+      @keyframes dataFlow {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+      }
+      @keyframes terminalCursor {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+      @keyframes fadeInUp {
+        0% { opacity: 0; transform: translateY(5px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+
+      .scan-line {
+        animation: scanMove 4s linear infinite;
+      }
+      .blink {
+        animation: blink 1s step-end infinite;
+      }
+      .pulse-green {
+        animation: pulseGlow 1.5s ease-in-out infinite;
+      }
+      .glow-nvidia {
+        animation: glowText 2s ease-in-out infinite;
+      }
+      .cursor-blink {
+        animation: terminalCursor 1s step-end infinite;
+      }
+
+      .crt-overlay {
+        fill: url(#crtPattern);
+        opacity: 0.08;
+        pointer-events: none;
+      }
+    </style>
+    <pattern id="crtPattern" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="4" fill="#111"/>
+      <rect width="1" height="1" fill="#222"/>
+    </pattern>
+    <linearGradient id="terminalGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#76B900" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#76B900" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="activeBar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#76B900" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#76B900" stop-opacity="0.1"/>
+    </linearGradient>
+    <radialGradient id="greenGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#76B900" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="500" fill="#050505"/>
+  <rect width="1200" height="500" fill="url(#crtPattern)"/>
+
+  <!-- Header -->
+  <rect x="0" y="0" width="1200" height="50" fill="#0a0a0a" stroke="#222" stroke-width="1"/>
+
+  <!-- NVIDIA Logo Box -->
+  <rect x="20" y="8" width="40" height="34" rx="4" fill="#76B900" fill-opacity="0.1" stroke="#76B900" stroke-width="1.5"/>
+  <rect x="20" y="8" width="40" height="34" rx="4" fill="url(#greenGlow)">
+    <animate attributeName="opacity" values="0.3;0.5;0.3" dur="3s" repeatCount="indefinite"/>
+  </rect>
+  <text x="40" y="30" font-family="monospace" font-size="14" font-weight="bold" fill="#76B900" text-anchor="middle">SF</text>
+
+  <!-- Title -->
+  <text x="75" y="28" font-family="Rajdhani, Arial, sans-serif" font-size="22" font-weight="bold" fill="#fff" class="glow-nvidia" letter-spacing="2">SH4D0WF0RG3</text>
+  <text x="278" y="25" font-family="monospace" font-size="12" fill="#76B900">v1.2.0</text>
+  <text x="75" y="42" font-family="monospace" font-size="9" fill="#666">AUTONOMOUS ETHICAL HACKING AI // NVIDIA NIM CONNECTED</text>
+
+  <!-- GPU Metrics (right side) -->
+  <g font-family="monospace" font-size="9" fill="#666" transform="translate(920, 0)">
+    <text x="0" y="18" fill="#666">GPU LOAD</text><text x="0" y="32" fill="#76B900" font-weight="bold">87%</text>
+    <text x="80" y="18" fill="#666">VRAM</text><text x="80" y="32" fill="#76B900" font-weight="bold">22.4 GB</text>
+    <text x="150" y="18" fill="#666">INFERENCE</text><text x="150" y="32" fill="#76B900" font-weight="bold">12ms</text>
+    <text x="235" y="18" fill="#666">MODE</text><text x="235" y="32" fill="#fbbf24" font-weight="bold">STEALTH</text>
+  </g>
+
+  <!-- Left Panel: System Status -->
+  <rect x="15" y="65" width="270" height="170" rx="3" fill="#0a0a0a" stroke="#222" stroke-width="1"/>
+  <rect x="15" y="65" width="270" height="24" rx="3" fill="#111"/>
+
+  <text x="25" y="81" font-family="monospace" font-size="11" font-weight="bold" fill="#76B900" letter-spacing="2">OODA LOOP ENGINE</text>
+
+  <!-- OODA Steps -->
+  <rect x="25" y="95" width="58" height="28" fill="#76B900" fill-opacity="0.15" stroke="#76B900" stroke-width="1" rx="2"/>
+  <text x="54" y="112" font-family="monospace" font-size="8" fill="#76B900" text-anchor="middle" font-weight="bold">OBSERVE</text>
+  <rect x="86" y="95" width="58" height="28" fill="#111" stroke="#333" stroke-width="1" rx="2"/>
+  <text x="115" y="112" font-family="monospace" font-size="8" fill="#666" text-anchor="middle">ORIENT</text>
+  <rect x="147" y="95" width="58" height="28" fill="#111" stroke="#333" stroke-width="1" rx="2"/>
+  <text x="176" y="112" font-family="monospace" font-size="8" fill="#666" text-anchor="middle">DECIDE</text>
+  <rect x="208" y="95" width="58" height="28" fill="#111" stroke="#333" stroke-width="1" rx="2"/>
+  <text x="237" y="112" font-family="monospace" font-size="8" fill="#666" text-anchor="middle">ACT</text>
+
+  <!-- Cycle Time -->
+  <text x="25" y="140" font-family="monospace" font-size="9" fill="#666">CYCLE TIME:</text>
+  <text x="110" y="140" font-family="monospace" font-size="9" fill="#fff">145ms</text>
+
+  <!-- Modules -->
+  <text x="25" y="162" font-family="monospace" font-size="11" font-weight="bold" fill="#76B900" letter-spacing="2">ACTIVE MODULES</text>
+
+  <!-- Module List -->
+  <g font-family="monospace" font-size="8" transform="translate(10, 0)">
+    <rect x="15" y="175" width="270" height="18" fill="#111" stroke="#222" rx="2"/><text x="25" y="187" fill="#ccc">Screen Capture</text>
+    <circle cx="265" cy="184" r="3.5" fill="#76B900" class="pulse-green"/><text x="274" y="187" fill="#76B900" font-size="7">ACTIVE</text>
+
+    <rect x="15" y="196" width="270" height="18" fill="#111" stroke="#222" rx="2"/><text x="25" y="208" fill="#ccc">Nemotron Vision</text>
+    <circle cx="265" cy="205" r="3.5" fill="#76B900" class="pulse-green"/><text x="274" y="208" fill="#76B900" font-size="7">ACTIVE</text>
+
+    <rect x="15" y="217" width="270" height="18" fill="#111" stroke="#222" rx="2"/><text x="25" y="229" fill="#ccc">YOLOv8 Detector</text>
+    <circle cx="265" cy="226" r="3.5" fill="#76B900" class="pulse-green"/><text x="274" y="229" fill="#76B900" font-size="7">ACTIVE</text>
+
+    <rect x="15" y="238" width="270" height="18" fill="#111" stroke="#222" rx="2"/><text x="25" y="250" fill="#ccc">Stealth Shell</text>
+    <circle cx="265" cy="247" r="3.5" fill="#76B900" class="pulse-green"/><text x="274" y="250" fill="#76B900" font-size="7">ACTIVE</text>
+
+    <rect x="15" y="259" width="270" height="18" fill="#111" stroke="#222" rx="2"/><text x="25" y="271" fill="#444">Keyboard Inject</text>
+    <circle cx="265" cy="268" r="3.5" fill="#fbbf24" opacity="0.6"/><text x="274" y="271" fill="#fbbf24" font-size="7">IDLE</text>
+
+    <rect x="15" y="280" width="270" height="18" fill="#111" stroke="#222" rx="2"/><text x="25" y="292" fill="#444">Report Gens</text>
+    <circle cx="265" cy="289" r="3.5" fill="#ef4444" opacity="0.6"/><text x="274" y="292" fill="#ef4444" font-size="7">OFFLINE</text>
+  </g>
+
+  <!-- Center Panel: Terminal -->
+  <rect x="300" y="65" width="540" height="270" rx="3" fill="#0a0a0a" stroke="#222" stroke-width="1"/>
+
+  <!-- Terminal Window Chrome -->
+  <rect x="300" y="65" width="540" height="24" rx="3" fill="#111"/>
+  <circle cx="318" cy="77" r="4" fill="#ef4444" opacity="0.8"/>
+  <circle cx="333" cy="77" r="4" fill="#fbbf24" opacity="0.8"/>
+  <circle cx="348" cy="77" r="4" fill="#22c55e" opacity="0.8"/>
+  <text x="370" y="80" font-family="monospace" font-size="7" fill="#666">root@shadowforge:~/campaign_alpha — python main.py --mode stealth</text>
+  <!-- Scan line on terminal -->
+  <rect x="300" y="65" width="540" height="2" fill="#76B900" opacity="0.4" class="scan-line"/>
+
+  <!-- Terminal Content Area -->
+  <clipPath id="terminalClip">
+    <rect x="310" y="95" width="520" height="225" rx="2"/>
+  </clipPath>
+  <g clip-path="url(#terminalClip)">
+    <rect x="310" y="95" width="520" height="225" fill="#0a0a0a"/>
+    <!-- Terminal Grad -->
+    <rect x="310" y="95" width="520" height="60" fill="url(#terminalGrad)"/>
+
+    <text x="315" y="113" font-family="monospace" font-size="10" fill="#666"># Initializing SH4D0WF0RG3 Core v1.2.0...</text>
+    <text x="315" y="130" font-family="monospace" font-size="10" fill="#76B900">[✓] NVIDIA NIM Endpoint Connected (Llama-3.3-70B)</text>
+    <text x="315" y="148" font-family="monospace" font-size="10" fill="#76B900">[✓] Riva ASR/TTS Stream Established (Latency: 12ms)</text>
+    <text x="315" y="166" font-family="monospace" font-size="10" fill="#76B900">[✓] Ethical Guardrails: ENGAGED (Strict Mode)</text>
+    <text x="315" y="190" font-family="monospace" font-size="10" fill="#fff">&gt; Target Authorization Verified: 192.168.1.0/24 (LAB_ENV)</text>
+    <text x="315" y="208" font-family="monospace" font-size="10" fill="#60a5fa">&gt; Starting OODA Loop in STEALTH mode...</text>
+    <text x="315" y="226" font-family="monospace" font-size="10" fill="#999">[RECON] Passive OSINT gathering initiated...</text>
+    <text x="315" y="244" font-family="monospace" font-size="10" fill="#fbbf24">[SCAN] Discovered open port 8080 (HTTP-Proxy)</text>
+    <text x="315" y="262" font-family="monospace" font-size="10" fill="#999">[ENUM] Service fingerprint: Apache/2.4.52</text>
+    <text x="315" y="280" font-family="monospace" font-size="10" fill="#76B900">[AI] Analyzing attack surface... 3 vectors found</text>
+    <text x="315" y="298" font-family="monospace" font-size="10" fill="#60a5fa">[SAFE] Skipping unauthorized exploit attempt</text>
+
+    <!-- Typing prompt -->
+    <text x="315" y="325" font-family="monospace" font-size="12" fill="#76B900">❯</text>
+    <rect x="330" y="316" width="2" height="16" fill="#76B900" class="cursor-blink"/>
+  </g>
+
+  <!-- Vision Feed Box -->
+  <rect x="300" y="340" width="540" height="130" rx="3" fill="#050505" stroke="#222" stroke-width="1"/>
+  <rect x="300" y="340" width="540" height="24" rx="3" fill="#111"/>
+  <text x="315" y="355" font-family="monospace" font-size="9" fill="#76B900">LIVE_FEED // YOLOv8 + OCR ACTIVE</text>
+  <text x="770" y="355" font-family="monospace" font-size="8" fill="#76B900" text-anchor="end">NEMOTRON MULTIMODAL INFERENCE</text>
+
+  <!-- Scan line -->
+  <rect x="300" y="340" width="540" height="2" fill="#76B900" opacity="0.5" class="scan-line" style="animation-delay: 1s"/>
+
+  <!-- Simulated Vision Content -->
+  <rect x="318" y="372" width="258" height="85" rx="2" fill="none" stroke="rgba(118,185,0,0.3)" stroke-width="1" stroke-dasharray="4,2">
+    <animate attributeName="stroke-dashoffset" values="0;-12" dur="1s" repeatCount="indefinite"/>
+  </rect>
+  <text x="697" y="439" font-family="monospace" font-size="8" fill="#76B900" text-anchor="middle">PROCESSING VISUAL STREAM...</text>
+  <text x="697" y="452" font-family="monospace" font-size="7" fill="#444">NEMOTRON MULTIMODAL</text>
+
+  <!-- Bounding Boxes -->
+  <rect x="360" y="390" width="120" height="55" rx="1" fill="rgba(118,185,0,0.05)" stroke="rgba(118,185,0,0.6)" stroke-width="1"/>
+  <text x="362" y="449" font-family="monospace" font-size="8" fill="#76B900">TERMINAL [99%]</text>
+  <text x="475" y="453" font-family="monospace" font-size="7" fill="#76B900" text-anchor="end">OCR: ACTIVE</text>
+
+  <rect x="490" y="410" width="100" height="40" rx="1" fill="rgba(59,130,246,0.05)" stroke="rgba(59,130,246,0.6)" stroke-width="1"/>
+  <text x="492" y="452" font-family="monospace" font-size="8" fill="#3b82f6">BROWSER [94%]</text>
+
+  <!-- Right Panel: Kill Chain -->
+  <rect x="860" y="65" width="325" height="270" rx="3" fill="#0a0a0a" stroke="#222" stroke-width="1"/>
+  <rect x="860" y="65" width="325" height="24" rx="3" fill="#111"/>
+
+  <text x="872" y="81" font-family="monospace" font-size="11" font-weight="bold" fill="#76B900" letter-spacing="2">KILL CHAIN</text>
+
+  <!-- Kill Chain Steps -->
+  <g font-family="monospace" font-size="9" transform="translate(0, 0)">
+    <!-- RECON (Active) -->
+    <rect x="870" y="98" width="305" height="28" rx="2" fill="rgba(118,185,0,0.1)" stroke="#76B900" stroke-width="1"/>
+    <text x="880" y="112" fill="#fff" font-weight="bold">🔍 RECON</text>
+    <text x="996" y="112" fill="#76B900">Nmap, Shodan</text>
+    <circle cx="1165" cy="112" r="3" fill="#76B900" class="pulse-green"/>
+
+    <!-- SCAN (Next) -->
+    <rect x="870" y="130" width="305" height="28" rx="2" fill="#111" stroke="#333" stroke-width="1"/>
+    <text x="880" y="144" fill="#666">📡 SCAN</text>
+    <text x="996" y="144" fill="#666">Port Scan</text>
+
+    <!-- ENUM -->
+    <rect x="870" y="162" width="305" height="28" rx="2" fill="#111" stroke="#333" stroke-width="1"/>
+    <text x="880" y="176" fill="#666">📋 ENUM</text>
+    <text x="996" y="176" fill="#666">Service Enum</text>
+
+    <!-- EXPLOIT -->
+    <rect x="870" y="194" width="305" height="28" rx="2" fill="#111" stroke="#333" stroke-width="1"/>
+    <text x="880" y="208" fill="#666">⚡ EXPLOIT</text>
+    <text x="996" y="208" fill="#666">PoC Gen</text>
+
+    <!-- POST -->
+    <rect x="870" y="226" width="305" height="28" rx="2" fill="#111" stroke="#333" stroke-width="1"/>
+    <text x="880" y="240" fill="#666">🔓 POST</text>
+    <text x="996" y="240" fill="#666">Privesc, Pivot</text>
+
+    <!-- REPORT -->
+    <rect x="870" y="258" width="305" height="28" rx="2" fill="#111" stroke="#333" stroke-width="1"/>
+    <text x="880" y="272" fill="#666">📄 REPORT</text>
+    <text x="996" y="272" fill="#666">PDF/HTML Gen</text>
+  </g>
+
+  <!-- Bottom: Ethical Guardrails + Voice -->
+  <rect x="860" y="340" width="325" height="130" rx="3" fill="#0a0a0a" stroke="#222" stroke-width="1"/>
+  <rect x="860" y="340" width="325" height="24" rx="3" fill="#111"/>
+  <text x="872" y="356" font-family="monospace" font-size="11" font-weight="bold" fill="#76B900" letter-spacing="2">VOICE INTERFACE</text>
+  <text x="1115" y="356" font-family="monospace" font-size="8" fill="#76B900" text-anchor="end">NVIDIA RIVA ASR/TTS</text>
+
+  <!-- Voice Visualizer Bars -->
+  <g transform="translate(870, 370)">
+    <rect x="0" y="10" width="6" height="40" rx="1" fill="#76B900" opacity="0.8" class="pulse-green"/>
+    <rect x="10" y="20" width="6" height="25" rx="1" fill="#76B900" opacity="0.6" class="pulse-green" style="animation-delay: 0.2s"/>
+    <rect x="20" y="5" width="6" height="55" rx="1" fill="#76B900" opacity="0.9" class="pulse-green" style="animation-delay: 0.4s"/>
+    <rect x="30" y="15" width="6" height="35" rx="1" fill="#76B900" opacity="0.7" class="pulse-green" style="animation-delay: 0.6s"/>
+    <rect x="40" y="0" width="6" height="65" rx="1" fill="#76B900" opacity="0.9" class="pulse-green" style="animation-delay: 0.8s"/>
+    <rect x="50" y="25" width="6" height="18" rx="1" fill="#76B900" opacity="0.5" class="pulse-green" style="animation-delay: 1.0s"/>
+    <rect x="60" y="12" width="6" height="30" rx="1" fill="#76B900" opacity="0.7" class="pulse-green" style="animation-delay: 1.2s"/>
+    <rect x="70" y="18" width="6" height="42" rx="1" fill="#76B900" opacity="0.8" class="pulse-green" style="animation-delay: 0.3s"/>
+    <rect x="80" y="8" width="6" height="45" rx="1" fill="#76B900" opacity="0.9" class="pulse-green" style="animation-delay: 0.7s"/>
+    <rect x="90" y="22" width="6" height="22" rx="1" fill="#76B900" opacity="0.5" class="pulse-green" style="animation-delay: 1.1s"/>
+    <rect x="100" y="0" width="6" height="60" rx="1" fill="#76B900" opacity="0.9" class="pulse-green" style="animation-delay: 0.5s"/>
+    <rect x="110" y="16" width="6" height="38" rx="1" fill="#76B900" opacity="0.7" class="pulse-green" style="animation-delay: 0.9s"/>
+    <rect x="120" y="4" width="6" height="50" rx="1" fill="#76B900" opacity="0.8" class="pulse-green" style="animation-delay: 0.1s"/>
+    <rect x="130" y="20" width="6" height="28" rx="1" fill="#76B900" opacity="0.6" class="pulse-green" style="animation-delay: 1.3s"/>
+    <rect x="140" y="0" width="6" height="55" rx="1" fill="#76B900" opacity="1.0" class="pulse-green" style="animation-delay: 0.4s"/>
+    <rect x="150" y="30" width="6" height="15" rx="1" fill="#76B900" opacity="0.4" class="pulse-green" style="animation-delay: 1.5s"/>
+    <rect x="160" y="12" width="6" height="35" rx="1" fill="#76B900" opacity="0.7" class="pulse-green" style="animation-delay: 0.6s"/>
+    <rect x="170" y="6" width="6" height="48" rx="1" fill="#76B900" opacity="0.9" class="pulse-green" style="animation-delay: 0.8s"/>
+    <rect x="180" y="0" width="6" height="58" rx="1" fill="#76B900" opacity="0.9" class="pulse-green" style="animation-delay: 1.0s"/>
+    <rect x="190" y="18" width="6" height="35" rx="1" fill="#76B900" opacity="0.6" class="pulse-green" style="animation-delay: 0.5s"/>
+    <rect x="200" y="8" width="6" height="48" rx="1" fill="#76B900" opacity="0.8" class="pulse-green" style="animation-delay: 1.2s"/>
+    <rect x="210" y="0" width="6" height="65" rx="1" fill="#76B900" opacity="1.0" class="pulse-green" style="animation-delay: 0.3s"/>
+    <rect x="220" y="15" width="6" height="40" rx="1" fill="#76B900" opacity="0.7" class="pulse-green" style="animation-delay: 1.4s"/>
+    <rect x="230" y="0" width="6" height="55" rx="1" fill="#76B900" opacity="0.9" class="pulse-green" style="animation-delay: 0.7s"/>
+    <rect x="240" y="10" width="6" height="42" rx="1" fill="#76B900" opacity="0.8" class="pulse-green" style="animation-delay: 0.2s"/>
+    <rect x="250" y="5" width="6" height="50" rx="1" fill="#76B900" opacity="0.9" class="pulse-green" style="animation-delay: 0.9s"/>
+    <rect x="260" y="0" width="6" height="58" rx="1" fill="#76B900" opacity="0.95" class="pulse-green" style="animation-delay: 1.1s"/>
+  </g>
+
+  <!-- Last Voice Command -->
+  <text x="872" y="459" font-family="monospace" font-size="8" fill="#76B900">● LISTENING</text>
+  <text x="872" y="469" font-family="monospace" font-size="8" fill="#666">&gt; "Initialize stealth recon on target..."</text>
+
+  <!-- Ethical Guardrails (Left Bottom) -->
+  <rect x="300" y="475" width="540" height="15" fill="#111" stroke="#222" rx="2"/>
+  <text x="311" y="486" font-family="monospace" font-size="8" fill="#3b82f6">🔒 ETHICAL GUARDRAILS │ Unauthorized actions blocked │ Destructive commands filtered │ PII redaction active</text>
+
+  <!-- Scanline overlay -->
+  <rect x="0" y="0" width="1200" height="500" fill="none" stroke="#76B900" stroke-width="0.5" opacity="0.05"/>
+
+  <!-- Matrix Rain Effect (Background particles - Left side) -->
+  <g font-family="monospace" font-size="8" fill="#76B900" opacity="0.15">
+    <text x="150" y="410">0</text>
+    <text x="160" y="430">1</text>
+    <text x="140" y="450">1</text>
+    <text x="170" y="460">0</text>
+    <text x="180" y="80">0</text>
+    <text x="190" y="120">1</text>
+    <text x="200" y="200">X</text>
+    <text x="220" y="300">F</text>
+    <text x="240" y="220">H</text>
+    <text x="250" y="90">0</text>
+    <text x="260" y="150">1</text>
+    <text x="270" y="350">X</text>
+    <text x="280" y="80">0</text>
+    <text x="790" y="400">0</text>
+    <text x="820" y="420">1</text>
+    <text x="840" y="380">X</text>
+    <text x="860" y="390">F</text>
+    <text x="880" y="410">H</text>
+    <text x="900" y="420">0</text>
+    <text x="920" y="380">1</text>
+    <text x="940" y="360">X</text>
+    <text x="960" y="340">0</text>
+    <text x="980" y="330">1</text>
+    <text x="1000" y="350">F</text>
+    <text x="1020" y="370">H</text>
+  </g>
+
+  <!-- Terminal green gradient overlay -->
+  <rect x="310" y="95" width="520" height="225" fill="url(#terminalGrad)" opacity="0.1" pointer-events="none"/>
+
+  <!-- OODA active glow -->
+  <circle cx="54" cy="109" r="20" fill="none" stroke="#76B900" stroke-width="0.5" opacity="0.15" class="pulse-green"/>
+
+  <!-- CRT bars overlay -->
+  <g stroke="#76B900" stroke-width="0.3" opacity="0.04" pointer-events="none">
+    <line x1="0" y1="2" x2="1200" y2="2"/>
+    <line x1="0" y1="6" x2="1200" y2="6"/>
+    <line x1="0" y1="10" x2="1200" y2="10"/>
+    <line x1="0" y1="14" x2="1200" y2="14"/>
+    <line x1="0" y1="18" x2="1200" y2="18"/>
+    <line x1="0" y1="22" x2="1200" y2="22"/>
+    <line x1="0" y1="26" x2="1200" y2="26"/>
+    <line x1="0" y1="30" x2="1200" y2="30"/>
+    <line x1="0" y1="34" x2="1200" y2="34"/>
+    <line x1="0" y1="38" x2="1200" y2="38"/>
+    <line x1="0" y1="42" x2="1200" y2="42"/>
+    <line x1="0" y1="46" x2="1200" y2="46"/>
+    <line x1="0" y1="50" x2="1200" y2="50"/>
+    <line x1="0" y1="54" x2="1200" y2="54"/>
+    <line x1="0" y1="58" x2="1200" y2="58"/>
+    <!-- ... repeated for all rows, compact representation using SVG smaller -->
+  </g>
+</svg>

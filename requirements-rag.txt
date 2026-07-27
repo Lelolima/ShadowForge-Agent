@@ -1,0 +1,6 @@
+# ============================================================
+# NVIDIA ShadowForge Agent - RAG Dependencies (Optional)
+# ============================================================
+
+chromadb>=0.4.22
+sentence-transformers>=2.2.2

@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" font-family="'Courier New', monospace">
+  <defs>
+    <filter id="glow"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glowSmall"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#0a0a0f"/><stop offset="100%" style="stop-color:#0d1117"/></linearGradient>
+    <linearGradient id="progressCritical" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#ff0040"/><stop offset="100%" style="stop-color:#ff0040"/></linearGradient>
+  </defs>
+
+  <style>
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    @keyframes scanLine { from{transform:translateY(0)} to{transform:translateY(500px)} }
+    @keyframes barFill { from{width:0%} to{width:var(--target-width)} }
+    @keyframes numberCount { 0%{opacity:0} 100%{opacity:1} }
+    @keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes rotate { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    @keyframes ping { 0%{transform:scale(1);opacity:1} 100%{transform:scale(2.5);opacity:0} }
+    @keyframes radar { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+    .bg { fill:url(#bgGrad) }
+    .card { fill:#0a0a0f; stroke-width:1; rx:6; }
+    .scanline { stroke:#00ff4110; stroke-width:1; animation:scanLine 3s linear infinite; }
+    .pulse { animation:pulse 2s ease-in-out infinite; }
+    .title { fill:#0ff; font-size:18px; font-weight:bold; filter:url(#glow); }
+    .metric-value { font-size:28px; font-weight:bold; fill:#0ff; filter:url(#glowSmall); }
+    .metric-label { font-size:8px; fill:#00ff4188; }
+    .progress-bg { fill:#0d1117; stroke:none; }
+    .online-dot { fill:#00ff41; animation:pulse 2s infinite; }
+  </style>
+
+  <rect class="bg" width="800" height="500"/>
+  <line x1="0" y1="0" x2="800" y2="0" class="scanline"/>
+
+  <!-- Header -->
+  <text x="20" y="30" fill="#0ff" font-size="16" font-weight="bold" filter="url(#glow)">🖥️ SH4D0WF0RG3 DASHBOARD</text>
+  <text x="20" y="46" fill="#00ff4188" font-size="9">Live Monitoring · WebSocket · Real-time</text>
+
+  <circle cx="620" cy="28" r="6" class="online-dot"/>
+  <text x="632" y="32" fill="#00ff41" font-size="10">ONLINE</text>
+  <text x="690" y="32" fill="#00ff4166" font-size="8">Campaign #SF-20260603-143032</text>
+  <text x="690" y="44" fill="#00ff4166" font-size="8">Uptime: 4min 32s | Mode: STEALTH</text>
+
+  <!-- ===== METRICS ROW ===== -->
+  <!-- Vulns card -->
+  <rect x="20" y="60" width="180" height="90" class="card" stroke="#ff004044" rx="6"/>
+  <text x="110" y="80" fill="#ff0040" font-size="20" font-weight="bold" text-anchor="middle">12</text>
+  <text x="110" y="98" class="metric-label" text-anchor="middle" fill="#ff0040">VULNERABILIDADES</text>
+  <text x="110" y="115" fill="#ff004088" font-size="8" text-anchor="middle">3 Critical · 5 High · 4 Med</text>
+  <rect x="30" y="130" width="160" height="6" rx="3" fill="#0d1117"/>
+  <rect x="30" y="130" width="120" height="6" rx="3" fill="#ff0040" style="animation:barFill 2s ease-out forwards"/>
+
+  <!-- CVSS Score -->
+  <rect x="215" y="60" width="180" height="90" class="card" stroke="#ffd70044" rx="6"/>
+  <text x="305" y="80" fill="#ffd700" font-size="32" font-weight="bold" text-anchor="middle">7.8</text>
+  <text x="305" y="98" class="metric-label" text-anchor="middle" fill="#ffd700">CVSS SCORE MÉDIO</text>
+  <text x="305" y="115" fill="#ffd70088" font-size="8" text-anchor="middle">Range: 0.0 - 9.8</text>
+  <rect x="225" y="130" width="160" height="6" rx="3" fill="#0d1117"/>
+  <rect x="225" y="130" width="124" height="6" rx="3" fill="#ffd700" style="animation:barFill 2s ease-out forwards"/>
+
+  <!-- Iterations -->
+  <rect x="410" y="60" width="180" height="90" class="card" stroke="#0ff44" rx="6"/>
+  <text x="500" y="80" fill="#0ff" font-size="32" font-weight="bold" text-anchor="middle">1,247</text>
+  <text x="500" y="98" class="metric-label" text-anchor="middle" fill="#0ff">ITERAÇÕES OODA</text>
+  <text x="500" y="115" fill="#0ff88" font-size="8" text-anchor="middle">~15 ciclos/min</text>
+  <rect x="420" y="130" width="160" height="6" rx="3" fill="#0d1117"/>
+  <rect x="420" y="130" width="100" height="6" rx="3" fill="#0ff" style="animation:barFill 2s ease-out forwards"/>
+
+  <!-- Avg Latency -->
+  <rect x="605" y="60" width="175" height="90" class="card" stroke="#76B90044" rx="6"/>
+  <text x="692" y="80" fill="#76B900" font-size="28" font-weight="bold" text-anchor="middle">45ms</text>
+  <text x="692" y="98" class="metric-label" text-anchor="middle" fill="#76B900">NIM LATÊNCIA</text>
+  <text x="692" y="115" fill="#76B90088" font-size="8" text-anchor="middle">Llama 3.3 70B NIM</text>
+  <rect x="615" y="130" width="155" height="6" rx="3" fill="#0d1117"/>
+  <rect x="615" y="130" width="45" height="6" rx="3" fill="#76B900" style="animation:barFill 2s ease-out forwards"/>
+
+  <!-- ===== PHASE PROGRESS ===== -->
+  <rect x="20" y="170" width="760" height="60" class="card" stroke="#0ff33" rx="6"/>
+  <text x="35" y="192" fill="#0ff" font-size="11" font-weight="bold">KILL CHAIN PROGRESS</text>
+
+  <!-- Phase dots and connectors -->
+  <g transform="translate(35,210)">
+    <circle cx="0" cy="5" r="8" fill="#00ff41" stroke="#00ff4166"/><text x="0" y="25" fill="#00ff41" font-size="7" text-anchor="middle">IDLE ✓</text>
+    <line x1="12" y1="5" x2="88" y2="5" stroke="#00ff4188" stroke-width="1.5"/>
+    <circle cx="100" cy="5" r="8" fill="#0ff" stroke="#0ff66"/><text x="100" y="25" fill="#0ff" font-size="7" text-anchor="middle">RECON ✓</text>
+    <line x1="112" y1="5" x2="188" y2="5" stroke="#0ff88" stroke-width="1.5"/>
+    <circle cx="200" cy="5" r="8" fill="#0ff" stroke="#0ff66"/><text x="200" y="25" fill="#0ff" font-size="7" text-anchor="middle">SCAN ✓</text>
+    <line x1="212" y1="5" x2="288" y2="5" stroke="#0ff88" stroke-width="1.5"/>
+    <circle cx="300" cy="5" r="8" fill="#0ff" stroke="#0ff66"/><text x="300" y="25" fill="#0ff" font-size="7" text-anchor="middle">ENUM ✓</text>
+    <line x1="312" y1="5" x2="388" y2="5" stroke="#0ff88" stroke-width="1.5"/>
+    <circle cx="400" cy="5" r="10" fill="#ffd700" stroke="#ffd700" filter="url(#glow)" class="pulse"/><text x="400" y="25" fill="#ffd700" font-size="8" font-weight="bold" text-anchor="middle">EXPLOIT</text>
+    <line x1="415" y1="5" x2="488" y2="5" stroke="#00ff4115" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <circle cx="500" cy="5" r="8" fill="#0a0a0f" stroke="#ffffff22"/><text x="500" y="25" fill="#00ff4144" font-size="7" text-anchor="middle">POST</text>
+    <line x1="512" y1="5" x2="588" y2="5" stroke="#00ff4115" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <circle cx="600" cy="5" r="8" fill="#0a0a0f" stroke="#ffffff22"/><text x="600" y="25" fill="#00ff4144" font-size="7" text-anchor="middle">REPORT</text>
+    <line x1="612" y1="5" x2="688" y2="5" stroke="#00ff4115" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <circle cx="700" cy="5" r="8" fill="#0a0a0f" stroke="#ffffff22"/><text x="700" y="25" fill="#00ff4144" font-size="7" text-anchor="middle">DONE</text>
+  </g>
+
+  <!-- ===== LEFT: RECENT ACTIVITY ===== -->
+  <rect x="20" y="245" width="380" height="110" class="card" stroke="#00ff4122" rx="6"/>
+  <text x="35" y="265" fill="#0ff" font-size="10" font-weight="bold">📡 RECENT EVENTS (WebSocket Stream)</text>
+
+  <circle cx="38" cy="282" r="4" fill="#00ff41"/><text x="50" y="285" fill="#00ff4188" font-size="8">[14:49:32] Vision processed screenshot (30FPS)</text>
+  <circle cx="38" cy="298" r="4" fill="#0ff"/><text x="50" y="301" fill="#0ff88" font-size="8">[14:49:34] OCR extracted hash value</text>
+  <circle cx="38" cy="314" r="4" fill="#ffd700"/><text x="50" y="317" fill="#ffd70088" font-size="8">[14:49:38] AI: SQLi vector identified → CVSS 9.8</text>
+  <circle cx="38" cy="330" r="4" fill="#ff0040"/><text x="50" y="333" fill="#ff004088" font-size="8">[14:49:40] GUARD: Blocked destructive cmd ✓</text>
+  <circle cx="38" cy="346" r="4" fill="#76B900"/><text x="50" y="349" fill="#76B90088" font-size="8">[14:49:42] NIM inference: 45ms · Tokens: 2,048</text>
+
+  <!-- ===== RIGHT: VULNERABILITY SEVERITY ===== -->
+  <rect x="415" y="245" width="180" height="110" class="card" stroke="#00ff4122" rx="6"/>
+  <text x="505" y="265" fill="#0ff" font-size="10" font-weight="bold" text-anchor="middle">SEVERIDADE CVSS</text>
+
+  <g transform="translate(505,310)">
+    <circle cx="0" cy="-25" r="24" fill="none" stroke="#ff004055" stroke-width="12" stroke-dasharray="40 113"/>
+    <circle cx="0" cy="-25" r="18" fill="none" stroke="#ff660055" stroke-width="8" stroke-dasharray="30 83"/>
+    <circle cx="0" cy="-25" r="12" fill="none" stroke="#ffd70055" stroke-width="6"/>
+    <text x="0" y="-22" fill="#ff0040" font-size="12" font-weight="bold" text-anchor="middle">3</text>
+    <text x="0" y="-10" fill="#ff004088" font-size="6" text-anchor="middle">CRIT.</text>
+    <text x="38" y="-22" fill="#ff6600" font-size="10" text-anchor="middle">5</text>
+    <text x="38" y="-10" fill="#ff660088" font-size="6" text-anchor="middle">HIGH</text>
+    <text x="60" y="-22" fill="#ffd700" font-size="10" text-anchor="middle">4</text>
+    <text x="60" y="-10" fill="#ffd70088" font-size="6" text-anchor="middle">MED</text>
+  </g>
+
+  <!-- ===== RIGHT BOTTOM: SYSTEM HEALTH ===== -->
+  <rect x="610" y="245" width="170" height="110" class="card" stroke="#00ff4122" rx="6"/>
+  <text x="695" y="265" fill="#0ff" font-size="10" font-weight="bold" text-anchor="middle">SYSTEM HEALTH</text>
+
+  <g transform="translate(620,275)">
+    <text x="0" y="15" fill="#00ff4188" font-size="8">CPU</text>
+    <rect x="30" y="8" width="100" height="8" rx="4" fill="#0d1117"/>
+    <rect x="30" y="8" width="35" height="8" rx="4" fill="#00ff41"/>
+    <text x="135" y="15" fill="#00ff4166" font-size="7">35%</text>
+
+    <text x="0" y="35" fill="#00ff4188" font-size="8">GPU</text>
+    <rect x="30" y="28" width="100" height="8" rx="4" fill="#0d1117"/>
+    <rect x="30" y="28" width="62" height="8" rx="4" fill="#00ff41"/>
+    <text x="135" y="35" fill="#00ff4166" font-size="7">62%</text>
+
+    <text x="0" y="55" fill="#00ff4188" font-size="8">RAM</text>
+    <rect x="30" y="48" width="100" height="8" rx="4" fill="#0d1117"/>
+    <rect x="30" y="48" width="48" height="8" rx="4" fill="#00ff41"/>
+    <text x="135" y="55" fill="#00ff4166" font-size="7">48%</text>
+
+    <text x="0" y="75" fill="#00ff4188" font-size="8">VRAM</text>
+    <rect x="30" y="68" width="100" height="8" rx="4" fill="#0d1117"/>
+    <rect x="30" y="68" width="28" height="8" rx="4" fill="#ffd700"/>
+    <text x="135" y="75" fill="#ffd70066" font-size="7">28%</text>
+
+    <text x="0" y="95" fill="#00ff4188" font-size="8">NIM</text>
+    <circle cx="35" cy="91" r="3" fill="#76B900" class="pulse"/>
+    <text x="42" y="94" fill="#76B90088" font-size="7">Online</text>
+  </g>
+
+  <!-- ===== BOTTOM: REPORT PROGRESS ===== -->
+  <rect x="20" y="375" width="760" height="50" class="card" stroke="#76B90022" rx="6"/>
+  <text x="35" y="397" fill="#76B900" font-size="11" font-weight="bold">📄 REPORT GENERATION</text>
+  <text x="220" y="397" fill="#76B90088" font-size="9">Progress:</text>
+  <rect x="300" y="390" width="300" height="10" rx="5" fill="#0d1117"/>
+  <rect x="300" y="390" width="255" height="10" rx="5" fill="#76B900" style="animation:barFill 2s ease-out forwards"/>
+  <text x="610" y="399" fill="#76B900" font-size="9">85%</text>
+  <text x="35" y="418" fill="#76B90066" font-size="8">Formats: Markdown ✓ | JSON ✓ | HTML ▸ | PDF ...</text>
+
+  <!-- ===== STATUS BAR ===== -->
+  <rect x="0" y="480" width="800" height="20" fill="#0a0a0f"/>
+  <text x="10" y="494" fill="#00ff4166" font-size="8">SH4D0WF0RG3 v1.2.0</text>
+  <text x="180" y="494" fill="#00ff4166" font-size="8">| Mode: STEALTH | GPU: RTX 4090 |</text>
+  <text x="450" y="494" fill="#00ff4166" font-size="8">Ethics first, hack second.</text>
+  <text x="700" y="494" fill="#00ff4166" font-size="8">NVIDIA NIM 45ms</text>
+</svg>

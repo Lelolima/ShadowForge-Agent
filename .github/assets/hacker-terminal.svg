@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" style="background:#000;font-family:'Courier New',monospace;">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f0" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#0f0" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Dark background with gradient -->
+  <rect width="100%" height="100%" fill="#050505"/>
+  <rect x="10" y="10" width="780" height="380" fill="#0a0a0a" stroke="#0f0" stroke-width="1" filter="url(#glow)"/>
+  <rect x="10" y="10" width="780" height="24" fill="#0f0" fill-opacity="0.08"/>
+
+  <!-- Terminal chrome -->
+  <text x="30" y="28" fill="#0f0" font-size="12" font-weight="bold">root@shadowforge:~/campaign</text>
+  <circle cx="750" cy="22" r="4" fill="#f00" opacity="0.6"><animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/></circle>
+  <circle cx="770" cy="22" r="4" fill="#0f0" opacity="0.6"><animate attributeName="opacity" values="0.6;1;0.6" dur="2s" begin="0.5s" repeatCount="indefinite"/></circle>
+
+  <!-- Typed text simulation -->
+  <text x="30" y="60" fill="#0f0" font-size="13" filter="url(#glow)">
+    <tspan x="30" dy="0">$ python3 main.py --mode stealth --target 192.168.1.0/24</tspan>
+    <tspan x="30" dy="20">[✓] NVIDIA NIM Connected (Llama-3.3-70B)</tspan>
+    <tspan x="30" dy="20">[✓] Ethical Guardrails: ENGAGED</tspan>
+    <tspan x="30" dy="20">[RECON] Passive OSINT gathering...</tspan>
+    <tspan x="30" dy="20">[SCAN] 192.168.1.10:80 OPEN (Apache/2.4.52)</tspan>
+    <tspan x="30" dy="20">[SCAN] 192.168.1.10:443 OPEN (TLSv1.3)</tspan>
+    <tspan x="30" dy="20">[AI] Analyzing attack surface... 3 vectors found</tspan>
+    <tspan x="30" dy="20">[EXPLOIT] Testing SQL injection vector...</tspan>
+    <tspan x="30" dy="20">[GUARD] Blocked: unauthorized destructive action</tspan>
+    <tspan x="30" dy="20">[REPORT] Generating PDF report...</tspan>
+  </text>
+
+  <!-- Cursor blink -->
+  <rect x="30" y="310" width="10" height="14" fill="#0f0">
+    <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Progress bars -->
+  <rect x="30" y="340" width="200" height="8" fill="none" stroke="#0f0" stroke-width="1" opacity="0.3"/>
+  <rect x="30" y="340" width="200" height="8" fill="#0f0" opacity="0.7">
+    <animate attributeName="width" values="0;200;0" dur="4s" repeatCount="indefinite"/>
+  </rect>
+  <text x="245" y="348" fill="#0f0" font-size="10">SCANNING...</text>
+
+  <!-- Matrix rain effect -->
+  <g font-size="8" fill="#0f0" opacity="0.3">
+    <text x="350" y="50">A</text>
+    <text x="350" y="65">B</text>
+    <text x="350" y="80">C</text>
+    <animateTransform attributeName="transform" type="translate" values="0,0;0,20;0,0" dur="3s" repeatCount="indefinite"/>
+  </g>
+  <g font-size="8" fill="#0f0" opacity="0.3">
+    <text x="400" y="30">1</text>
+    <text x="400" y="45">0</text>
+    <text x="400" y="60">1</text>
+    <animateTransform attributeName="transform" type="translate" values="0,0;0,30;0,0" dur="2.5s" repeatCount="indefinite"/>
+  </g>
+  <g font-size="8" fill="#0f0" opacity="0.3">
+    <text x="450" y="40">F</text>
+    <text x="450" y="55">E</text>
+    <text x="450" y="70">D</text>
+    <animateTransform attributeName="transform" type="translate" values="0,0;0,25;0,0" dur="3.5s" repeatCount="indefinite"/>
+  </g>
+
+  <!-- Scan lines overlay -->
+  <line x1="10" y1="200" x2="790" y2="200" stroke="#0f0" stroke-width="0.3" opacity="0.2">
+    <animate attributeName="y1" values="200;400;200" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="200;400;200" dur="4s" repeatCount="indefinite"/>
+  </line>
+</svg>

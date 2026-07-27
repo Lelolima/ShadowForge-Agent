@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SH4D0WF0RG3 | Autonomous Ethical Hacking AI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --cyan:#0ff;--green:#00ff41;--gold:#ffd700;--red:#ff0040;
+  --bg:#0a0a0f;--surface:#0d0d18;--surface2:#111125;
+  --dim-cyan:rgba(0,255,255,.08);--dim-green:rgba(0,255,65,.06);
+  --font-mono:'Share Tech Mono',monospace;
+  --font-display:'Orbitron',sans-serif;
+  --font-body:'Rajdhani',sans-serif;
+}
+
+html{scroll-behavior:smooth}
+
+body{
+  background:var(--bg);color:#c0c0c0;
+  font-family:var(--font-body);font-size:16px;line-height:1.6;
+  overflow-x:hidden;
+}
+
+/* ═══ MATRIX RAIN ═══ */
+#matrix-canvas{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:0;opacity:.12;pointer-events:none;
+}
+
+/* ═══ CRT SCANLINES ═══ */
+.crt-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:9999;pointer-events:none;
+  background:repeating-linear-gradient(
+    0deg,rgba(0,0,0,.03) 0px,rgba(0,0,0,.03) 1px,transparent 1px,transparent 3px
+  );
+}
+.crt-overlay::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.4) 100%);
+}
+
+/* ═══ CONTAINER ═══ */
+.container{
+  position:relative;z-index:1;max-width:1100px;margin:0 auto;
+  padding:40px 30px 80px;
+}
+
+/* ═══ HERO ═══ */
+.hero{text-align:center;padding:60px 0 40px;position:relative}
+
+.glitch-wrapper{position:relative;display:inline-block}
+
+.glitch{
+  font-family:var(--font-display);font-weight:900;
+  font-size:clamp(2.8rem,7vw,5.5rem);letter-spacing:.05em;
+  color:var(--cyan);position:relative;
+  text-shadow:0 0 20px rgba(0,255,255,.6),0 0 60px rgba(0,255,255,.2);
+  animation:glitch-skew 4s infinite linear alternate-reverse;
+}
+.glitch::before,.glitch::after{
+  content:attr(data-text);position:absolute;top:0;left:0;
+  width:100%;height:100%;overflow:hidden;
+}
+.glitch::before{
+  color:var(--red);z-index:-1;
+  animation:glitch-1 3s infinite linear alternate-reverse;
+  clip-path:inset(0 0 65% 0);
+}
+.glitch::after{
+  color:var(--green);z-index:-2;
+  animation:glitch-2 2.5s infinite linear alternate-reverse;
+  clip-path:inset(40% 0 0 0);
+}
+
+@keyframes glitch-1{
+  0%,100%{transform:translate(0)}
+  20%{transform:translate(-3px,2px)}
+  40%{transform:translate(3px,-1px)}
+  60%{transform:translate(-2px,1px)}
+  80%{transform:translate(2px,-2px)}
+}
+@keyframes glitch-2{
+  0%,100%{transform:translate(0)}
+  25%{transform:translate(2px,-2px)}
+  50%{transform:translate(-3px,1px)}
+  75%{transform:translate(1px,2px)}
+}
+@keyframes glitch-skew{
+  0%,100%{transform:skew(0deg)}
+  48%{transform:skew(0deg)}
+  50%{transform:skew(-0.5deg)}
+  52%{transform:skew(0.5deg)}
+  54%{transform:skew(0deg)}
+}
+
+.version-tag{
+  font-family:var(--font-mono);font-size:1.1rem;color:var(--green);
+  margin-top:12px;letter-spacing:.3em;
+  text-shadow:0 0 10px rgba(0,255,65,.5);
+}
+.version-tag .blink{animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+
+.subtitle{
+  font-family:var(--font-mono);font-size:1rem;color:#888;
+  margin-top:20px;min-height:1.6em;
+}
+.subtitle .cursor{
+  display:inline-block;width:10px;height:1.2em;
+  background:var(--cyan);vertical-align:text-bottom;margin-left:2px;
+  animation:cursor-blink 1s step-end infinite;
+}
+@keyframes cursor-blink{50%{opacity:0}}
+
+.warning-bar{
+  margin-top:30px;padding:14px 24px;
+  border:1px solid var(--gold);border-radius:4px;
+  background:rgba(255,215,0,.04);
+  font-family:var(--font-mono);font-size:.85rem;color:var(--gold);
+  text-shadow:0 0 8px rgba(255,215,0,.3);
+  animation:pulse-border 3s infinite;
+}
+@keyframes pulse-border{
+  0%,100%{border-color:var(--gold);box-shadow:0 0 5px rgba(255,215,0,.2)}
+  50%{border-color:rgba(255,215,0,.5);box-shadow:0 0 15px rgba(255,215,0,.1)}
+}
+
+/* ═══ SECTIONS ═══ */
+.section{margin-top:60px;opacity:0;transform:translateY(30px);transition:all .8s ease}
+.section.visible{opacity:1;transform:translateY(0)}
+
+.section-title{
+  font-family:var(--font-display);font-weight:700;font-size:1.6rem;
+  color:var(--cyan);letter-spacing:.1em;
+  text-shadow:0 0 15px rgba(0,255,255,.4);
+  border-bottom:2px solid var(--dim-cyan);padding-bottom:12px;margin-bottom:30px;
+  position:relative;
+}
+.section-title::after{
+  content:'';position:absolute;bottom:-2px;left:0;width:80px;height:2px;
+  background:var(--cyan);box-shadow:0 0 10px var(--cyan);
+}
+
+/* ═══ OODA LOOP SVG ═══ */
+.ooda-container{
+  display:flex;justify-content:center;
+  margin:30px 0;padding:20px;
+  background:radial-gradient(ellipse,var(--dim-cyan),transparent 70%);
+  border-radius:12px;
+}
+.ooda-container svg{max-width:100%;height:auto}
+
+.ooda-node{
+  fill:var(--surface2);stroke:var(--cyan);stroke-width:2;
+  filter:drop-shadow(0 0 8px rgba(0,255,255,.4));
+  transition:all .3s;cursor:pointer;
+}
+.ooda-node:hover{
+  stroke:var(--green);filter:drop-shadow(0 0 20px rgba(0,255,65,.6));
+  fill:rgba(0,255,65,.08);
+}
+.ooda-label{
+  fill:var(--cyan);font-family:var(--font-display);font-size:13px;
+  font-weight:700;letter-spacing:.1em;pointer-events:none;
+}
+.ooda-sublabel{
+  fill:#888;font-family:var(--font-mono);font-size:9px;pointer-events:none;
+}
+.ooda-arrow{
+  stroke:var(--cyan);stroke-width:1.5;fill:none;
+  marker-end:url(#arrowhead);opacity:.6;
+}
+.ooda-glow{
+  fill:none;stroke:var(--cyan);stroke-width:1;opacity:.15;
+}
+
+@keyframes rotate-loop{
+  from{stroke-dashoffset:0}to{stroke-dashoffset:-60}
+}
+.loop-path{
+  stroke:var(--green);stroke-width:2;fill:none;
+  stroke-dasharray:10 5;opacity:.5;
+  animation:rotate-loop 2s linear infinite;
+}
+
+/* ═══ KILL CHAIN ═══ */
+.killchain{
+  display:flex;flex-wrap:wrap;gap:4px;align-items:center;
+  justify-content:center;padding:20px 0;
+}
+.kc-phase{
+  position:relative;padding:14px 22px;
+  background:var(--surface);border:1px solid rgba(0,255,255,.2);
+  border-radius:4px;text-align:center;
+  transition:all .4s;cursor:default;
+}
+.kc-phase:hover{
+  border-color:var(--cyan);background:var(--dim-cyan);
+  transform:translateY(-4px);
+  box-shadow:0 6px 30px rgba(0,255,255,.15);
+}
+.kc-phase .kc-icon{font-size:1.6rem;display:block;margin-bottom:6px}
+.kc-phase .kc-name{
+  font-family:var(--font-mono);font-size:.75rem;
+  color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;
+}
+.kc-phase .kc-label{font-size:.65rem;color:#666;margin-top:2px}
+.kc-arrow{
+  color:var(--cyan);font-size:1.2rem;opacity:.4;
+  font-family:var(--font-mono);
+}
+
+.kc-phase.active{
+  border-color:var(--green);
+  box-shadow:0 0 20px rgba(0,255,65,.2);
+  animation:kc-pulse 2s infinite;
+}
+@keyframes kc-pulse{
+  0%,100%{box-shadow:0 0 20px rgba(0,255,65,.2)}
+  50%{box-shadow:0 0 35px rgba(0,255,65,.35)}
+}
+
+/* ═══ MODULES GRID ═══ */
+.modules-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:16px;
+}
+.module-card{
+  background:var(--surface);border:1px solid rgba(0,255,255,.1);
+  border-radius:6px;padding:24px;
+  transition:all .4s;position:relative;overflow:hidden;
+}
+.module-card::before{
+  content:'';position:absolute;top:0;left:0;width:3px;height:100%;
+  background:var(--cyan);opacity:.5;transition:opacity .3s;
+}
+.module-card:hover{
+  border-color:rgba(0,255,255,.3);transform:translateY(-3px);
+  box-shadow:0 8px 30px rgba(0,0,0,.4),0 0 15px var(--dim-cyan);
+}
+.module-card:hover::before{opacity:1}
+
+.module-card[data-color="green"]::before{background:var(--green)}
+.module-card[data-color="gold"]::before{background:var(--gold)}
+.module-card[data-color="red"]::before{background:var(--red)}
+
+.module-icon{
+  width:48px;height:48px;margin-bottom:14px;
+  stroke:var(--cyan);fill:none;stroke-width:1.5;
+  filter:drop-shadow(0 0 6px rgba(0,255,255,.3));
+}
+.module-card[data-color="green"] .module-icon{stroke:var(--green);filter:drop-shadow(0 0 6px rgba(0,255,65,.3))}
+.module-card[data-color="gold"] .module-icon{stroke:var(--gold);filter:drop-shadow(0 0 6px rgba(255,215,0,.3))}
+.module-card[data-color="red"] .module-icon{stroke:var(--red);filter:drop-shadow(0 0 6px rgba(255,0,64,.3))}
+
+.module-name{
+  font-family:var(--font-display);font-size:1.05rem;
+  color:#e0e0e0;font-weight:700;margin-bottom:6px;
+}
+.module-desc{font-size:.85rem;color:#888;line-height:1.5}
+.module-features{
+  margin-top:12px;list-style:none;padding:0;
+}
+.module-features li{
+  font-family:var(--font-mono);font-size:.75rem;color:#666;
+  padding:3px 0 3px 16px;position:relative;
+}
+.module-features li::before{
+  content:'›';position:absolute;left:0;color:var(--cyan);
+}
+
+/* ═══ CODE BLOCK ═══ */
+.code-block{
+  background:#080812;border:1px solid rgba(0,255,255,.15);
+  border-radius:6px;padding:20px;margin:12px 0;
+  font-family:var(--font-mono);font-size:.82rem;
+  color:#aaa;line-height:1.7;overflow-x:auto;
+  position:relative;
+}
+.code-block::before{
+  content:attr(data-lang);position:absolute;top:8px;right:12px;
+  font-size:.65rem;color:#444;letter-spacing:.1em;
+}
+.code-prompt{color:var(--green)}
+.code-comment{color:#555}
+.code-cmd{color:var(--cyan)}
+.code-flag{color:var(--gold)}
+.code-string{color:#0f8}
+
+/* ═══ ETHICS BAR ═══ */
+.ethics-bar{
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;
+}
+.ethics-item{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 16px;background:var(--surface);
+  border:1px solid rgba(255,0,64,.2);border-radius:4px;
+  font-family:var(--font-mono);font-size:.78rem;color:#aaa;
+}
+.ethics-dot{
+  width:8px;height:8px;border-radius:50%;
+  box-shadow:0 0 8px currentColor;
+}
+.ethics-dot.on{background:var(--green);color:var(--green)}
+.ethics-dot.off{background:var(--red);color:var(--red)}
+
+/* ═══ TECH STACK ═══ */
+.tech-grid{
+  display:flex;flex-wrap:wrap;gap:8px;
+}
+.tech-tag{
+  padding:8px 16px;background:var(--surface);
+  border:1px solid rgba(0,255,255,.1);border-radius:3px;
+  font-family:var(--font-mono);font-size:.78rem;color:#888;
+  transition:all .3s;
+}
+.tech-tag:hover{
+  border-color:var(--cyan);color:var(--cyan);
+  text-shadow:0 0 8px rgba(0,255,255,.3);
+  background:var(--dim-cyan);
+}
+
+/* ═══ STATS ═══ */
+.stats-row{
+  display:flex;flex-wrap:wrap;gap:16px;margin:24px 0;
+  justify-content:center;
+}
+.stat-box{
+  text-align:center;padding:16px 28px;
+  background:var(--surface);border:1px solid rgba(0,255,255,.1);
+  border-radius:6px;min-width:120px;
+}
+.stat-val{
+  font-family:var(--font-display);font-size:2rem;font-weight:900;
+  color:var(--cyan);text-shadow:0 0 15px rgba(0,255,255,.4);
+}
+.stat-label{font-family:var(--font-mono);font-size:.7rem;color:#666;margin-top:4px}
+
+/* ═══ FOOTER ═══ */
+.footer{
+  text-align:center;padding:40px 0 20px;
+  border-top:1px solid rgba(0,255,255,.08);margin-top:60px;
+}
+.footer-text{font-family:var(--font-mono);font-size:.75rem;color:#444}
+.footer-text a{color:var(--cyan);text-decoration:none}
+.footer-text a:hover{text-shadow:0 0 8px var(--cyan)}
+
+/* ═══ SCROLLBAR ═══ */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:rgba(0,255,255,.3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(0,255,255,.5)}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:600px){
+  .container{padding:20px 16px 40px}
+  .killchain{flex-direction:column;align-items:stretch}
+  .kc-arrow{transform:rotate(90deg);text-align:center}
+  .modules-grid{grid-template-columns:1fr}
+}
+
+/* ═══ HEX DECOR ═══ */
+.hex-grid{
+  position:absolute;top:0;right:0;width:200px;height:200px;
+  opacity:.03;pointer-events:none;
+}
+</style>
+</head>
+<body>
+
+<canvas id="matrix-canvas"></canvas>
+<div class="crt-overlay"></div>
+
+<div class="container">
+
+  <!-- ═══ HERO ═══ -->
+  <header class="hero">
+    <div class="glitch-wrapper">
+      <h1 class="glitch" data-text="SH4D0WF0RG3">SH4D0WF0RG3</h1>
+    </div>
+    <div class="version-tag">v1.2.0 <span class="blink">█</span> 1337 MODE</div>
+    <div class="subtitle">
+      <span id="typed-text"></span><span class="cursor"></span>
+    </div>
+    <div class="warning-bar">
+      ⚠ LEGAL WARNING ⚠ — Authorized pentest ONLY. Unauthorized use is ILLEGAL. Ethics first, hack second.
+    </div>
+  </header>
+
+  <!-- ═══ STATS ═══ -->
+  <div class="stats-row" id="stats">
+    <div class="stat-box"><div class="stat-val">7</div><div class="stat-label">OODA PHASES</div></div>
+    <div class="stat-box"><div class="stat-val">6</div><div class="stat-label">CORE MODULES</div></div>
+    <div class="stat-box"><div class="stat-val">14+</div><div class="stat-label">SECURITY FIXES</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:var(--green)">OODA</div><div class="stat-label">ARCHITECTURE</div></div>
+  </div>
+
+  <!-- ═══ ABOUT ═══ -->
+  <section class="section" id="about">
+    <h2 class="section-title">// SYSTEM.DOSSIER</h2>
+    <p style="color:#aaa;line-height:1.7;max-width:800px">
+      <strong style="color:var(--cyan)">ShadowForge-Agent</strong> é um agente autônomo de
+      <strong style="color:var(--green)">hacking ético</strong> com arquitetura
+      <strong style="color:var(--gold)">OODA</strong> (Observe→Orient→Decide→Act),
+      integração completa com a stack <strong style="color:var(--green)">NVIDIA</strong>
+      (NIM, Riva, Embeddings) e kill chain automatizada de pentest.
+      Visão computacional, interface por voz, controle de shell stealth,
+      ferramentas de recon/exploit e RAG tático com MITRE ATT&CK.
+    </p>
+  </section>
+
+  <!-- ═══ OODA ARCHITECTURE ═══ -->
+  <section class="section" id="architecture">
+    <h2 class="section-title">// OODA LOOP ARCHITECTURE</h2>
+    <div class="ooda-container">
+      <svg viewBox="0 0 640 360" width="640" height="360">
+        <defs>
+          <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="var(--cyan)" opacity=".7"/>
+          </marker>
+          <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- Outer loop arc -->
+        <path class="loop-path" d="M 320,40 C 520,40 580,180 580,180 C 580,320 520,320 320,320 C 120,320 60,180 60,180 C 60,40 120,40 320,40" />
+
+        <!-- OBSERVE -->
+        <rect class="ooda-node" x="200" y="50" width="140" height="60" rx="6"/>
+        <text class="ooda-label" x="270" y="78" text-anchor="middle">OBSERVE</text>
+        <text class="ooda-sublabel" x="270" y="96" text-anchor="middle">screenshot · ASR · shell</text>
+
+        <!-- ORIENT -->
+        <rect class="ooda-node" x="420" y="140" width="140" height="60" rx="6"/>
+        <text class="ooda-label" x="490" y="168" text-anchor="middle">ORIENT</text>
+        <text class="ooda-sublabel" x="490" y="186" text-anchor="middle">RAG · memory · context</text>
+
+        <!-- DECIDE -->
+        <rect class="ooda-node" x="200" y="240" width="140" height="60" rx="6"/>
+        <text class="ooda-label" x="270" y="268" text-anchor="middle">DECIDE</text>
+        <text class="ooda-sublabel" x="270" y="286" text-anchor="middle">ethics · LLM · plan</text>
+
+        <!-- ACT -->
+        <rect class="ooda-node" x="40" y="140" width="140" height="60" rx="6"/>
+        <text class="ooda-label" x="110" y="168" text-anchor="middle">ACT</text>
+        <text class="ooda-sublabel" x="110" y="186" text-anchor="middle">exploit · report · ctrl</text>
+
+        <!-- Arrows -->
+        <path class="ooda-arrow" d="M 340,80 L 420,150"/>
+        <path class="ooda-arrow" d="M 420,200 L 340,260"/>
+        <path class="ooda-arrow" d="M 200,260 L 180,200"/>
+        <path class="ooda-arrow" d="M 180,150 L 200,95"/>
+
+        <!-- Center label -->
+        <text x="270" y="178" text-anchor="middle" fill="var(--green)" font-family="Orbitron" font-size="11" font-weight="700" opacity=".6">
+          OODA LOOP
+        </text>
+        <text x="270" y="195" text-anchor="middle" fill="#555" font-family="Share Tech Mono" font-size="9">
+          continuous cycle
+        </text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ═══ KILL CHAIN ═══ -->
+  <section class="section" id="killchain">
+    <h2 class="section-title">// KILL CHAIN — CAMPAIGN PHASES</h2>
+    <div class="killchain">
+      <div class="kc-phase active">
+        <span class="kc-icon">⏸️</span>
+        <span class="kc-name">IDLE</span>
+        <span class="kc-label">standby</span>
+      </div>
+      <span class="kc-arrow">→</span>
+      <div class="kc-phase">
+        <span class="kc-icon">🔍</span>
+        <span class="kc-name">RECON</span>
+        <span class="kc-label">reconnaissance</span>
+      </div>
+      <span class="kc-arrow">→</span>
+      <div class="kc-phase">
+        <span class="kc-icon">📡</span>
+        <span class="kc-name">SCAN</span>
+        <span class="kc-label">port scanning</span>
+      </div>
+      <span class="kc-arrow">→</span>
+      <div class="kc-phase">
+        <span class="kc-icon">📋</span>
+        <span class="kc-name">ENUM</span>
+        <span class="kc-label">enumeration</span>
+      </div>
+      <span class="kc-arrow">→</span>
+      <div class="kc-phase">
+        <span class="kc-icon">⚡</span>
+        <span class="kc-name">EXPLOIT</span>
+        <span class="kc-label">exploitation</span>
+      </div>
+      <span class="kc-arrow">→</span>
+      <div class="kc-phase">
+        <span class="kc-icon">🔓</span>
+        <span class="kc-name">POST</span>
+        <span class="kc-label">post-exploitation</span>
+      </div>
+      <span class="kc-arrow">→</span>
+      <div class="kc-phase">
+        <span class="kc-icon">📊</span>
+        <span class="kc-name">REPORT</span>
+        <span class="kc-label">reporting</span>
+      </div>
+      <span class="kc-arrow">→</span>
+      <div class="kc-phase">
+        <span class="kc-icon">✅</span>
+        <span class="kc-name">DONE</span>
+        <span class="kc-label">completed</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ MODULES ═══ -->
+  <section class="section" id="modules">
+    <h2 class="section-title">// SUBSYSTEMS — CORE MODULES</h2>
+    <div class="modules-grid">
+
+      <div class="module-card" data-color="green">
+        <svg class="module-icon" viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="18" stroke-width="1.5"/>
+          <circle cx="24" cy="24" r="8" stroke-width="1.5"/>
+          <line x1="24" y1="6" x2="24" y2="16"/>
+          <line x1="24" y1="32" x2="24" y2="42"/>
+          <line x1="6" y1="24" x2="16" y2="24"/>
+          <line x1="32" y1="24" x2="42" y2="24"/>
+        </svg>
+        <h3 class="module-name">Vision</h3>
+        <p class="module-desc">Screen capture com diff detection, OCR Tesseract, YOLOv8 object detection e análise visual via Nemotron.</p>
+        <ul class="module-features">
+          <li>ScreenCapture (mss + diff)</li>
+          <li>OCRExtractor (Tesseract)</li>
+          <li>YOLOv8 Detector</li>
+          <li>ScreenUnderstanding (NIM)</li>
+        </ul>
+      </div>
+
+      <div class="module-card" data-color="gold">
+        <svg class="module-icon" viewBox="0 0 48 48">
+          <path d="M8 36 L14 28 L8 20"/>
+          <path d="M40 36 L34 28 L40 20"/>
+          <path d="M14 28 Q 24 18 34 28" stroke-width="1.5"/>
+          <line x1="10" y1="12" x2="24" y2="8" stroke-width="1" opacity=".5"/>
+          <line x1="38" y1="12" x2="24" y2="8" stroke-width="1" opacity=".5"/>
+          <circle cx="24" cy="8" r="2" fill="currentColor" stroke="none" opacity=".5"/>
+        </svg>
+        <h3 class="module-name">Speech</h3>
+        <p class="module-desc">Interface por voz NVIDIA Riva com ASR pt-BR, TTS, VAD e wake word "shadow".</p>
+        <ul class="module-features">
+          <li>Riva ASR (streaming)</li>
+          <li>Riva TTS (pt-BR)</li>
+          <li>Voice Interface</li>
+          <li>Wake Word + PTT</li>
+        </ul>
+      </div>
+
+      <div class="module-card" data-color="cyan">
+        <svg class="module-icon" viewBox="0 0 48 48">
+          <rect x="6" y="8" width="36" height="28" rx="3"/>
+          <line x1="6" y1="14" x2="42" y2="14" opacity=".3"/>
+          <circle cx="10" cy="11" r="1.5" fill="currentColor" stroke="none" opacity=".5"/>
+          <circle cx="16" cy="11" r="1.5" fill="currentColor" stroke="none" opacity=".5"/>
+          <text x="24" y="27" text-anchor="middle" font-family="monospace" font-size="8" fill="currentColor" opacity=".6">$ _</text>
+        </svg>
+        <h3 class="module-name">Control</h3>
+        <p class="module-desc">Shell stealth, keyboard/mouse com humanização bezier e OPSEC anti-forensics.</p>
+        <ul class="module-features">
+          <li>StealthShell (async)</li>
+          <li>StealthKeyboard</li>
+          <li>StealthMouse (bezier)</li>
+          <li>StealthManager (OPSEC)</li>
+        </ul>
+      </div>
+
+      <div class="module-card" data-color="red">
+        <svg class="module-icon" viewBox="0 0 48 48">
+          <path d="M24 4 L44 14 L44 34 L24 44 L4 34 L4 14 Z"/>
+          <path d="M24 16 L34 22 L34 32 L24 38 L14 32 L14 22 Z" stroke-width="1" opacity=".4"/>
+          <circle cx="24" cy="24" r="3" fill="currentColor" stroke="none" opacity=".6"/>
+        </svg>
+        <h3 class="module-name">Hacker Tools</h3>
+        <p class="module-desc">Nmap wrapper, web exploitation (SQLi/XSS/SSRF), OSINT (Shodan/Censys), post-exploitation.</p>
+        <ul class="module-features">
+          <li>ReconScanner (Nmap)</li>
+          <li>WebExploiter (OWASP)</li>
+          <li>OSINTGatherer</li>
+          <li>NetworkExploiter</li>
+        </ul>
+      </div>
+
+      <div class="module-card" data-color="gold">
+        <svg class="module-icon" viewBox="0 0 48 48">
+          <rect x="8" y="6" width="32" height="36" rx="3"/>
+          <line x1="14" y1="14" x2="34" y2="14" opacity=".4"/>
+          <line x1="14" y1="20" x2="28" y2="20" opacity=".4"/>
+          <line x1="14" y1="26" x2="32" y2="26" opacity=".4"/>
+          <line x1="14" y1="32" x2="22" y2="32" opacity=".4"/>
+          <circle cx="36" cy="36" r="6" stroke="var(--green)" stroke-width="1.5" fill="none"/>
+          <path d="M33 36 L36 39 L40 33" stroke="var(--green)" stroke-width="1.5" fill="none"/>
+        </svg>
+        <h3 class="module-name">Planning</h3>
+        <p class="module-desc">Orquestrador de campanhas multi-agente, RAG MITRE ATT&CK e OWASP, decomposição de objetivos.</p>
+        <ul class="module-features">
+          <li>CampaignOrchestrator</li>
+          <li>MITRERAG (ChromaDB)</li>
+          <li>Template Decomposition</li>
+          <li>Failure Recovery</li>
+        </ul>
+      </div>
+
+      <div class="module-card" data-color="green">
+        <svg class="module-icon" viewBox="0 0 48 48">
+          <circle cx="24" cy="18" r="12"/>
+          <path d="M12 34 Q 24 42 36 34" stroke-width="1.5" opacity=".4"/>
+          <path d="M8 38 Q 24 50 40 38" stroke-width="1" opacity=".2"/>
+          <circle cx="20" cy="16" r="2" fill="var(--green)" stroke="none" opacity=".5"/>
+          <circle cx="28" cy="16" r="2" fill="var(--green)" stroke="none" opacity=".5"/>
+          <path d="M19 21 Q 24 25 29 21" stroke-width="1.5" fill="none"/>
+        </svg>
+        <h3 class="module-name">Models (NVIDIA)</h3>
+        <p class="module-desc">NIM client com fallback inteligente, Nemotron Vision multimodal, embeddings NeMo Riva.</p>
+        <ul class="module-features">
+          <li>NIMClient (streaming)</li>
+          <li>NemotronVision (VLM)</li>
+          <li>NVIDIAEmbeddings</li>
+          <li>PromptManager</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══ QUICK START ═══ -->
+  <section class="section" id="quickstart">
+    <h2 class="section-title">// BOOT SEQUENCE — QUICK START</h2>
+
+    <div class="code-block" data-lang="BASH">
+      <span class="code-comment"># 1. Clone &amp; configure</span><br>
+      <span class="code-prompt">$</span> <span class="code-cmd">git clone</span> <span class="code-string">https://github.com/shadowforge/NVIDIA-ShadowForge-Agent</span><br>
+      <span class="code-prompt">$</span> <span class="code-cmd">cd</span> ShadowForge-Agent<br>
+      <span class="code-prompt">$</span> <span class="code-cmd">cp</span> .env.example .env<br>
+      <span class="code-comment"># 2. Set NVIDIA_API_KEY in .env</span>
+    </div>
+
+    <div class="code-block" data-lang="BASH">
+      <span class="code-comment"># 3. Install dependencies</span><br>
+      <span class="code-prompt">$</span> <span class="code-cmd">pip install</span> <span class="code-flag">-r</span> requirements.txt<br>
+      <span class="code-prompt">$</span> <span class="code-cmd">pip install</span> <span class="code-flag">-r</span> requirements-hacker.txt <span class="code-comment"># pentest tools</span><br>
+      <span class="code-prompt">$</span> <span class="code-cmd">pip install</span> <span class="code-flag">-r</span> requirements-vision.txt <span class="code-comment"># vision stack</span>
+    </div>
+
+    <div class="code-block" data-lang="BASH">
+      <span class="code-comment"># 4. Launch agent</span><br>
+      <span class="code-prompt">$</span> <span class="code-cmd">python main.py</span> <span class="code-flag">--mode stealth</span> <span class="code-flag">--target 192.168.1.0/24</span><br>
+      <span class="code-prompt">$</span> <span class="code-cmd">python main.py</span> <span class="code-flag">--voice</span> <span class="code-flag">--always-listen</span> <span class="code-comment"># voice mode</span><br>
+      <span class="code-prompt">$</span> <span class="code-cmd">python main.py</span> <span class="code-flag">--simulate</span> <span class="code-comment"># safe simulation</span>
+    </div>
+  </section>
+
+  <!-- ═══ ETHICS ═══ -->
+  <section class="section" id="ethics">
+    <h2 class="section-title">// ETHICS MODULE — GUARDRAILS</h2>
+    <p style="color:#aaa;margin-bottom:16px">
+      O agente possui guardrails éticos que NUNCA devem ser desativados em produção.
+      Todas as ações são verificadas antes da execução.
+    </p>
+    <div class="ethics-bar">
+      <div class="ethics-item"><span class="ethics-dot on"></span>Autorização obrigatória</div>
+      <div class="ethics-item"><span class="ethics-dot on"></span>Verificação de escopo</div>
+      <div class="ethics-item"><span class="ethics-dot on"></span>Registro de ações</div>
+      <div class="ethics-item"><span class="ethics-dot on"></span>Recusa de ilegal</div>
+      <div class="ethics-item"><span class="ethics-dot on"></span>Blacklist de hosts</div>
+      <div class="ethics-item"><span class="ethics-dot off"></span>Destruição bloqueada</div>
+      <div class="ethics-item"><span class="ethics-dot off"></span>Backdoor bloqueado</div>
+      <div class="ethics-item"><span class="ethics-dot off"></span>Exfiltração real bloqueada</div>
+    </div>
+  </section>
+
+  <!-- ═══ TECH STACK ═══ -->
+  <section class="section" id="techstack">
+    <h2 class="section-title">// TECH STACK</h2>
+    <div class="tech-grid">
+      <span class="tech-tag">Python 3.10+</span>
+      <span class="tech-tag">NVIDIA NIM</span>
+      <span class="tech-tag">NVIDIA Riva</span>
+      <span class="tech-tag">Nemotron</span>
+      <span class="tech-tag">Llama 3.3</span>
+      <span class="tech-tag">Pydantic v2</span>
+      <span class="tech-tag">aiohttp</span>
+      <span class="tech-tag">asyncio</span>
+      <span class="tech-tag">SQLite / aiosqlite</span>
+      <span class="tech-tag">ChromaDB</span>
+      <span class="tech-tag">FastAPI</span>
+      <span class="tech-tag">WebSocket</span>
+      <span class="tech-tag">Rich</span>
+      <span class="tech-tag">Pillow</span>
+      <span class="tech-tag">YOLOv8</span>
+      <span class="tech-tag">Tesseract OCR</span>
+      <span class="tech-tag">Nmap</span>
+      <span class="tech-tag">SQLMap</span>
+      <span class="tech-tag">Shodan</span>
+      <span class="tech-tag">Metasploit RPC</span>
+      <span class="tech-tag">Docker</span>
+      <span class="tech-tag">TensorRT</span>
+      <span class="tech-tag">pytest</span>
+      <span class="tech-tag">Ruff / Bandit</span>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="footer">
+    <p class="footer-text">
+      SH4D0WF0RG3 v1.2.0 · <a href="https://github.com/shadowforge/NVIDIA-ShadowForge-Agent">GitHub</a> · MIT License · Ethics first, hack second <span class="blink" style="color:var(--green)">█</span>
+    </p>
+  </footer>
+
+</div>
+
+<script>
+// ═══ MATRIX RAIN ═══
+const canvas = document.getElementById('matrix-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF{}[]|/\\<>§±∞≈≠';
+const fontSize = 14;
+const columns = Math.floor(canvas.width / fontSize);
+const drops = Array.from({length: columns}, () => Math.random() * -100);
+
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(10,10,15,0.05)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#00ff41';
+  ctx.font = fontSize + 'px monospace';
+
+  for (let i = 0; i < drops.length; i++) {
+    const char = chars[Math.floor(Math.random() * chars.length)];
+    const x = i * fontSize;
+    const y = drops[i] * fontSize;
+    ctx.globalAlpha = Math.random() * 0.5 + 0.2;
+    ctx.fillText(char, x, y);
+    if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i] += 0.5 + Math.random() * 0.5;
+  }
+  ctx.globalAlpha = 1;
+}
+
+setInterval(drawMatrix, 50);
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+// ═══ TYPING ANIMATION ═══
+const phrases = [
+  'Autonomous Ethical Hacking AI',
+  'NVIDIA NIM + Riva Powered',
+  'OODA Loop Architecture',
+  'Full Pentest Kill Chain',
+  'Vision • Speech • Control • Exploit',
+  'Ethics first, hack second. >>'
+];
+
+let phraseIdx = 0, charIdx = 0, isDeleting = false;
+const typedEl = document.getElementById('typed-text');
+
+function typeLoop() {
+  const current = phrases[phraseIdx];
+  if (!isDeleting) {
+    typedEl.textContent = current.substring(0, charIdx + 1);
+    charIdx++;
+    if (charIdx === current.length) {
+      setTimeout(() => { isDeleting = true; typeLoop(); }, 2000);
+      return;
+    }
+    setTimeout(typeLoop, 50 + Math.random() * 40);
+  } else {
+    typedEl.textContent = current.substring(0, charIdx - 1);
+    charIdx--;
+    if (charIdx === 0) {
+      isDeleting = false;
+      phraseIdx = (phraseIdx + 1) % phrases.length;
+      setTimeout(typeLoop, 400);
+      return;
+    }
+    setTimeout(typeLoop, 25);
+  }
+}
+typeLoop();
+
+// ═══ SCROLL REVEAL ═══
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold: 0.1});
+
+document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+// ═══ KILL CHAIN ANIMATION ═══
+const kcPhases = document.querySelectorAll('.kc-phase');
+let kcActive = 0;
+setInterval(() => {
+  kcPhases.forEach(p => p.classList.remove('active'));
+  kcPhases[kcActive].classList.add('active');
+  kcActive = (kcActive + 1) % kcPhases.length;
+}, 1500);
+</script>
+
+</body>
+</html>

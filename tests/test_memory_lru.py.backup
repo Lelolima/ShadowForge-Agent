@@ -1,0 +1,303 @@
+#!/usr/bin/env python3.11
+"""
+============================================================
+ ShadowForge-Agent - Teste de LRU na Memória de Curto Prazo
+ Arquivo: tests/test_memory_lru.py
+============================================================
+ Testes para a lógica LRU (Least Recently Used) na classe
+ MemoriaCurtoPrazo.
+============================================================
+"""
+
+import sys
+from pathlib import Path
+
+# Adiciona a raiz do projeto ao sys.path para importar módulos do core
+ROOT_DIR = Path(__file__).parent.parent.resolve()
+sys.path.insert(0, str(ROOT_DIR))
+
+from core.memory import MemoriaCurtoPrazo, EntradaMemoria
+
+
+def test_lru_insertion_order():
+    """Testa que as entradas são removidas na ordem LRU quando a capacidade é excedida."""
+    capacidade = 3
+    mem = MemoriaCurtoPrazo(capacidade=capacidade)
+
+    # Adiciona 3 entradas (até a capacidade)
+    e1 = mem.adicionar("tipo1", "conteudo1")
+    e2 = mem.adicionar("tipo2", "conteudo2")
+    e3 = mem.adicionar("tipo3", "conteudo3")
+    assert mem.tamanho == capacidade
+    # As entradas devem estar na ordem de inserção: e1, e2, e3 (mais recente)
+    assert list(mem._entradas.keys()) == [e1.id, e2.id, e3.id]
+
+    # Adiciona uma quarta entrada, deve remover a mais antiga (e1)
+    e4 = mem.adicionar("tipo4", "conteudo4")
+    assert mem.tamanho == capacidade
+    # Agora a ordem mais antiga para mais recente deve ser: e2, e3, e4
+    assert list(mem._entradas.keys()) == [e2.id, e3.id, e4.id]
+    # e1 deve ter sido removida
+    assert e1.id not in mem._entradas
+    # O índice por tipo também deve ter sido atualizado
+    assert "tipo1" not in mem._indice_por_tipo  # tipo1 foi removido completamente
+    assert mem._indice_por_tipo.get("tipo2") == [e2.id]
+    assert mem._indice_por_tipo.get("tipo3") == [e3.id]
+    assert mem._indice_por_tipo.get("tipo4") == [e4.id]
+
+
+def test_lru_access_updates_order():
+    """Testa que re-adicionar uma entrada existente cria uma nova entrada (mais recente)."""
+    capacidade = 3
+    mem = MemoriaCurtoPrazo(capacidade=capacidade)
+
+    e1 = mem.adicionar("tipo", "conteudo1")
+    e2 = mem.adicionar("tipo", "conteudo2")
+    e3 = mem.adicionar("tipo", "conteudo3")
+    # Ordem: e1, e2, e3 (mais recente)
+    assert list(mem._entradas.keys()) == [e1.id, e2.id, e3.id]
+
+    # Re-adiciona com mesmo tipo e conteúdo (mas será uma NOVA entrada com novo ID)
+    e1_updated = mem.adicionar("tipo", "conteudo1_atualizado")
+    # Note: um novo ID é gerado, não o mesmo
+    assert e1_updated.id != e1.id
+    # Agora a ordem deve ser: e2, e3, e1_updated (e1_updated movido para o fim)
+    assert list(mem._entradas.keys()) == [e2.id, e3.id, e1_updated.id]
+    assert mem.tamanho == capacidade
+
+    # Adiciona uma nova entrada e4, deve remover a mais antiga agora (e2)
+    e4 = mem.adicionar("tipo", "conteudo4")
+    assert mem.tamanho == capacidade
+    # Ordem esperada: e3, e1_updated, e4
+    assert list(mem._entradas.keys()) == [e3.id, e1_updated.id, e4.id]
+    assert e2.id not in mem._entradas
+    # Verificar índice por tipo: deve ter e3, e1_updated, e4 (nessa ordem de inserção no índice)
+    # Note: e1.id e e2.id foram removidos do índice quando suas entradas foram removidas de _entradas
+    ids_tipo = mem._indice_por_tipo.get("tipo", [])
+    expected_ids_in_index = [e3.id, e1_updated.id, e4.id]
+    assert ids_tipo == expected_ids_in_index
+    # buscar_por_tipo filtra pelos que ainda existem em _entradas
+    result = mem.buscar_por_tipo("tipo", limite=3)
+    # Todos os IDs em expected_ids_in_index ainda estão em _entradas
+    expected = [mem._entradas[eid] for eid in expected_ids_in_index]
+    assert result == expected
+    # Neste caso, expected será [e3, e1_updated, e4]
+
+
+def test_lru_type_index():
+    """Testa que o índice por tipo é mantido corretamente em inserções e remoções."""
+    capacidade = 2
+    mem = MemoriaCurtoPrazo(capacidade=capacidade)
+
+    # Adiciona dois entradas do mesmo tipo
+    e1 = mem.adicionar("A", "a1")
+    e2 = mem.adicionar("A", "a2")
+    # Adiciona uma entrada do tipo B
+    e3 = mem.adicionar("B", "b1")
+    # Capacidade é 2, então adicionar e3 deve remover a mais antiga (e1)
+    assert mem.tamanho == capacidade
+    assert e1.id not in mem._entradas
+    assert e2.id in mem._entradas
+    assert e3.id in mem._entradas
+
+    # Índice por tipo: tipo A deve ter apenas e2 (e1 foi removido)
+    assert mem._indice_por_tipo.get("A") == [e2.id]
+    # tipo B deve ter e3
+    assert mem._indice_por_tipo.get("B") == [e3.id]
+
+    # Agora adiciona outra entrada do tipo A, deve remover a mais antiga agora (e2)
+    e4 = mem.adicionar("A", "a3")
+    assert mem.tamanho == capacidade
+    assert e2.id not in mem._entradas
+    assert e3.id in mem._entradas  # B ainda lá
+    assert e4.id in mem._entradas
+
+    # Índice por tipo: tipo A deve ter e4 (e2 foi removido)
+    assert mem._indice_por_tipo.get("A") == [e4.id]
+    # tipo B deve ter e3
+    assert mem._indice_por_tipo.get("B") == [e3.id]
+
+    # Limpa e verifica
+    mem.limpar()
+    assert mem.tamanho == 0
+    assert mem._indice_por_tipo == {}
+
+
+def test_buscar_por_tipo_order():
+    """Testa que buscar_por_tipo retorna as entradas na ordem de inserção (mais recentes por último)."""
+    capacidade = 5
+    mem = MemoriaCurtoPrazo(capacidade=capacidade)
+
+    # Adiciona três entradas do tipo X em ordem
+    e1 = mem.adicionar("X", "x1")
+    e2 = mem.adicionar("X", "x2")
+    e3 = mem.adicionar("X", "x3")
+    # Também adiciona outros tipos para não afetar o limite por tipo
+    mem.adicionar("Y", "y1")
+    mem.adicionar("Y", "y2")
+
+    # buscar_por_tipo("X", limite=2) deve retornar as duas mais recentes por inserção: e2, e3
+    result = mem.buscar_por_tipo("X", limite=2)
+    assert [e.conteudo for e in result] == ["x2", "x3"]
+
+    # Agora adiciona mais duas do tipo X, ultrapassando a capacidade geral, mas vamos ver o índice por tipo
+    e4 = mem.adicionar("X", "x4")
+    e5 = mem.adicionar("X", "x5")
+    # Após adicionar e4 e e5, a memória total excedeu capacidade? Vamos verificar:
+    # Após e3: 3 entries, depois y1, y2: 5 entries (capacidade 5). Adicionar e4 -> remove mais antiga (e1)
+    # Adicionar e5 -> remove mais antiga (e2)
+    # Então agora as entradas do tipo X devem ser: e3, e4, e5 (e1 e e2 removidos)
+    # O índice por tipo X terá: [e1.id, e2.id, e3.id, e4.id, e5.id] mas e1 e e2 foram removidos do _entradas.
+    result = mem.buscar_por_tipo("X", limite=2)
+    assert [e.conteudo for e in result] == ["x4", "x5"]
+
+
+def test_buscar_recentes_order():
+    """Testa que buscar_recentes retorna as N entradas mais recentes (globalmente)."""
+    capacidade = 4
+    mem = MemoriaCurtoPrazo(capacidade=capacidade)
+
+    e1 = mem.adicionar("T1", "c1")
+    e2 = mem.adicionar("T2", "c2")
+    e3 = mem.adicionar("T3", "c3")
+    e4 = mem.adicionar("T4", "c4")
+    # Agora a memória está cheia: ordem [e1, e2, e3, e4] (e4 mais recente)
+    assert mem.tamanho == capacidade
+    assert [e.conteudo for e in mem.buscar_recentes(4)] == ["c1", "c2", "c3", "c4"]
+
+    # Adiciona e5, deve remover e1
+    e5 = mem.adicionar("T5", "c5")
+    # Ordem agora: [e2, e3, e4, e5]
+    assert [e.conteudo for e in mem.buscar_recentes(4)] == ["c2", "c3", "c4", "c5"]
+    # Limite 2 deve retornar os dois mais recentes: e4, e5
+    assert [e.conteudo for e in mem.buscar_recentes(2)] == ["c4", "c5"]
+
+
+def test_buscar_por_tags():
+    """Testa que buscar_por_tags retorna entradas que contenham qualquer das tags."""
+    capacidade = 10
+    mem = MemoriaCurtoPrazo(capacidade=capacidade)
+
+    e1 = mem.adicionar("T", "conteudo1", tags=["alpha", "beta"])
+    e2 = mem.adicionar("T", "conteudo2", tags=["gamma"])
+    e3 = mem.adicionar("T", "conteudo3", tags=["beta", "delta"])
+
+    # Busca por tags que existem
+    result = mem.buscar_por_tags(["beta"], limite=10)
+    # Deve retornar e1 e e3 (ambos têm beta)
+    assert len(result) == 2
+    conteudos = {e.conteudo for e in result}
+    assert conteudos == {"conteudo1", "conteudo3"}
+
+    # Busca por múltiplas tags
+    result = mem.buscar_por_tags(["alpha", "gamma"], limite=10)
+    # Deve retornar e1 (alpha) e e2 (gamma)
+    assert len(result) == 2
+    conteudos = {e.conteudo for e in result}
+    assert conteudos == {"conteudo1", "conteudo2"}
+
+    # Busca por tag inexistente
+    result = mem.buscar_por_tags(["epsilon"], limite=10)
+    assert len(result) == 0
+
+
+if __name__ == "__main__":
+    # Executa os testes e relata os resultados
+    tests = [
+        test_lru_insertion_order,
+        test_lru_access_updates_order,
+        test_lru_type_index,
+        test_buscar_por_tipo_order,
+        test_buscar_recentes_order,
+        test_buscar_por_tags,
+        test_lru_properties,
+    ]
+    passed = 0
+    failed = 0
+    for test in tests:
+        try:
+            test()
+            print(f"[PASS] {test.__name__}")
+            passed += 1
+        except Exception as e:
+            print(f"[FAIL] {test.__name__}: {e}")
+            failed += 1
+    print(f"\nTotal: {passed} passed, {failed} failed")
+    sys.exit(1 if failed > 0 else 0)
+from hypothesis import given, strategies as st, settings, note
+from hypothesis.strategies import text, integers, lists, tuples, sampled_from, none
+import string
+
+# Strategies for generating test data
+def random_string(min_size=0, max_size=10, alphabet=string.ascii_letters):
+    return text(alphabet=alphabet, min_size=min_size, max_size=max_size)
+
+def random_operation(capacidad):
+    """Generate a random operation to apply to MemoriaCurtoPrazo."""
+    # We'll generate a tuple indicating the operation and its arguments
+    op_type = sampled_from(['add', 'buscar_por_tipo', 'buscar_recentes', 'limpar'])
+    if op_type == 'add':
+        tipo = random_string(min_size=1, max_size=5)
+        contenido = random_string(min_size=0, max_size=20)
+        return ('add', (tipo, contenido))
+    elif op_type == 'buscar_por_tipo':
+        tipo = random_string(min_size=1, max_size=5)
+        limite = integers(min_value=0, max_value=10)
+        return ('buscar_por_tipo', (tipo, limite))
+    elif op_type == 'buscar_recentes':
+        limite = integers(min_value=0, max_value=10)
+        return ('buscar_recentes', (limite,))
+    else:  # 'limpar'
+        return ('limpar', ())
+
+# Helper to apply an operation to a MemoriaCurtoPrazo instance and return the result
+def apply_operation(mem, op):
+    op_name, args = op
+    if op_name == 'add':
+        tipo, contenido = args
+        return mem.adicionar(tipo, contenido)
+    elif op_name == 'buscar_por_tipo':
+        tipo, limite = args
+        return mem.buscar_por_tipo(tipo, limite)
+    elif op_name == 'buscar_recentes':
+        (limite,) = args
+        return mem.buscar_recentes(limite)
+    elif op_name == 'limpar':
+        mem.limpar()
+        return None
+    else:
+        raise ValueError(f"Unknown operation: {op_name}")
+
+# Invariants to check after each operation
+def check_invariants(mem):
+    # 1. Size does not exceed capacity
+    assert mem.tamanho <= mem.capacidad, f"Size {mem.tamanho} exceeds capacity {mem.capacidad}"
+    
+    # 2. Type index consistency: for each tipo, the list of IDs in _indice_por_tipo[tipo] 
+    #    should correspond to entries of that tipo in _entradas, in the same order.
+    for tipo, id_list in mem._indice_por_tipo.items():
+        # Filter to only those IDs that are still in _entradas
+        existing_ids = [eid for eid in id_list if eid in mem._entradas]
+        # The list in _indice_por_tipo should match the order of these IDs as they appear in _entradas
+        # Get the order of these IDs in _entradas (which is insertion order)
+        ids_in_order = [eid for eid in mem._entradas.keys() if mem._entradas[eid].tipo == tipo]
+        # The filtered id_list should be exactly ids_in_order
+        assert existing_ids == ids_in_order, f"Type index mismatch for tipo {tipo}: {existing_ids} vs {ids_in_order}"
+    
+    # 3. The total number of entries across all tipos in the index should equal the total number of entries
+    total_from_index = sum(len(id_list) for id_list in mem._indice_por_tipo.values())
+    # The index should only contain IDs that are currently in _entradas (we remove on eviction)
+    assert total_from_index == mem.tamanho, f"Index total {total_from_index} != actual size {mem.tamanho}"
+
+@given(
+    capacidad=integers(min_value=1, max_value=10),
+    operations=lists(random_operation(None), min_size=0, max_size=50)
+)
+@settings(max_examples=100, deadline=None)
+def test_lru_properties(capacidad, operations):
+    """Property-based test for LRU cache invariants."""
+    mem = MemoriaCurtoPrazo(capacidad=capacidad)
+    for op in operations:
+        apply_operation(mem, op)
+        check_invariants(mem)
+

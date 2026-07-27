@@ -1,0 +1,8 @@
+# ============================================================
+# NVIDIA ShadowForge Agent - Vision Dependencies (Optional)
+# ============================================================
+
+mss>=9.0.1
+opencv-python>=4.9.0
+pytesseract>=0.3.10
+ultralytics>=8.1.0

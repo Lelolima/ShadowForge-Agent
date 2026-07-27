@@ -1,0 +1,93 @@
+# ============================================================
+#  NVIDIA ShadowForge Agent - Docker Compose
+#  Stack completa com NVIDIA GPU, Riva, ChromaDB
+# ============================================================
+
+version: "3.9"
+
+services:
+  shadowforge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: shadowforge-agent
+    restart: unless-stopped
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./config:/opt/shadowforge/config
+      - ./data:/opt/shadowforge/data
+      - ./logs:/opt/shadowforge/logs
+    environment:
+      - NVIDIA_API_KEY=${NVIDIA_API_KEY}
+      - NVIDIA_ORG_ID=${NVIDIA_ORG_ID}
+      - SHADOWFORGE_MODE=stealth
+      - SHADOWFORGE_CONFIG=/opt/shadowforge/config/default.yaml
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    depends_on:
+      - riva
+      - chromadb
+    networks:
+      - shadowforge-net
+
+  riva:
+    image: nvcr.io/nvidia/riva/riva-speech:2.15.0-server
+    container_name: shadowforge-riva
+    restart: unless-stopped
+    ports:
+      - "50051:50051"
+    volumes:
+      - ./data/riva:/opt/riva/models
+    environment:
+      - RIVA_MODEL_LANGUAGE=pt-BR
+      - RIVA_ASR_ENABLE=true
+      - RIVA_TTS_ENABLE=true
+      - RIVA_NLP_ENABLE=false
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - shadowforge-net
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: shadowforge-chromadb
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/chromadb:/chroma/chroma
+    environment:
+      - ANONYMIZED_TELEMETRY=false
+    networks:
+      - shadowforge-net
+
+  metasploit-rpc:
+    image: metasploitframework/metasploit-framework:latest
+    container_name: shadowforge-msf
+    restart: unless-stopped
+    ports:
+      - "55553:55553"
+    environment:
+      - MSF_RPC_HOST=0.0.0.0
+      - MSF_RPC_PORT=55553
+      - MSF_RPC_PASSWORD=${MSF_RPC_SENHA:-shadowforge}
+    networks:
+      - shadowforge-net
+    profiles:
+      - offensive
+
+networks:
+  shadowforge-net:
+    driver: bridge
