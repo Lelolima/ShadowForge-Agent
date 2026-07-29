@@ -41,6 +41,10 @@ O **ShadowForge Agent** é um agente autônomo de hacking ético que combina a s
   <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/tool-recon.svg" width="100%" alt="Simulated Reconnaissance" />
 </p>
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/recon-shadowforge.gif" width="100%" alt="Reconhecimento em Tempo Real" />
+</p>
+
 Executa `nmap`, `shodan` e OSINT passivo de forma autônoma, com enriquecimento de dados via IA:
 
 ```bash
@@ -61,6 +65,10 @@ $ python main.py --mode stealth --target 10.0.0.0/24
   <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/tool-exploit.svg" width="100%" alt="Simulated Exploitation" />
 </p>
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/exploit-shadowforge.gif" width="100%" alt="Exploração em Tempo Real" />
+</p>
+
 O agente identifica vetores de ataque, testa POCs e gera relatórios — sempre com guardrails éticos bloqueando ações destrutivas:
 
 ```
@@ -69,6 +77,24 @@ O agente identifica vetores de ataque, testa POCs e gera relatórios — sempre 
 [GUARD] Blocked: DROP TABLE users; DELETE FROM sessions;
 [SAFE] Escalating to human authorization
 [REPORT] Generating PDF report with CVSS scores...
+```
+
+---
+
+## <span style="color:#fbbf24">&#62;</span> Demonstração em Tempo Real: Varredura (SCAN)
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/scan-shadowforge.gif" width="100%" alt="Varredura de Portas em Tempo Real" />
+</p>
+
+Executa varreduras de portas e descoberta de serviços de forma otimizada:
+
+```
+[SCAN] Iniciando varredura TCP SYN em 10.0.0.0/24...
+[SCAN] Host 192.168.1.10: Porta 22/ABERTA (OpenSSH)
+[SCAN] Host 192.168.1.10: Porta 80/ABERTA (nginx)
+[SCAN] Host 192.168.1.10: Porta 443/ABERTA (TLSv1.3)
+[SCAN] Descoberto 3 hosts ativos com 12 serviços expostos
 ```
 
 ---
