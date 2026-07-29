@@ -1,0 +1,670 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="500" viewBox="0 0 800 500"
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f2027;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#203a43;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="panelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e272e;stop-opacity:0.95"/>
+      <stop offset="100%" style="stop-color:#2d3436;stop-opacity:0.95"/>
+    </linearGradient>
+    <linearGradient id="skillGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#a29bfe;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#6c5ce7;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="validGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00b894;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#00cec9;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="warningGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#fdcb6e;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#e17055;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="errorGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#d63031;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#ff7675;stop-opacity:1"/>
+    </linearGradient>
+
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-color="rgba(0,0,0,0.5)"/>
+    </filter>
+
+    <marker id="versionMarker" markerWidth="8" markerHeight="6" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#636e72"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="500" fill="url(#bgGrad)"/>
+
+  <!-- Title Bar -->
+  <rect x="0" y="0" width="800" height="50" fill="#2d3436" opacity="0.9" filter="url(#dropShadow)"/>
+  <text x="400" y="33" text-anchor="middle"
+        font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+        font-size="18" fill="#fff" font-weight="600">
+    ShadowForge-Agent-main • Skill Ecosystem Monitor
+  </text>
+  <text x="750" y="33" text-anchor="end"
+        font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+        font-size="12" fill="#b2bec3">
+    MONITORING • 47 skills • 3.2k daily loads • 99.8% success rate
+  </text>
+
+  <!-- LEFT PANEL: Skill Version Timeline -->
+  <g id="timelinePanel" transform="translate(30,80)">
+    <rect x="0" y="0" width="300" height="380" rx="8"
+          fill="url(#panelGrad)" filter="url(#innerShadow)"/>
+    <text x="150" y="25" text-anchor="middle"
+          font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+          font-size="14" fill="#fff" font-weight="500">
+      Skill Version Timeline (Last 6h)
+    </text>
+
+    <!-- Time Axis -->
+    <line x1="20" y1="350" x2="280" y2="350"
+          stroke="#636e72" stroke-width="2"/>
+    <text x="150" y="370" text-anchor="middle"
+          font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+          font-size="10" fill="#dfe6e9">Time →</text>
+
+    <!-- Skill Tracks -->
+    <g id="skillTracks" transform="translate(20,50)">
+      <!-- Auth Skill -->
+      <g transform="translate(0,0)">
+        <text x="-80" y="20" text-anchor="end"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="11" fill="#dfe6e9">auth.js</text>
+        <line x1="0" y1="30" x2="260" y2="30"
+              stroke="#2d3436" stroke-width="1"/>
+
+        <rect x="20" y="20" width="15" height="20" rx="3"
+              fill="#a29bfe" filter="url(#glow)"/>
+        <text x="27" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v1.2.0</text>
+
+        <rect x="80" y="20" width="15" height="20" rx="3"
+              fill="#a29bfe" filter="url(#glow)"/>
+        <text x="87" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v1.2.1</text>
+
+        <rect x="140" y="20" width="15" height="20" rx="3"
+              fill="#a29bfe" filter="url(#glow)"/>
+        <text x="147" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v1.3.0</text>
+
+        <rect x="200" y="20" width="15" height="20" rx="3"
+              fill="#00b894" filter="url(#glow)"/>
+        <text x="207" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v1.3.1</text>
+
+        <!-- Active version indicator -->
+        <rect x="200" y="45" width="15" height="10" rx="2"
+              fill="#fff" opacity="0.3"/>
+        <animateTransform attributeName="transform" type="translate"
+                          from="200 45" to="260 45"
+                          dur="6s" repeatCount="indefinite"/>
+      </g>
+
+      <!-- Payment Skill -->
+      <g transform="translate(0,80)">
+        <text x="-80" y="20" text-anchor="end"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="11" fill="#dfe6e9">payment.js</text>
+        <line x1="0" y1="30" x2="260" y2="30"
+              stroke="#2d3436" stroke-width="1"/>
+
+        <rect x="40" y="20" width="15" height="20" rx="3"
+              fill="#a29bfe" filter="url(#glow)"/>
+        <text x="47" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v2.0.0</text>
+
+        <rect x="100" y="20" width="15" height="20" rx="3"
+              fill="#a29bfe" filter="url(#glow)"/>
+        <text x="107" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v2.0.1</text>
+
+        <rect x="160" y="20" width="15" height="20" rx="3"
+              fill="#fdcb6e" filter="url(#glow)"/>
+        <text x="167" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v2.1.0</text>
+
+        <rect x="220" y="20" width="15" height="20" rx="3"
+              fill="#00b894" filter="url(#glow)"/>
+        <text x="227" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v2.1.1</text>
+
+        <!-- Active version indicator -->
+        <rect x="220" y="45" width="15" height="10" rx="2"
+              fill="#fff" opacity="0.3"/>
+        <animateTransform attributeName="transform" type="translate"
+                          from="220 45" to="260 45"
+                          dur="5s" repeatCount="indefinite"/>
+      </g>
+
+      <!-- Notification Skill -->
+      <g transform="translate(0,160)">
+        <text x="-80" y="20" text-anchor="end"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="11" fill="#dfe6e9">notification.js</text>
+        <line x1="0" y1="30" x2="260" y2="30"
+              stroke="#2d3436" stroke-width="1"/>
+
+        <rect x="60" y="20" width="15" height="20" rx="3"
+              fill="#a29bfe" filter="url(#glow)"/>
+        <text x="67" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v1.0.0</text>
+
+        <rect x="120" y="20" width="15" height="20" rx="3"
+              fill="#a29bfe" filter="url(#glow)"/>
+        <text x="127" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v1.0.1</text>
+
+        <rect x="180" y="20" width="15" height="20" rx="3"
+              fill="#d63031" filter="url(#glow)"/>
+        <text x="187" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v1.1.0</text>
+
+        <rect x="240" y="20" width="15" height="20" rx="3"
+              fill="#00b894" filter="url(#glow)"/>
+        <text x="247" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v1.1.1</text>
+
+        <!-- Active version indicator -->
+        <rect x="240" y="45" width="15" height="10" rx="2"
+              fill="#fff" opacity="0.3"/>
+        <animateTransform attributeName="transform" type="translate"
+                          from="240 45" to="260 45"
+                          dur="4s" repeatCount="indefinite"/>
+      </g>
+
+      <!-- User Service Skill -->
+      <g transform="translate(0,240)">
+        <text x="-80" y="20" text-anchor="end"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="11" fill="#dfe6e9">user-service.js</text>
+        <line x1="0" y1="30" x2="260" y2="30"
+              stroke="#2d3436" stroke-width="1"/>
+
+        <rect x="30" y="20" width="15" height="20" rx="3"
+              fill="#a29bfe" filter="url(#glow)"/>
+        <text x="37" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v3.0.0</text>
+
+        <rect x="90" y="20" width="15" height="20" rx="3"
+              fill="#a29bfe" filter="url(#glow)"/>
+        <text x="97" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v3.0.1</text>
+
+        <rect x="150" y="20" width="15" height="20" rx="3"
+              fill="#fdcb6e" filter="url(#glow)"/>
+        <text x="157" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v3.1.0</text>
+
+        <rect x="210" y="20" width="15" height="20" rx="3"
+              fill="#00b894" filter="url(#glow)"/>
+        <text x="217" y="35" text-anchor="middle"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#fff">v3.1.1</text>
+
+        <!-- Active version indicator -->
+        <rect x="210" y="45" width="15" height="10" rx="2"
+              fill="#fff" opacity="0.3"/>
+        <animateTransform attributeName="transform" type="translate"
+                          from="210 45" to="260 45"
+                          dur="3.5s" repeatCount="indefinite"/>
+      </g>
+    </g>
+
+    <!-- Version Legend -->
+    <g transform="translate(20,320)">
+      <text x="0" y="0"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#dfe6e9">Version Status:</text>
+      <rect x="100" y="-10" width="15" height="15" rx="3"
+            fill="#a29bfe" filter="url(#glow)"/>
+      <text x="120" y="2"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="9" fill="#fff">Cached</text>
+
+      <rect x="100" y="10" width="15" height="15" rx="3"
+            fill="#00b894" filter="url(#glow)"/>
+      <text x="120" y="22"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="9" fill="#fff">Active</text>
+
+      <rect x="100" y="20" width="15" height="15" rx="3"
+            fill="#fdcb6e" filter="url(#glow)"/>
+      <text x="120" y="32"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="9" fill="#fff">Updating</text>
+
+      <rect x="100" y="30" width="15" height="15" rx="3"
+            fill="#d63031" filter="url(#glow)"/>
+      <text x="120" y="42"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="9" fill="#fff">Failed</text>
+    </g>
+  </g>
+
+  <!-- CENTER PANEL: Skill Health Dashboard -->
+  <g id="healthPanel" transform="translate(350,80)">
+    <rect x="0" y="0" width="300" height="380" rx="8"
+          fill="url(#panelGrad)" filter="url(#innerShadow)"/>
+    <text x="150" y="25" text-anchor="middle"
+          font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+          font-size="14" fill="#fff" font-weight="500">
+      Skill Health Overview
+    </text>
+
+    <!-- Overall Health Gauge -->
+    <g transform="translate(20,50)">
+      <text x="0" y="0"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#dfe6e9">Overall Health:</text>
+      <text x="180" y="0"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#fff" font-weight="600">98.7%</text>
+
+      <circle cx="90" cy="20" r="25"
+              fill="none" stroke="#2d3436" stroke-width="3"/>
+      <circle cx="90" cy="20" r="25"
+              fill="none" stroke="url(#validGrad)" stroke-width="3"
+              stroke-dasharray="157" stroke-dashoffset="157">
+        <animate attributeName="stroke-dashoffset"
+                 from="157" to="3" dur="2s" repeatCount="1"
+                 fill="freeze"/>
+      </circle>
+      <text x="90" y="25" text-anchor="middle"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="16" fill="#fff" font-weight="600">98</text>
+      <text x="90" y="45" text-anchor="middle"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#b2bec3">healthy</text>
+    </g>
+
+    <!-- Load Statistics -->
+    <g transform="translate(20,120)">
+      <text x="0" y="0"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#dfe6e9">Load Statistics:</text>
+      <text x="0" y="20"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#dfe6e9">• Avg. Load Time: 184ms</text>
+      <text x="0" y="35"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#dfe6e9">• Peak Load Time: 420ms</text>
+      <text x="0" y="50"
+            font-family="'Segoe Word:font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#dfe6e9">• Loads/min: 47.2</text>
+      <text x="0" y="65"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#dfe6e9">• Failed Loads: 0.3%</text>
+
+      <!-- Mini sparkline for load time -->
+      <path d="M 150,10 Q 170,0 190,10 T 230,20 T 270,10 T 310,20"
+            fill="none" stroke="url(#warningGrad)" stroke-width="1.5"
+            opacity="0.7"/>
+      <text x="320" y="15"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="9" fill="#fff">Load Trend</text>
+    </g>
+
+    <!-- Top Skills by Usage -->
+    <g transform="translate(20,200)">
+      <text x="0" y="0"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#dfe6e9">Top Skills by Usage:</text>
+
+      <!-- Skill 1 -->
+      <g transform="translate(0,30)">
+        <rect x="0" y="0" width="260" height="25" rx="5"
+              fill="#2d3436" opacity="0.7"/>
+        <circle cx="10" cy="12" r="8"
+                fill="#06d6a0" filter="url(#glow)"/>
+        <text x="30" y="18"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="11" fill="#fff" font-weight="600">auth.js</text>
+        <text x="150" y="18"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="11" fill="#fff" font-weight="600">1.2k loads/h</text>
+        <text x="240" y="18" text-anchor="end"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="10" fill="#b2bec3">99.9%</text>
+      </g>
+
+      <!-- Skill 2 -->
+      <g transform="translate(0,60)">
+        <rect x="0" y="0" width="260" height="25" rx="5"
+              fill="#2d3436" opacity="0.7"/>
+        <circle cx="10" cy="12" r="8"
+                fill="#fdcb6e" filter="url(#glow)"/>
+        <text x="30" y="18"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="11" fill="#fff" font-weight="600">payment.js</text>
+        <text x="150" y="18"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="11" fill="#fff" font-weight="600">980 loads/h</text>
+        <text x="240" y="18" text-anchor="end"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="10" fill="#b2bec3">99.7%</text>
+      </g>
+
+      <!-- Skill 3 -->
+      <g transform="translate(0,90)">
+        <rect x="0" y="0" width="260" height="25" rx="5"
+              fill="#2d3436" opacity="0.7"/>
+        <circle cx="10" cy="12" r="8"
+                fill="#118ab2" filter="url(#glow)"/>
+        <text x="30" y="18"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="11" fill="#fff" font-weight="600">notification.js</text>
+        <text x="150" y="18"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="11" fill="#fff" font-weight="600">760 loads/h</text>
+        <text x="240" y="18" text-anchor="end"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="10" fill="#b2bec3">99.5%</text>
+      </g>
+
+      <!-- Skill 4 -->
+      <g transform="translate(0,120)">
+        <rect x="0" y="0" width="260" height="25" rx="5"
+              fill="#2d3436" opacity="0.7"/>
+        <circle cx="10" cy="12" r="8"
+                fill="#ff9f1c" filter="url(#glow)"/>
+        <text x="30" y="18"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="11" fill="#fff" font-weight="600">user-service.js</text>
+        <text x="150" y="18"
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="11" fill="#fff" font-weight="600">650 loads/h</text>
+        <text x="240" y="18" text-anchor="end
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="10" fill="#b2bec3">99.2%</text>
+      </g>
+    </g>
+
+    <!-- Recent Activity Feed -->
+    <g transform="translate(20,280)">
+      <text x="0" y="0"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#dfe6e9">Recent Activity:</text>
+
+      <!-- Activity 1 -->
+      <g transform="translate(0,20)">
+        <rect x="0" y="0" width="260" height="20" rx="5
+              fill="#2d3436" opacity="0.5"/>
+        <circle cx="10" cy="10" r="4" fill="#00b894"/>
+        <text x="20" y="15
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="10" fill="#fff">Loaded: payment.v2.1.1</text>
+        <text x="200" y="15" text-anchor="end
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#b2bec3">0.3s ago</text>
+
+        <circle cx="12" cy="10" r="6" fill="#00b894" opacity="0>
+          <animate attributeName="r" values="4;8;4" dur="1.5s"
+                   repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.3;0.7;0.3"
+                   dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+
+      <!-- Activity 2 -->
+      <g transform="translate(0,45)">
+        <rect x="0" y="0" width="260" height="20" rx="5
+              fill="#2d3436" opacity="0.5"/>
+        <circle cx="10" cy="10" r="4" fill="#fdcb6e"/>
+        <text x="20" y="15
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="10" fill="#fff">Updating: auth.v1.3.1</text>
+        <text x="200" y="15" text-anchor="end
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#b2bec3">1.1s ago</text>
+
+        <circle cx="12" cy="10" r="6" fill="#fdcb6e" opacity="0>
+          <animate attributeName="r" values="4;8;4" dur="1.5s"
+                   repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.3;0.7;0.3"
+                   dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+
+      <!-- Activity 3 -->
+      <g transform="translate(0,70)">
+        <rect x="0" y="0" width="260" height="20" rx="5
+              fill="#2d3436" opacity="0.5"/>
+        <circle cx="10" cy="10" r="4" fill="#d63031"/>
+        <text x="20" y="15
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="10" fill="#fff">Failed: legacy-service.v1.0.0</text>
+        <text x="200" y="15" text-anchor="end
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#b2bec3">2.4s ago</text>
+
+        <circle cx="12" cy="10" r="6" fill="#d63031" opacity="0>
+          <animate attributeName="r" values="4;8;4" dur="1.5s"
+                   repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.3;0.7;0.3
+                   dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+
+      <!-- Activity 4 -->
+      <g transform="translate(0,95)">
+        <rect x="0" y="0" width="260" height="20" rx="5
+              fill="#2d3436" opacity="0.5"/>
+        <circle cx="10" cy="10" r="4" fill="#00b894"/>
+        <text x="20" y="15
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="10" fill="#fff">Rolling back: user-service.v3.1.0</text>
+        <text x="200" y="15" text-anchor="end
+              font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+              font-size="9" fill="#b2bec3">3.2s ago</text>
+
+        <circle cx="12" cy="10" r="6" fill="#00b894" opacity="0>
+          <animate attributeName="r" values=4;8;4   dur="1.5s"
+                   repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.3;0.7;0.3
+                   dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+    </g>
+  </g>
+
+  <!-- RIGHT PANEL: System Alerts & Metrics -->
+  <g id="alertsPanel" transform="translate(670,80)">
+    <rect x="0" y="0" width="100" height="380" rx="8
+          fill="url(#panelGrad)" filter="url(#innerShadow)"/>
+    <text x="50" y="25" text-anchor="middle
+          font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+          font-size="12" fill="#fff" font-weight="500">
+      Alerts
+    </text>
+
+    <!-- Alert Indicators -->
+    <g transform="translate(10,40)">
+      <circle cx="15" cy="15" r="8
+              fill="#ff6b6b" filter="url(#glow)"/>
+      <text x="30" y="20
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="11" fill="#fff">3</text>
+      <text x="50" y="20
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#dfe6e9">Critical</text>
+    </g>
+
+    <g transform="translate(10,80)">
+      <circle cx="15" cy="15" r="8
+              fill="#ffd166" filter="url(#glow)"/>
+      <text x="30" y="20
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="11" fill="#fff">7</text>
+      <text x="50" y="20
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#dfe6e9">Warning</text>
+    </g>
+
+    <g transform="translate(10,120)">
+      <circle cx="15" cy="15" r="8
+              fill="#06d6a0" filter="url(#glow)"/>
+      <text x="30" y="20
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="11" fill="#fff">0</text>
+      <text x="50" y="20
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#dfe6e9">Info</text>
+    </g>
+
+    <!-- System Metrics -->
+    <g transform="translate(10,180)">
+      <text x="0" y="0
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="11" fill="#dfe6e9">System:</text>
+      <text x="0" y="15
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#dfe6e9">• CPU: 42%</text>
+      <text x="0" y="30
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#dfe6e9">• Memory: 2.1/4.0 GB</text>
+      <text x="0" y="45
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#dfe6e9">• Disk: 65%</text>
+      <text x="0" y="60
+            font-family="'Segoe Word:font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#dfe6e9">• Uptime: 14d 3h</text>
+    </g>
+
+    <!-- Health Trend Sparkline -->
+    <g transform="translate(10,250)">
+      <text x="0" y="0
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="11" fill="#dfe6e9">Health Trend:</text>
+      <path d="M 0,20 Q 10,10 20,20 T 40,10 T 60,20 T 80,10 T 100,20"
+            fill="none" stroke="url(#validGrad)" stroke-width="2"
+            opacity="0.8"/>
+      <circle cx="0" cy="20" r="2" fill="#06d6a0"/>
+      <circle cx="100" cy="20" r="2" fill="#06d6a0"/>
+
+      <circle cx="50" cy="15" r="3" fill="#00b894" opacity="0.7>
+        <animate attributeName="cy" values="15;10;15" dur="2s"
+                 repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- Last Updated -->
+    <g transform="translate(10,350)">
+      <text x="0" y="0
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#b2bec3">Last updated:</text>
+      <text x="0" y="12
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#fff">Just now</text>
+
+      <circle cx="80" y="6" r="3" fill="#00b894" opacity="0>
+        <animate attributeName="opacity" values="0;1;0"
+                 dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+  </g>
+
+  <!-- BOTTOM PANEL: Resource Utilization -->
+  <g id="resourcesPanel" transform="translate(30,480)">
+    <rect x="0" y="0" width="740" height="20" rx="5
+          fill="url(#panelGrad)" filter="url(#innerShadow)"/>
+    <text x="370" y="13" text-anchor="middle
+          font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+          font-size="11" fill="#fff" font-weight="500">
+      Resource Utilization
+    </text>
+
+    <!-- CPU -->
+    <g transform="translate(30,0)">
+      <text x="0" y="10
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="9" fill="#dfe6e9">CPU:</text>
+      <rect x="40" y="0" width="100" height="10" rx="3
+            fill="#2d3436"/>
+      <rect x="42" y="2" width="58" height="6" rx="2
+            fill="url(#validGrad)"/>
+      <text x="150" y="10
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="9" fill="#fff">42%</text>
+    </g>
+
+    <!-- Memory -->
+    <g transform="translate(180,0)">
+      <text x="0" y="10
+            font-family="'Segoe Word:font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="9" fill="#dfe6e9">Memory:</text>
+      <rect x="40" y="0" width="100" height="10" rx="3
+            fill="#2d3436"/>
+      <rect x="42" y="2" width="43" height="6" rx="2
+            fill="url(#warningGrad)"/>
+      <text x="150" y="10
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="9" fill="#fff">2.1/4.0 GB</text>
+    </g>
+
+    <!-- Disk I/O -->
+    <g transform="translate(330,0)">
+      <text x="0" y="10
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="9" fill="#dfe6e9">Disk I/O:</text>
+      <text x="80" y="10
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="9" fill="#fff">12.4 MB/s</text>
+    </g>
+
+    <!-- Network -->
+    <g transform="translate(480,0)">
+      <text x="0" y="10
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="9" fill="#dfe6e9">Network:</text>
+      <text x="80" y="10
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="9" fill="#fff">8.7 MB/s ↓ • 6.2 MB/s ↑</text>
+    </g>
+
+    <!-- Error Rate -->
+    <g transform="translate(630,0)">
+      <text x="0" y="10
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="9" fill="#dfe6e9">Errors:</text>
+      <text x="50" y="10
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="9" fill="#fff">0.12%</text>
+    </g>
+  </g>
+
+  <!-- Subtle Background Animation -->
+  <rect x="0" y="50" width="800" height="450" fill="none">
+    <animate attributeName="opacity" values="0;0.015;0"
+             dur="10s" repeatCount="indefinite"/>
+  </rect>
+</svg>

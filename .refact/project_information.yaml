@@ -1,0 +1,32 @@
+schema_version: 1
+enabled: true
+defaults:
+  max_chars_per_item: 8000
+  max_items_per_section: 50
+sections:
+  system_info:
+    enabled: true
+  environment_instructions:
+    enabled: true
+    max_chars: 6000
+  detected_environments:
+    enabled: true
+    max_items: 50
+  git_info:
+    enabled: true
+    max_chars: 6000
+  project_tree:
+    enabled: true
+    max_chars: 16000
+    max_depth: 4
+  instruction_files:
+    enabled: true
+    max_chars_per_item: 8000
+  project_configs:
+    enabled: true
+    max_items: 30
+    max_chars_per_item: 4000
+  memories:
+    enabled: true
+    max_items: 30
+    max_chars_per_item: 2000

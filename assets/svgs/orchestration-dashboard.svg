@@ -1,0 +1,379 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="500" viewBox="0 0 800 500"
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f2027;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#203a43;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="panelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e272e;stop-opacity:0.95"/>
+      <stop offset="100%" style="stop-color:#2d3436;stop-opacity:0.95"/>
+    </linearGradient>
+    <linearGradient id="metricGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00b894;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#00cec9;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="warningGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#fdcb6e;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#e17055;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="errorGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#d63031;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#ff7675;stop-opacity:1"/>
+    </linearGradient>
+
+    <!-- Shadows -->
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="rgba(0,0,0,0.6)"/>
+    </filter>
+    <filter id="innerShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-color="rgba(0,0,0,0.3)" flood-opacity="0.5"/>
+    </filter>
+
+    <!-- Arrow marker -->
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="4" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#636e72"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="500" fill="url(#bgGrad)"/>
+
+  <!-- Title Bar -->
+  <rect x="0" y="0" width="800" height="50" fill="#2d3436" opacity="0.9" filter="url(#dropShadow)"/>
+  <text x="400" y="33" text-anchor="middle"
+        font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+        font-size="18" fill="#fff" font-weight="600">
+    ShadowForge-Agent-main • Orchestration Command Center
+  </text>
+  <text x="750" y="33" text-anchor="end"
+        font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+        font-size="12" fill="#b2bec3">
+    LIVE • Updated 2s ago
+  </text>
+
+  <!-- LEFT PANEL: Agent Topology -->
+  <g id="topologyPanel" transform="translate(20,70)">
+    <rect x="0" y="0" width="230" height="180" rx="8"
+          fill="url(#panelGrad)" filter="url(#innerShadow)"/>
+    <text x="115" y="25" text-anchor="middle"
+          font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+          font-size="14" fill="#fff" font-weight="500">
+      Active Agent Topology
+    </text>
+
+    <!-- Agent Nodes -->
+    <g id="agentNodes">
+      <!-- Orchestrator -->
+      <circle cx="115" cy="60" r="20" fill="#4eCDC4" filter="url(#dropShadow)"/>
+      <text x="115" y="65" text-anchor="middle"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#fff" font-weight="600">ORCH</text>
+
+      <!-- Workers -->
+      <circle cx="50" cy="30" r="15" fill="#a29bfe" filter="url(#dropShadow)"/>
+      <text x="50" y="35" text-anchor="middle"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#fff">WK-1</text>
+
+      <circle cx="180" cy="30" r="15" fill="#a29bfe" filter="url(#dropShadow)"/>
+      <text x="180" y="35" text-anchor="middle"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#fff">WK-2</text>
+
+      <circle cx="50" cy="90" r="15" fill="#a29bfe" filter="url(#dropShadow)"/>
+      <text x="50" y="95" text-anchor="middle"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#fff">WK-3</text>
+
+      <circle cx="180" cy="90" r="15" fill="#a29bfe" filter="url(#dropShadow)"/>
+      <text x="180" y="95" text-anchor="middle"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#fff">WK-4</text>
+
+      <!-- Connections -->
+      <path d="M 115,80 Q 50,110 50,90" stroke="#636e72" stroke-width="1.5"
+            opacity="0.4" marker-end="url(#arrow)"/>
+      <path d="M 115,80 Q 180,110 180,90" stroke="#636e72" stroke-width="1.5"
+            opacity="0.4" marker-end="url(#arrow)"/>
+      <path d="M 115,40 Q 50,10  50,30" stroke="#636e72" stroke-width="1.5"
+            opacity="0.4" marker-end="url(#arrow)"/>
+      <path d="M 115,40 Q 180,10  180,30" stroke="#636e72" stroke-width="1.5"
+            opacity="0.4" marker-end="url(#arrow)"/>
+
+      <!-- Animated data packets -->
+      <circle cx="115" cy="80" r="4" fill="#00b894" opacity="0">
+        <animateMotion dur="3s" repeatCount="indefinite">
+          <mpath xlink:href="#path1"/>
+        </animateMotion>
+      </circle>
+      <circle cx="115" cy="80" r="4" fill="#00b894" opacity="0">
+        <animateMotion dur="3s" repeatCount="indefinite" begin="0.5s">
+          <mpath xlink:href="#path2"/>
+        </animateMotion>
+      </circle>
+      <circle cx="115" cy="60" r="4" fill="#00b894" opacity="0">
+        <animateMotion dur="3s" repeatCount="indefinite" begin="1s">
+          <mpath xlink:href="#path3"/>
+        </animateMotion>
+      </circle>
+      <circle cx="115" cy="60" r="4" fill="#00b894" opacity="0">
+        <animateMotion dur="3s" repeatCount="indefinite" begin="1.5s">
+          <mpath xlink:href="#path4"/>
+        </animateMotion>
+      </circle>
+
+      <!-- Define paths for animation -->
+      <path id="path1" d="M 115,80 Q 50,110 50,90" fill="none"/>
+      <path id="path2" d="M 115,80 Q 180,110 180,90" fill="none"/>
+      <path id="path3" d="M 115,40 Q 50,10  50,30" fill="none"/>
+      <path id="path4" d="M 115,40 Q 180,10  180,30" fill="none"/>
+    </g>
+
+    <!-- Status Indicators -->
+    <g transform="translate(0,200)">
+      <text x="0" y="20"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#dfe6e9">System Health:</text>
+      <rect x="100" y="10" width="80" height="20" rx="10" fill="#2d3436"/>
+      <rect x="102" y="12" width="76" height="16" rx="8" fill="#00b894"/>
+      <text x="140" y="25"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#fff">98.7%</text>
+
+      <text x="0" y="50"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#dfe6e9">Active Tasks:</text>
+      <text x="100" y="50"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#fff" font-weight="600">42</text>
+
+      <text x="0" y="80"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#dfe6e9">Queue Depth:</text>
+      <rect x="100" y="70" width="80" height="15" rx="5" fill="#2d3436"/>
+      <rect x="102" y="72" width="60" height="11" rx="3" fill="#fdcb6e"/>
+      <text x="140" y="83"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#fff">18</text>
+    </g>
+  </g>
+
+  <!-- CENTER PANEL: Real-time Metrics -->
+  <g id="metricsPanel" transform="translate(270,70)">
+    <rect x="0" y="0" width="320" height="180" rx="8"
+          fill="url(#panelGrad)" filter="url(#innerShadow)"/>
+    <text x="160" y="25" text-anchor="middle"
+          font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+          font-size="14" fill="#fff" font-weight="500">
+      Performance Metrics (Last 5min)
+    </text>
+
+    <!-- Latency Sparkline -->
+    <g transform="translate(20,50)">
+      <text x="0" y="-10"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#dfe6e9">Latency (p95):</text>
+      <text x="120" y="-10"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#fff" font-weight="600">23ms</text>
+      <path d="M 0,80 Q 20,60 40,70 T 80,50 T 120,60 T 160,40 T 200,50 T 240,60 T 280,50 T 320,40"
+            fill="none" stroke="url(#metricGrad)" stroke-width="2" opacity="0.8"/>
+      <circle cx="0" cy="80" r="3" fill="#00b894"/>
+      <circle cx="320" cy="40" r="3" fill="#00b894"/>
+      <circle cx="160" cy="50" r="6" fill="#00b894" opacity="0.7">
+        <animate attributeName="cy" values="50;30;50" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="r" values="6;10;6" dur="2s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- Throughput Gauge -->
+    <g transform="translate(20,110)">
+      <text x="0" y="-10"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#dfe6e9">Throughput:</text>
+      <text x="120" y="-10"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#fff" font-weight="600">87.3 tasks/min</text>
+      <circle cx="60" cy="30" r="25" fill="none" stroke="#2d3436" stroke-width="4"/>
+      <circle cx="60" cy="30" r="25" fill="none"
+              stroke="url(#metricGrad)" stroke-width="4"
+              stroke-dasharray="157" stroke-dashoffset="157">
+        <animate attributeName="stroke-dashoffset"
+                 from="157" to="31" dur="1.5s" repeatCount="1" fill="freeze"/>
+      </circle>
+      <text x="60" y="35" text-anchor="middle"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="16" fill="#fff" font-weight="600">87</text>
+      <text x="60" y="50" text-anchor="middle"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#b2bec3">tasks/min</text>
+    </g>
+
+    <!-- Error Rate -->
+    <g transform="translate(180,110)">
+      <text x="0" y="-10"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#dfe6e9">Error Rate:</text>
+      <text x="120" y="-10"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#fff" font-weight="600">0.12%</text>
+      <rect x="20" y="10" width="80" height="20" rx="10" fill="#2d3436"/>
+      <rect x="22" y="12" width="16" height="16" rx="8" fill="#00b894"/>
+      <text x="60" y="25"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#fff">99.88%</text>
+    </g>
+  </g>
+
+  <!-- RIGHT PANEL: Alerts & Events -->
+  <g id="alertsPanel" transform="translate(610,70)">
+    <rect x="0" y="0" width="170" height="180" rx="8"
+          fill="url(#panelGrad)" filter="url(#innerShadow)"/>
+    <text x="85" y="25" text-anchor="middle"
+          font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+          font-size="14" fill="#fff" font-weight="500">
+      Recent Events
+    </text>
+    <g transform="translate(10,40)">
+      <!-- Event 1 -->
+      <rect x="0" y="0" width="150" height="25" rx="5"
+            fill="#2d3436" opacity="0.7"/>
+      <circle cx="5" cy="12" r="6" fill="#00b894"/>
+      <text x="20" y="18"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="11" fill="#fff">Skill loaded: payment.v2.1.0</text>
+      <text x="130" y="18" text-anchor="end"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#b2bec3">0.8s ago</text>
+
+      <!-- Event 2 -->
+      <rect x="0" y="30" width="150" height="25" rx="5"
+            fill="#2d3436" opacity="0.7"/>
+      <circle cx="5" cy="42" r="6" fill="#fdcb6e"/>
+      <text x="20" y="48"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="11" fill="#fff">High latency detected</text>
+      <text x="130" y="48" text-anchor="end"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#b2bec3">1.2s ago</text>
+
+      <!-- Event 3 -->
+      <rect x="0" y="60" width="150" height="25" rx="5"
+            fill="#2d3436" opacity="0.7"/>
+      <circle cx="5" cy="72" r="6" fill="#d63031"/>
+      <text x="20" y="78"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="11" fill="#fff">Plugin quarantined: suspicious.js</text>
+      <text x="130" y="78" text-anchor="end"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#b2bec3">2.1s ago</text>
+
+      <!-- Event 4 -->
+      <rect x="0" y="90" width="150" height="25" rx="5"
+            fill="#2d3436" opacity="0.7"/>
+      <circle cx="5" cy="102" r="6" fill="#00b894"/>
+      <text x="20" y="108"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="11" fill="#fff">Deadlock avoided: flow-42</text>
+      <text x="130" y="108" text-anchor="end"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="10" fill="#b2bec3">3.5s ago</text>
+
+      <!-- Animated pulse for new events -->
+      <circle cx="12" cy="12" r="10" fill="#00b894" opacity="0">
+        <animate attributeName="r" values="6;12;6" dur="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.3;0.7;0.3" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+  </g>
+
+  <!-- BOTTOM PANEL: System Resources -->
+  <g id="resourcesPanel" transform="translate(20,270)">
+    <rect x="0" y="0" width="760" height="180" rx="8"
+          fill="url(#panelGrad)" filter="url(#innerShadow)"/>
+    <text x="380" y="25" text-anchor="middle"
+          font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+          font-size="14" fill="#fff" font-weight="500">
+      Resource Utilization
+    </text>
+
+    <!-- CPU -->
+    <g transform="translate(30,50)">
+      <text x="0" y="0"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#dfe6e9">CPU:</text>
+      <rect x="50" y="-10" width="200" height="20" rx="10" fill="#2d3436"/>
+      <rect x="52" y="-8" width="156" height="16" rx="8"
+            fill="url(#metricGrad)"/>
+      <text x="160" y="0"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#fff">68%</text>
+      <rect x="52" y="-8" width="0" height="16" rx="8" fill="#fff" opacity="0.3">
+        <animate attributeName="width" from="0" to="156" dur="3s"
+                 repeatCount="indefinite"/>
+      </rect>
+    </g>
+
+    <!-- Memory -->
+    <g transform="translate(30,90)">
+      <text x="0" y="0"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#dfe6e9">Memory:</text>
+      <rect x="50" y="-10" width="200" height="20" rx="10" fill="#2d3436"/>
+      <rect x="52" y="-8" width="120" height="16" rx="8"
+            fill="url(#warningGrad)"/>
+      <text x="160" y="0"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#fff">4.2/6.0 GB</text>
+      <rect x="52" y="-8" width="0" height="16" rx="8" fill="#fff" opacity="0.3">
+        <animate attributeName="width" from="0" to="120" dur="2.5s"
+                 repeatCount="indefinite"/>
+      </rect>
+    </g>
+
+    <!-- Network I/O -->
+    <g transform="translate(30,130)">
+      <text x="0" y="0"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#dfe6e9">Network:</text>
+      <text x="160" y="0"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#fff">12.4 MB/s ↓ • 8.7 MB/s ↑</text>
+      <path d="M 50,0 Q 100,-10 150,0 T 250,0"
+            fill="none" stroke="#00b894" stroke-width="2" opacity="0.6">
+        <animate attributeName="d"
+                 values="M 50,0 Q 100,-10 150,0 T 250,0;
+                         M 50,0 Q 100,10 150,0 T 250,0;
+                         M 50,0 Q 100,-10 150,0 T 250,0"
+                 dur="2s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- Disk Usage -->
+    <g transform="translate(300,50)">
+      <text x="0" y="0"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#dfe6e9">Disk:</text>
+      <rect x="50" y="-10" width="150" height="20" rx="10" fill="#2d3436"/>
+      <rect x="52" y="-8" width="90" height="16" rx="8"
+            fill="url(#errorGrad)"/>
+      <text x="130" y="0"
+            font-family="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            font-size="12" fill="#fff">78%</text>
+      <rect x="52" y="-8" width="0" height="16" rx="8" fill="#fff" opacity="0.3">
+        <animate attributeName="width" from="0" to="90" dur="4s"
+                 repeatCount="indefinite"/>
+      </rect>
+    </g>
+  </g>
+
+  <!-- Subtle background animation -->
+  <rect x="0" y="50" width="800" height="450" fill="none">
+    <animate attributeName="opacity" values="0;0.02;0"
+             dur="8s" repeatCount="indefinite"/>
+  </rect>
+</svg>
