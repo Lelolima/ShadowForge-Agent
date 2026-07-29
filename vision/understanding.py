@@ -214,7 +214,8 @@ class ScreenUnderstanding:
                     ips = re.findall(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", texto)
                     if ips:
                         resultado["relevante"] = [{"tipo": "ip", "valor": ip} for ip in ips[:5]]
-        except Exception:
+        except Exception as e:
+            logger.debug("OCR fallback failed: %s", e)
             pass
 
         return resultado

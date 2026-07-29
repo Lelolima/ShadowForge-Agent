@@ -493,7 +493,7 @@ class ShadowForgeAgent(ODDATemplate):
                     "tipo": "processos",
                     "dados": processos,
                 })
-            except Exception:
+            except Exception as e:
                 pass
 
         return observacoes
@@ -517,14 +517,14 @@ class ShadowForgeAgent(ODDATemplate):
                     alvo=self.estado.alvo_principal or "",
                 )
                 orientacao["tecnicas_sugeridas"] = contexto_tatico
-            except Exception:
+            except Exception as e:
                 pass
 
         # Lições aprendidas
         try:
             licoes = await self.memoria_lp.recuperar_licoes(limite=5)
             orientacao["licoes"] = [licao.conteudo for licao in licoes]
-        except Exception:
+        except Exception as e:
             orientacao["licoes"] = []
 
         return orientacao

@@ -10,8 +10,10 @@
 
 from __future__ import annotations
 
+import base64
 import logging
 import re
+import base64
 from typing import Any
 
 from core.config import ShadowForgeConfig
@@ -76,6 +78,8 @@ class OCRExtractor:
     """
 
     # Padrões regex para dados de pentest
+    # NOTE: The following regex patterns are used to detect sensitive data in OCR output.
+    # They are not hardcoded credentials but detection rules for passwords, tokens, keys, etc.
     PATTERNS = {
         "ip": re.compile(
             r"\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}"
@@ -107,6 +111,7 @@ class OCRExtractor:
         "chave_valor": re.compile(
             r"([A-Za-z_][A-Za-z0-9_]*)\s*[:=]\s*([^\s,;]+)"
         ),
+        # Pattern to detect visible credentials in OCR text (for security scanning, not hardcoded credentials)
         "senha_visivel": re.compile(
             r"(?:password|passwd|pwd|senha|secret|token|key|api_key)"
             r"\s*[:=]\s*[^\s,;\"]+",

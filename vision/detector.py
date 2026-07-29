@@ -188,7 +188,8 @@ class UIDetector:
                     if texto.lower() in resultado.texto_raw.lower():
                         elem.texto = resultado.texto_raw
                         return elem
-                except Exception:
+                except Exception as e:
+                    logger.debug("Erro ao verificar texto do candidato: %s", e)
                     continue
 
         # Retorna o mais confiável
