@@ -198,7 +198,7 @@ class ShadowForgeConfig(BaseModel):
     nome: str = "ShadowForge"
     versao: str = "1.1.0"
     codinome: str = "SH4D0WF0RG3"
-    modo: ModoOperacao = ModoOperacao.STEALTH
+    modo: ModoOperacao = Field(default=ModoOperacao.STEALTH, alias="mode")
     idioma: str = "pt-BR"
     leetspeak_logs: bool = True
     tema: str = "matrix"
@@ -223,7 +223,7 @@ class ShadowForgeConfig(BaseModel):
     data_dir: Path = Field(default_factory=lambda: Path.cwd() / "data")
     logs_dir: Path = Field(default_factory=lambda: Path.cwd() / "logs")
 
-    model_config = {"env_prefix": "SHADOWFORGE_", "env_nested_delimiter": "__"}
+    model_config = {"env_prefix": "SHADOWFORGE", "env_nested_delimiter": "__"}
 
     @classmethod
     def carregar_de_yaml(cls, caminho: str | Path) -> ShadowForgeConfig:
@@ -258,12 +258,12 @@ class ShadowForgeConfig(BaseModel):
     @classmethod
     def carregar_de_env(cls) -> ShadowForgeConfig:
         """Carrega configuração de variáveis de ambiente."""
-        api_key = os.environ.get("NVIDIA_API_KEY", "")
+        api_key = os.environ.get("SHADOWFORGE__NVIDIA__API_KEY", "")
         modo = os.environ.get("SHADOWFORGE_MODE", "stealth")
-
+        print(f"[DEBUG] carregar_de_env: SHADOWFORGE_MODE={os.environ.get('SHADOWFORGE_MODE')!r}, modo={modo!r}, SHADOWFORGE__NVIDIA__API_KEY={os.environ.get('SHADOWFORGE__NVIDIA__API_KEY')!r}, api_key={api_key!r}")
         return cls(
             nvidia=ConfigNVIDIA(api_key=api_key),
-            modo=ModoOperacao(modo),
+            mode=ModoOperacao(modo),
         )
 
     def verificar_etica(self, acao: str, alvo: str = "") -> tuple[bool, str]:

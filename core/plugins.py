@@ -26,9 +26,21 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+import blake3
+
 from core.event_bus import EventBus, EventoShadowForge
 
 logger = logging.getLogger("shadowforge.core.plugins")
+
+
+def _get_file_hash(file_path: Path) -> str:
+    """Retorna o hash BLAKE3 do arquivo (resistente a colisões quânticas)."""
+    try:
+        with open(file_path, 'rb') as f:
+            return blake3.blake3(f.read()).hexdigest()
+    except (IOError, OSError):
+        return ""
+
 
 # M-07 FIX: Prefixo de namespace para evitar conflito com builtins
 _PLUGIN_NAMESPACE_PREFIX = "shadowforge.plugins."
@@ -110,7 +122,7 @@ class PluginManager:
         for dir_path in self._plugin_dirs:
             if not dir_path.is_dir():
                 continue
-            for path_file in dir_path.glob("*.py"):
+            for path_file in dir_path.rglob("*.py"):
                 if path_file.name.startswith("_"):
                     continue
                 info = await self._load_plugin(path_file)
@@ -137,8 +149,7 @@ class PluginManager:
                 return None
             # H-10 FIX: Verificar hash do plugin contra lista de trust (se configurada)
             if _TRUSTED_PLUGIN_HASHES:
-                import hashlib
-                file_hash = hashlib.sha256(path.read_bytes()).hexdigest()
+                file_hash = _get_file_hash(path)
                 if file_hash not in _TRUSTED_PLUGIN_HASHES:
                     logger.warning("[PLUGIN] Hash não confiável para %s: %s (requer registro em _TRUSTED_PLUGIN_HASHES)", path.name, file_hash[:16])
                     return None

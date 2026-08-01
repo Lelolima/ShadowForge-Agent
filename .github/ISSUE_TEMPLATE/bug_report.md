@@ -6,45 +6,45 @@ labels: bug
 assignees: ''
 ---
 
-## Description
-A clear and concise description of what the bug is.
+## Descrição do Problema
+Uma descrição clara e concisa do problema.
+Qual é o comportamento inesperado ou o erro que ocorreu?
 
-## Steps to Reproduce
-1. Run command: `python main.py --mode ... --target ...`
-2. ...
-3. See error
+## Passos para Reproduzir
+Passos para reproduzir o comportamento:
+1. Passo um
+2. Passo dois
+3. Passo três
 
-## Expected Behavior
-What you expected to happen.
+## Comportamento Esperado
+Uma descrição clara e concisa do que você esperava que acontecesse.
 
-## Actual Behavior
-What actually happened (include error messages, tracebacks).
+## Capturas de Tela
+Se aplicável, adicione capturas de tela para ajudar a explicar o problema.
 
-## Environment
-- OS: [e.g. Windows 11, Ubuntu 22.04, macOS 14]
-- Python: [e.g. 3.12.3]
-- GPU: [e.g. RTX 4090 / None]
-- NVIDIA Driver: [e.g. 550.x.x]
-- ShadowForge version: [e.g. 1.0.0]
-- Mode: [e.g. stealth, recon_only, debug]
-- Simulation: [e.g. yes, no]
+## Ambiente (por favor, preencha as seguintes informações):
+- Sistema Operacional: [ex. Windows 11, Ubuntu 22.04]
+- Versão do Python: [ex. 3.10, 3.11]
+- Versão do ShadowForge: [ex. 1.0.0]
+- Modo: [ex. stealth, recon_only, debug]
+- Simulação: [ex. sim, não]
 
-## Configuration
-Relevant sections from `config/default.yaml` or `.env` (REMOVE any API keys):
+## Configuração
+Seções relevantes de `config/default.yaml` ou `.env` (REMOVA quaisquer chaves de API):
 
 ```yaml
-# Paste relevant config here (redact sensitive values)
+# Cole a configuração relevante aqui (remova valores sensíveis)
 ```
 
 ## Logs
 ```
-Paste relevant logs here (REMOVE any API keys, tokens, or sensitive data)
+Cole os logs relevantes aqui (REMOVE quaisquer chaves de API, tokens ou dados sensíveis)
 ```
 
-## Ethical Guardrails Status
-- [ ] Authorization verification was active
-- [ ] Target was in whitelist
-- [ ] Simulation mode was used
+## Status das Salvaguardas Éticas
+- [ ] Verificação de autorização estava ativa
+- [ ] Alvo estava na lista de permissões
+- [ ] Modo de simulação foi usado
 
-## Additional Context
-Any other context, screenshots, or references that help explain the issue.
+## Contexto Adicional
+Qualquer outro contexto, capturas de tela ou referências que ajudem a explicar o problema.

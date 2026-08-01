@@ -1,0 +1,83 @@
+<svg width="260" height="200" viewBox="0 0 260 200" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .terminal-bg {
+      fill: #000;
+      stroke: #333;
+      stroke-width: 2;
+      rx: 5;
+      ry: 5;
+    }
+    .terminal-bar {
+      fill: #555;
+      height: 20;
+    }
+    .terminal-dot {
+      fill: #f00;
+      cx: 15;
+      cy: 15;
+      r: 3;
+    }
+    .terminal-dot.yellow { fill: #ff0; }
+    .terminal-dot.green { fill: #0f0; }
+    .terminal-text {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      fill: #0f0;
+    }
+    .success { fill: #0f0; }
+    .warning { fill: #ff0; }
+    .error { fill: #f44; }
+    @keyframes type {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+    .typing {
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 2px solid #0f0;
+      width: 0;
+      animation: type 1.5s steps(20, end) forwards;
+    }
+    @keyframes blink {
+      0%, 70% { border-color: transparent; }
+      71%, 100% { border-color: #0f0; }
+    }
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      background-color: #0f0;
+      animation: blink 1s infinite;
+    }
+    @keyframes pulseSuccess {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+    .pulse-success { animation: pulseSuccess 1.5s ease-in-out infinite; }
+  </style>
+
+  <!-- Terminal background -->
+  <rect class="terminal-bg" x="10" y="10" width="240" height="180"/>
+  <rect class="terminal-bar" x="10" y="10" width="240" height="20"/>
+
+  <!-- Traffic lights -->
+  <circle class="terminal-dot" cx="15" cy="20" r="3"/>
+  <circle class="terminal-dot yellow" cx="25" cy="20" r="3"/>
+  <circle class="terminal-dot green" cx="35" cy="20" r="3"/>
+
+  <!-- Terminal content -->
+  <foreignObject x="20" y="40" width="220" height="140">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 'Courier New', monospace; font-size: 12px; color: #0f0; line-height: 1.4;">
+      <div>$ python scripts/dev.py</div>
+      <div class="typing">[🔍] Iniciando linting comecando verificações de qualidade...</div>
+      <div class="typing success">[✓] Linting concluído com sucesso! (0 erros, 0 avisos)</div>
+      <div class="typing">[🧪] Executando suíte de testes...</div>
+      <div class="typing success">[✓] Todos os testes passaram! (45/45)</div>
+      <div class="typing">[🔍] Executando verificação de tipos...</div>
+      <div class="typing success">[✓] Verificação de tipos concluída! (0 erros)</div>
+      <div class="typing">[🎨] Formatando código com black...</div>
+      <div class="typing success">[✓] Código formatado com sucesso!</div>
+      <div class="pulse-success">[🚀] Todas as tarefas concluídas!</div>
+      <div><span class="cursor"></span></div>
+    </div>
+  </foreignObject>
+</svg>

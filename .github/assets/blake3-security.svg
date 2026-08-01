@@ -1,0 +1,66 @@
+<svg width="260" height="200" viewBox="0 0 260 200" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .terminal-bg {
+      fill: #000;
+      stroke: #333;
+      stroke-width: 2;
+      rx: 5;
+      ry: 5;
+    }
+    .terminal-bar {
+      fill: #1a1a1a;
+      height: 20;
+    }
+    .terminal-text {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      fill: #fff;
+    }
+    .success { fill: #0f0; }
+    .warning { fill: #ff0; }
+    .error { fill: #f44; }
+    .highlight { fill: #0ff; font-weight: bold; }
+    .hash { font-family: 'Consolas', monospace; letter-spacing: 1px; }
+    @keyframes scan {
+      0% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -200; }
+    }
+    .scan-line {
+      stroke: #0f0;
+      stroke-width: 2;
+      fill: none;
+      stroke-dasharray: 10, 5;
+      animation: scan 2s linear infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+    .pulse { animation: pulse 1.5s ease-in-out infinite; }
+  </style>
+
+  <!-- Terminal background -->
+  <rect class="terminal-bg" x="10" y="10" width="240" height="180"/>
+  <rect class="terminal-bar" x="10" y="10" width="240" height="20"/>
+
+  <!-- Terminal content -->
+  <text x="20" y="35" class="terminal-text">$ python -c "import blake3; from pathlib import Path"</text>
+  <text x="20" y="55" class="terminal-text">>>> file_path = Path("plugins/test_plugin/plugin.py")</text>
+  <text x="20" y="75" class="terminal-text">>>> hash_obj = blake3.blake3()</text>
+  <text x="20" y="95" class="terminal-text">>>> with open(file_path, "rb") as f:</text>
+  <text x="30" y="115" class="terminal-text">...     hash_obj.update(f.read())</text>
+  <text x="20" y="135" class="terminal-text">>>> file_hash = hash_obj.hexdigest()</text>
+  <text x="20" y="155" class="terminal-text">>>> print(f"BLAKE3 hash: {hash}")</text>
+  <text x="20" y="175" class="terminal-text"><tspan class="success">BLAKE3 hash: a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456</tspan></text>
+
+  <!-- Visual hash representation -->
+  <rect x="20" y="110" width="220" height="40" fill="#000" opacity="0.3" stroke="#0f0" stroke-width="1"/>
+  <text x="30" y="130" class="hash" fill="#0f0">a1b2c3d4 e5f67890 12345678 90123456 7890abcd ef123456 7890abcdef</text>
+  <text x="30" y="145" class="hash" fill="#0f0">12345678 90abcdef</text>
+
+  <!-- Security shield -->
+  <g class="pulse" transform="translate(220,40)">
+    <path d="M0,-20 L10,0 L0,20 L-10,0 Z" fill="#0f0" opacity="0.3"/>
+    <text x="-5" y="5" font-size="8" fill="#000" text-anchor="middle">🔒</text>
+  </g>
+</svg>

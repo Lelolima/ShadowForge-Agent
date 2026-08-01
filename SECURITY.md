@@ -1,128 +1,125 @@
-# Security Policy
+# Política de Segurança
 
-## Supported Versions
+## Versões Suportadas
 
-| Version | Supported          | Security Fixes | Bug Fixes  |
+| Versão | Suportada          | Correções de Segurança | Correções de Bugs  |
 | ------- | ------------------ | -------------- | ---------- |
-| 1.0.x   | :white_check_mark: | Yes            | Yes        |
-| < 1.0   | :x:                | No             | No         |
+| 1.0.x   | :white_check_mark: | Sim            | Sim        |
+| < 1.0   | :x:                | Não            | Não        |
 
-## Reporting a Vulnerability
+## Relatando uma Vulnerabilidade
 
-We take security vulnerabilities seriously. If you discover a security
-vulnerability in ShadowForge, please report it responsibly.
+Levamos as vulnerabilidades de segurança a sério. Se você descobrir uma vulnerabilidade de segurança no ShadowForge, por favor, relate-a de forma responsável.
 
-**DO NOT** file a public GitHub issue for security vulnerabilities.
+**NÃO** abra uma issue pública no GitHub para vulnerabilidades de segurança.
 
-### Reporting Process
+### Processo de Relato
 
-1. **Email**: Send a detailed report to lelolima806@gmail.com
-2. **GitHub**: Use the [Private Security Advisory](../../security/advisories/new) feature
-3. **PGP**: For sensitive reports, encrypt with our public PGP key (available in the repository root)
+1. **E-mail**: Envie um relatório detalhado para lelolima806@gmail.com
+2. **GitHub**: Use o recurso [Consultoria de Segurança Privada](../../security/advisories/new)
+3. **PGP**: Para relatórios sensíveis, criptografe com nossa chave PGP pública (disponível na raiz do repositório)
 
-### What to Include
+### O que Incluir
 
-- **Description**: Clear description of the vulnerability
-- **Impact**: What an attacker could achieve (use CVSS v3.1 if possible)
-- **Reproduction**: Step-by-step instructions to reproduce
-- **Proof of Concept**: Minimal code or commands demonstrating the issue
-- **Affected Versions**: Which version(s) are affected
-- **Suggested Fix**: If you have a proposed remediation
+- **Descrição**: Descrição clara da vulnerabilidade
+- **Impacto**: O que um atacante poderia alcançar (use CVSS v3.1 se possível)
+- **Reprodução**: Instruções passo a passo para reproduzir
+- **Prova de Conceito**: Código mínimo ou comandos demonstrando o problema
+- **Versões Afetadas**: Qual(is) versão(ões) são afetadas
+- **Correção Sugerida**: Se você tiver uma proposta de remediação
 
-### Response Timeline
+### Cronograma de Resposta
 
-| Stage | Target Time |
+| Etapa | Tempo Alvo |
 |-------|-------------|
-| Acknowledgment | 48 hours |
-| Initial Assessment | 5 business days |
-| Detailed Response | 7 business days |
-| Fix Development | 30 days (critical), 90 days (others) |
-| CVE Assignment | If applicable, coordinated with reporter |
+| Confirmação | 48 horas |
+| Avaliação Inicial | 5 dias úteis |
+| Resposta Detalhada | 7 dias úteis |
+| Desenvolvimento da Correção | 30 dias (crítico), 90 dias (outros) |
+| Atribuição de CVE | Se aplicável, coordenado com o relator |
 
-### Disclosure Policy
+### Política de Divulgação
 
-We follow **coordinated responsible disclosure**:
+Seguimos a **divulgação responsável coordenada**:
 
-- Reports are kept confidential until a fix is released
-- We request a 90-day embargo period before public disclosure
-- Reporters are credited (unless they prefer to remain anonymous)
-- We will not take legal action against good-faith security research
+- Os relatórios são mantidos confidenciais até que uma correção seja lançada
+- Solicitamos um período de embargo de 90 dias antes da divulgação pública
+- Os relatadores são creditados (a menos que prefiram permanecer anônimos)
+- Não tomaremos medidas legais contra pesquisas de segurança feitas de boa fé
 
-## Security Features
+## Recursos de Segurança
 
-This project includes multiple layers of security:
+Este projeto inclui várias camadas de segurança:
 
-### Ethical Guardrails
+### Guarda-eti dens Éticos
 
-- **Authorization Verification**: Requires explicit confirmation before any penetration test
-- **Blacklist/Whitelist**: Configurable IP/host restrictions to prevent unauthorized targeting
-- **Destructive Action Prevention**: Cannot delete, destroy, or wipe target data
-- **Backdoor Prevention**: Cannot install persistent backdoors on targets
-- **Exfiltration Prevention**: Cannot exfiltrate real data from targets
-- **Simulation Mode**: Full end-to-end testing without executing real attacks
+- **Verificação de Autorização**: Requer confirmação explícita antes de qualquer teste de penetração
+- **Lista Negra/Branca**: Restrições configuráveis de IP/hospedeiro para impedir direcionamento não autorizado
+- **Prevenção de Ação Destrutiva**: Não pode excluir, destruir ou limpar dados do alvo
+- **Prevenção de Portas dos Fundos**: Não pode instalar portas dos fundos persistentes nos alvos
+- **Prevenção de Exfiltração**: Não pode exfiltrar dados reais dos alvos
+- **Modo de Simulação**: Testes de ponta a ponta completos sem executar ataques reais
 
-### Audit & Logging
+### Auditoria & Logging
 
-- **Full Audit Trail**: Every agent action is logged with timestamps
-- **Log Sanitization**: Sensitive data (API keys, credentials) are redacted from logs
-- **Tamper Detection**: Log integrity verification for forensic accountability
+- **Trilha de Auditoria Completa**: Cada ação do agente é registrada com timestamps
+- **Sanitização de Logs**: Dados sensíveis (chaves de API, credenciais) são redigidos dos logs
+- **Detecção de Adulteração**: Verificação de integridade de logs para responsabilidade forense
 
-### Data Protection
+### Proteção de Dados
 
-- **Local-First**: All data stored locally (SQLite, ChromaDB)
-- **No Cloud Storage**: Scan results, credentials, and reports never leave the host
-- **Environment Isolation**: API keys loaded from `.env` only (never hardcoded)
-- **Git Exclusion**: `.env`, `*.pem`, `*.key`, credentials are gitignored
+- **Local-First**: Todos os dados armazenados localmente (SQLite, ChromaDB)
+- **Nenhum Armazenamento em Nuvem**: Resultados de scan, credenciais e relatórios nunca deixam o host
+- **Isolamento de Ambiente**: Chaves de API carregadas apenas do `.env` (nunca hardcodeadas)
+- **Exclusão do Git**: `.env`, `*.pem`, `*.key`, credenciais são ignoradas pelo git
 
-### Supply Chain
+### Cadeia de Suprimentos
 
-- **Pinned Dependencies**: All requirements specify minimum versions
-- **Security Scanning**: Bandit integrated in CI and pre-commit hooks
-- **Private Key Detection**: Pre-commit hook prevents accidental credential leaks
-- **Dependency Audits**: `safety` check in CI pipeline
+- **Dependências Fixadas**: Todos os requisitos especificam versões mínimas
+- **Varredura de Segurança**: Bandit integrado em CI e ganchos pré-commit
+- **Detecção de Chave Privada**: Gancho pré-commit impede vazamentos acidentais de credenciais
+- **Auditoria de Dependências**: Verificação `safety` no pipeline de CI
 
-## LGPD & GDPR Compliance
+## Conformidade LGPD & GDPR
 
-This project is designed with privacy-by-design and privacy-by-default principles:
+Este projeto é projetado com princípios de privacidade por projeto e privacidade por padrão:
 
-### LGPD (Lei Geral de Protecao de Dados - Brazil)
+### LGPD (Lei Geral de Proteção de Dados - Brasil)
 
-- **Art. 4**: Personal data processed only with legal basis (authorized testing consent)
-- **Art. 6**: Purpose limitation, adequacy, and minimization enforced by design
-- **Art. 7**: Legal basis is explicit consent from data subject or legitimate interest
-- **Art. 46**: International data transfers (NVIDIA API) comply with adequacy requirements
-- **Art. 43**: Data Protection Impact Assessment recommended before campaigns
+- **Art. 4**: Dados pessoais processados apenas com base legal (consentimento de teste autorizado)
+- **Art. 6**: Limitação de finalidade, adequação e minimização aplicadas por design
+- **Art. 7**: Base legal é consentimento explícito do titular dos dados ou interesse legítimo
+- **Art. 46**: Transferências internacionais de dados (API NVIDIA) cumprem requisitos de adequação
+- **Art. 43**: Avaliação de Impacto à Proteção de Dados recomendada antes de campanhas
 
-### GDPR (General Data Protection Regulation - EU)
+### GDPR (Regulamento Geral de Proteção de Dados - UE)
 
-- **Art. 5**: Principles of processing -- lawfulness, purpose limitation, data minimization
-- **Art. 6**: Lawful basis for processing (explicit consent or legitimate interest)
-- **Art. 25**: Data protection by design and by default
-- **Art. 32**: Security of processing -- encryption, resilience, access controls
-- **Art. 35**: Data Protection Impact Assessment recommended for large-scale campaigns
-- **Art. 44-49**: International data transfers comply with adequacy decisions
+- **Art. 5**: Princípios de processamento -- lawfulness, limitação de finalidade, minimização de dados
+- **Art. 6**: Base legal para processamento (consentimento explícito ou interesse legítimo)
+- **Art. 25**: Proteção de dados por design e por padrão
+- **Art. 32**: Segurança do processamento -- criptografia, resiliência, controles de acesso
+- **Art. 35**: Avaliação de Impacto à Proteção de Dados recomendada para campanhas em larga escala
+- **Art. 44-49**: Transferências internacionais de dados cumprem decisões de adequação
 
-## Legal Compliance
+## Conformidade Legal
 
-This project is designed to comply with:
+Este projeto é projetado para cumprir com:
 
-- **LGPD** (Lei Geral de Protecao de Dados - Brazil)
-- **GDPR** (General Data Protection Regulation - EU)
-- **CFAA** (Computer Fraud and Abuse Act - US)
-- **Budapest Convention** (Convention on Cybercrime)
-- **LGPD** (Lei Geral de Protecao de Dados - Lei 13.709/2018)
+- **LGPD** (Lei Geral de Proteção de Dados - Brasil)
+- **GDPR** (Regulamento Geral de Proteção de Dados - UE)
+- **CFAA** (Lei de Fraude e Abuso de Computador - EUA)
+- **Convenção de Budapeste** (Convenção sobre Crime Cibernético)
+- **LGPD** (Lei Geral de Proteção de Dados - Lei 13.709/2018)
 
-Users must ensure they have proper written authorization before using this tool
-against any target. Unauthorized access to computer systems is illegal in most
-jurisdictions.
+Os usuários devem garantir que tenham autorização escrita adequada antes de usar esta ferramenta contra qualquer alvo. Acesso não autorizado a sistemas de computador é ilegal na maioria das jurisdições.
 
-## Security Best Practices for Users
+## Melhores Práticas de Segurança para Usuários
 
-1. **Always use simulation mode first** (`--simulate` flag)
-2. **Never test systems without written authorization**
-3. **Keep API keys secure** -- never commit `.env` to version control
-4. **Review scan results** before sharing -- redact any PII
-5. **Use VPN/proxy** to mask your origin during testing
-6. **Follow scope boundaries** -- do not exceed authorized test scope
-7. **Report vulnerabilities** found during testing through proper channels
-8. **Destroy local data** after campaign completion (`rm -rf data/ campaigns/`)
+1. **Sempre use o modo de simulação primeiro** (`--simulate` flag)
+2. **Nunca teste sistemas sem autorização escrita**
+3. **Mantenha as chaves de API seguras** -- nunca faça commit do `.env` no controle de versão
+4. **Revise os resultados do scan** antes de compartilhar -- redija qualquer PII
+5. **Use VPN/proxy** para mascarar sua origem durante os testes
+6. **Siga os limites de escopo** -- não exceda o escopo de teste autorizado
+7. **Relate vulnerabilidades** encontradas durante os testes através dos canais adequados
+8. **Destrua os dados locais** após a conclusão da campanha (`rm -rf data/ campaigns/`)

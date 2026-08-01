@@ -17,7 +17,7 @@ from typing import Any
 try:
     from fastapi import FastAPI, WebSocket, WebSocketDisconnect
     from fastapi.middleware.cors import CORSMiddleware
-    from fastapi.responses import HTMLResponse
+    from fastapi.responses import HTMLResponse, Response
     HAS_FASTAPI = True
 except ImportError:
     HAS_FASTAPI = False
@@ -99,6 +99,16 @@ if HAS_FASTAPI:
     async def api_events() -> dict[str, Any]:
         """Eventos recentes."""
         return {"eventos": _dashboard_state.get("eventos", [])[-200:]}
+
+    @app.get("/metrics")
+    async def metrics():
+        """Prometheus metrics endpoint."""
+        try:
+            from observability.metrics import get_metrics, get_metrics_content_type
+            data = get_metrics()
+            return Response(content=data, media_type=get_metrics_content_type())
+        except ImportError:
+            return Response(content=b"# prometheus_client not installed\n", media_type="text/plain")
 
     @app.websocket("/ws")
     async def websocket_endpoint(websocket: WebSocket) -> None:  # type: ignore

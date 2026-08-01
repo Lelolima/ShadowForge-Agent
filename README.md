@@ -99,6 +99,26 @@ Executa varreduras de portas e descoberta de serviços de forma otimizada:
 
 ---
 
+## <span style="color:#0f0">&#62;</span> Demonstração em Tempo Real: Segurança e Desenvolvimento
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/blake3-security.svg" width="100%" alt="BLAKE3 Security Implementation" />
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/dev-script.svg" width="100%" alt="Development Script Execution" />
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/hot-reloader.svg" width="100%" alt="Hot-Reloader for Plugins" />
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Lelolima/ShadowForge-Agent/main/.github/assets/plugin-generator.svg" width="100%" alt="Plugin Generator" />
+</p>
+
+Demonstração das melhorias de segurança com BLAKE3, geração automática de plugins, hot-reloading e execução de scripts de desenvolvimento.
+
 ## <span style="color:#0f0">&#62;</span> Arquitetura
 
 <p align="center">

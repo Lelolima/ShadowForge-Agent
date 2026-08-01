@@ -1,0 +1,286 @@
+"""
+Input validation utilities for ShadowForge Agent.
+Provides functions to validate and sanitize user inputs.
+"""
+
+import re
+from typing import Any, Optional, Pattern, Union
+from dataclasses import dataclass
+
+
+class ValidationError(ValueError):
+    """Exception raised when input validation fails."""
+    pass
+
+
+@dataclass
+class ValidationRule:
+    """Defines a validation rule for input fields."""
+    pattern: Optional[Pattern[str]] = None
+    min_length: int = 0
+    max_length: int = float('inf')
+    allowed_chars: Optional[str] = None
+    forbidden_chars: Optional[str] = None
+    custom_validator: Optional[callable] = None
+
+
+def validate_input(
+    value: Any,
+    field_name: str = "input",
+    rules: Optional[ValidationRule] = None,
+    required: bool = True
+) -> Any:
+    """
+    Validate and sanitize input based on rules.
+
+    Args:
+        value: The input value to validate
+        field_name: Name of the field for error messages
+        rules: Validation rules to apply
+        required: Whether the field is required
+
+    Returns:
+        The validated value
+
+    Raises:
+        ValidationError: If validation fails
+    """
+    # Handle None/missing values
+    if value is None:
+        if required:
+            raise ValidationError(f"{field_name} is required")
+        return None
+
+    # Convert to string for string-based validations
+    str_value = str(value)
+
+    # Apply rules if provided
+    if rules:
+        # Check length
+        if len(str_value) < rules.min_length:
+            raise ValidationError(
+                f"{field_name} must be at least {rules.min_length} characters long"
+            )
+
+        if len(str_value) > rules.max_length:
+            raise ValidationError(
+                f"{field_name} must be no more than {rules.max_length} characters long"
+            )
+
+        # Check allowed characters
+        if rules.allowed_chars is not None:
+            allowed_pattern = f'^[{re.escape(rules.allowed_chars)}]+$'
+            if not re.match(allowed_pattern, str_value):
+                raise ValidationError(
+                    f"{field_name} contains invalid characters. "
+                    f"Allowed: {rules.allowed_chars}"
+                )
+
+        # Check forbidden characters
+        if rules.forbidden_chars is not None:
+            forbidden_pattern = f'[{re.escape(rules.forbidden_chars)}]'
+            if re.search(forbidden_pattern, str_value):
+                raise ValidationError(
+                    f"{field_name} contains forbidden characters: {rules.forbidden_chars}"
+                )
+
+        # Check regex pattern
+        if rules.pattern is not None:
+            if not re.match(rules.pattern, str_value):
+                raise ValidationError(
+                    f"{field_name} does not match required pattern"
+                )
+
+        # Run custom validator
+        if rules.custom_validator is not None:
+            if not rules.custom_validator(value):
+                raise ValidationError(
+                    f"{field_name} failed custom validation"
+                )
+
+    return value
+
+
+def sanitize_input(value: str, sanitize_type: str = "general") -> str:
+    """
+    Sanitize input by removing potentially dangerous content.
+
+    Args:
+        value: The string to sanitize
+        sanitize_type: Type of sanitization to apply
+                      ("general", "html", "sql", "shell", "path")
+
+    Returns:
+        Sanitized string
+    """
+    if not isinstance(value, str):
+        value = str(value)
+
+    if sanitize_type == "html":
+        # Basic HTML escaping
+        return (
+            value.replace("&", "&")
+                 .replace("<", "<")
+                 .replace(">", ">")
+                 .replace('"', '"')
+                 .replace("'", "'")
+                 .replace("/", "&#x2F;")
+        )
+    elif sanitize_type == "sql":
+        # Basic SQL injection prevention (parameterized queries are better)
+        return value.replace("'", "''").replace('"', '""')
+    elif sanitize_type == "shell":
+        # Shell escaping - wrap in single quotes and escape internal single quotes
+        return "'" + value.replace("'", "'\"'\"'") + "'"
+    elif sanitize_type == "path":
+        # Prevent path traversal
+        return value.replace("..", "").replace("/", "").replace("\\", "")
+    else:
+        # General sanitization - remove control characters except common whitespace
+        return ''.join(char for char in value if ord(char) >= 32 or char in '\n\r\t')
+
+
+def validate_ip_address(ip: str) -> str:
+    """
+    Validate an IP address (IPv4 or IPv6).
+
+    Args:
+        ip: IP address string to validate
+
+    Returns:
+        Validated IP address
+
+    Raises:
+        ValidationError: If IP is invalid
+    """
+    ip_pattern = re.compile(
+        r'^'
+        r'(?:'
+        r'(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}'   # IPv4: 3 groups of 1-3 digits + dot
+        r'(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'       # IPv4: final group of 1-3 digits
+        r'|'                                                # OR
+        r'(?:[0-9a-fA-F]{1,4}:){0,6}::(?:[0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4}'  # IPv6 with compression
+        r'|'                                                # OR
+        r'(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}'         # IPv6: 8 groups of 1-4 hex digits (standard form)
+        r')$'
+    )
+
+    if not ip_pattern.match(ip):
+        raise ValidationError(f"Invalid IP address: {ip}")
+
+    return ip
+
+
+def validate_hostname(hostname: str) -> str:
+    """
+    Validate a hostname.
+
+    Args:
+        hostname: Hostname to validate
+
+    Returns:
+        Validated hostname
+
+    Raises:
+        ValidationError: If hostname is invalid
+    """
+    if len(hostname) > 255:
+        raise ValidationError("Hostname too long")
+
+    if len(hostname) == 0:
+        raise ValidationError("Hostname cannot be empty")
+
+    # Each label should be 1-63 chars, and only contain alphanumeric and hyphen
+    # Cannot start or end with hyphen
+    label_pattern = re.compile(r'^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$', re.IGNORECASE)
+
+    if hostname.endswith("."):
+        # Strip trailing dot for validation
+        hostname = hostname[:-1]
+
+    labels = hostname.split(".")
+    if len(labels) < 1:
+        raise ValidationError("Invalid hostname format")
+
+    for label in labels:
+        if not label_pattern.match(label):
+            raise ValidationError(f"Invalid hostname label: {label}")
+        if len(label) > 63:
+            raise ValidationError(f"Hostname label too long: {label}")
+
+    return hostname
+
+
+def validate_port(port: Union[str, int]) -> int:
+    """
+    Validate a port number.
+
+    Args:
+        port: Port number to validate
+
+    Returns:
+        Validated port number
+
+    Raises:
+        ValidationError: If port is invalid
+    """
+    try:
+        port_num = int(port)
+    except (ValueError, TypeError):
+        raise ValidationError(f"Port must be an integer: {port}")
+
+    if port_num < 1 or port_num > 65535:
+        raise ValidationError(f"Port must be between 1 and 65535: {port}")
+
+    return port_num
+
+
+def validate_email(email: str) -> str:
+    """
+    Validate an email address.
+
+    Args:
+        email: Email address to validate
+
+    Returns:
+        Validated email address
+
+    Raises:
+        ValidationError: If email is invalid
+    """
+    # Simple email regex - for production, consider using a more robust validator
+    email_pattern = re.compile(
+        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    )
+
+    if not email_pattern.match(email):
+        raise ValidationError(f"Invalid email address: {email}")
+
+    return email
+
+
+def validate_url(url: str) -> str:
+    """
+    Validate a URL.
+
+    Args:
+        url: URL to validate
+
+    Returns:
+        Validated URL
+
+    Raises:
+        ValidationError: If URL is invalid
+    """
+    url_pattern = re.compile(
+        r'^https?://'  # http:// or https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
+        r'localhost|'  # localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+        r'(?::\d+)?'  # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+
+    if not url_pattern.match(url):
+        raise ValidationError(f"Invalid URL: {url}")
+
+    return url

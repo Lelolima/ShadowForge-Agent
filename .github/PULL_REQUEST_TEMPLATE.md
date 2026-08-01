@@ -1,36 +1,36 @@
-## Description
-Brief description of changes and motivation.
+## Descrição
+Breve descrição das alterações e motivação.
 
-## Type of Change
-- [ ] Bug fix (non-breaking change that fixes an issue)
-- [ ] New feature (non-breaking change that adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to change)
-- [ ] Security improvement
-- [ ] Documentation update
-- [ ] Refactoring (no functional changes)
+## Tipo de Alteração
+- [ ] Correção de bug (alteração não disruptiva que corrige um problema)
+- [ ] Novo recurso (alteração não disruptiva que adiciona funcionalidade)
+- [ ] Alteração disruptiva (correção ou recurso que causaría mudança na funcionalidade existente)
+- [ ] Melhoria de segurança
+- [ ] Atualização de documentação
+- [ ] Refatoração (sem alterações funcionais)
 
-## Ethical Considerations
-- [ ] This change does NOT weaken ethical guardrails
-- [ ] This change does NOT enable unauthorized access
-- [ ] New attack capabilities include appropriate safeguards
-- [ ] No real credentials, API keys, or sensitive data included
+## Considerações Éticas
+- [ ] Esta alteração NÃO enfraquece as salvaguardas éticas
+- [ ] Esta alteração NÃO permite acesso não autorizado
+- [ ] Novas capacidades de ataque incluem salvaguardas apropriadas
+- [ ] Nenhuma credencial real, chaves de API ou dados sensíveis incluídos
 
-## Testing
-- [ ] Tests added or updated for new functionality
-- [ ] All existing tests pass
-- [ ] Tested in simulation mode (`--simulate`)
-- [ ] Linting passes (`ruff check .`)
-- [ ] Type checking passes (`mypy core/ models/ planning/`)
+## Testes
+- [ ] Testes adicionados ou atualizados para nova funcionalidade
+- [ ] Todos os testes existentes passam
+- [ ] Testado em modo de simulação (`--simulate`)
+- [ ] Verificação de linting aprovada (`ruff check .`)
+- [ ] Verificação de tipos aprovada (`mypy core/ models/ planning/`)
 
-## Changes Made
+## Alterações Realizadas
 -
 -
 -
 
 ## Checklist
-- [ ] Code follows project style guidelines (ruff, mypy)
-- [ ] Self-review of code completed
-- [ ] Comments added for complex logic
-- [ ] Documentation updated if needed
-- [ ] No breaking changes (or documented if present)
-- [ ] CHANGELOG.md updated with notable changes
+- [ ] O código segue as diretrizes de estilo do projeto (ruff, mypy)
+- [ ] Revisão automática do código concluída
+- [ ] Comentários adicionados para lógica complexa
+- [ ] Documentação atualizada se necessário
+- [ ] Nenhuma alteração disruptiva (ou documentada se presente)
+- [ ] CHANGELOG.md atualizado com alterações notáveis

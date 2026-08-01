@@ -1,39 +1,39 @@
 ---
 name: Feature request
-about: Suggest a feature for ShadowForge
+about: Sugira um recurso para o ShadowForge
 title: "[FEATURE] "
 labels: enhancement
 assignees: ''
 ---
 
-## Problem Statement
-A clear description of what problem this feature would solve.
-What is currently impossible or difficult that this feature would enable?
+## Declaração do Problema
+Uma descrição clara do problema que este recurso resolveria.
+O que é atualmente impossível ou difícil que este recurso possibilitaria?
 
-## Proposed Solution
-Describe your proposed solution in detail.
-How would it work from the user's perspective?
+## Solução Proposta
+Descreva sua solução proposta em detalhes.
+Como funcionaria do ponto de vista do usuário?
 
-## Alternatives Considered
-Any alternative solutions or features you've considered.
+## Alternativas Consideradas
+Quais soluções ou recursos alternativos você考考?
 
-## Use Case
-How would this feature be used in a real-world authorized penetration test?
+## Caso de Uso
+Como esse recurso seria usado em um teste de penetração autorizado no mundo real?
 
-Example scenario:
-1. As a pentester, I would...
-2. This feature would help me...
+Cenário de exemplo:
+1. Como testador de penetração, eu gostaria que...
+2. Este recurso me ajudaria a...
 
-## Security & Ethical Considerations
-- [ ] This feature does NOT weaken existing ethical guardrails
-- [ ] This feature does NOT enable unauthorized access
-- [ ] New attack capabilities include appropriate safeguards
-- [ ] Privacy implications have been considered (LGPD/GDPR)
+## Considerações de Segurança e Ética
+- [ ] Este recurso NÃO enfraquece as salvaguardas éticas existentes
+- [ ] Este recurso NÃO permite acesso não autorizado
+- [ ] Novas capacidades de ataque incluem salvaguardas apropriadas
+- [ ] Implicações de privacidade foram consideradas (LGPD/GDPR)
 
-Describe any security/ethical implications:
+Descreva quaisquer implicações de segurança/ética:
 
-## Implementation Ideas
-Any thoughts on how this could be implemented (optional):
+## Ideias de Implementação
+Quaisquer pensamentos sobre como isso poderia ser implementado (opcional):
 
-## Additional Context
-Any other context, screenshots, references, or links.
+## Contexto Adicional
+Qualquer outro contexto, screenshots, referências ou links.

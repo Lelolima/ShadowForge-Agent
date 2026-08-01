@@ -1,6 +1,6 @@
 """
 ============================================================
-NVIDIA ShadowForge Agent - NIM Client
+NVIDIA ShadowForge Agent - NIM Client com Connection Pooling
 Arquivo: models/nim_client.py
 ============================================================
 Client para NVIDIA Inference Manager (NIM) com streaming,
@@ -32,7 +32,7 @@ class NIMClient:
     multi-GPU load balancing, rate limiting e fallback.
 
     Quando a API key retorna 403 (modelos nao ativados),
-    o client opera em modo simulacao com mensagens inteligentes.
+    o client opera em modo simulacao com mensagens intelligentes.
     Para ativar modelos: acesse https://build.nvidia.com/
     e clique "Try" no modelo desejado, depois "Get API Key".
     """
@@ -81,6 +81,7 @@ class NIMClient:
             logger.warning("NVIDIA API Key nao configurada - NIM operando em modo simulacao")
 
         self._session: aiohttp.ClientSession | None = None
+        self._connector: aiohttp.TCPConnector | None = None
         self._request_count = 0
         self._last_request_time = 0.0
 
@@ -89,15 +90,32 @@ class NIMClient:
         return self._disponivel
 
     async def _get_session(self) -> aiohttp.ClientSession:
-        """Obtem sessao HTTP reutilizavel."""
+        """Obtem sessao HTTP reutilizavel com connection pooling."""
         if self._session is None or self._session.closed:
+            # Configure connection pool for better performance
+            self._connector = aiohttp.TCPConnector(
+                limit=100,           # Max total connections
+                limit_per_host=30,   # Max connections per host
+                ttl_dns_cache=300,   # DNS cache TTL
+                use_dns_cache=True,
+                keepalive_timeout=30,
+                enable_cleanup_closed=True,
+            )
+
+            timeout = aiohttp.ClientTimeout(
+                total=self._timeout,
+                connect=10,
+                sock_read=10
+            )
+
             self._session = aiohttp.ClientSession(
+                connector=self._connector,
                 headers={
                     "Authorization": f"Bearer {self._api_key}",
                     "Content-Type": "application/json",
                     "Accept": "application/json",
                 },
-                timeout=aiohttp.ClientTimeout(total=self._timeout),
+                timeout=timeout,
             )
         return self._session
 
@@ -405,6 +423,8 @@ class NIMClient:
         return resultado
 
     async def fechar(self) -> None:
-        """Fecha sessao HTTP."""
+        """Fecha sessao HTTP e connector."""
         if self._session and not self._session.closed:
             await self._session.close()
+        if self._connector:
+            await self._connector.close()

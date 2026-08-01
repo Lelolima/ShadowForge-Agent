@@ -1,225 +1,200 @@
-# Contributing to ShadowForge
+# Contribuindo para o ShadowForge
 
-First off, thank you for considering contributing to ShadowForge! It's people
-like you that make this tool better for the entire security community.
+Primeiramente, obrigado por considerar contribuir para o ShadowForge! É por causa de pessoas como você que esta ferramenta fica melhor para toda a comunidade de segurança.
 
-## Code of Conduct
+## Código de Conduta
 
-This project and everyone participating in it is governed by our
-[Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to
-uphold this code. Please report unacceptable behavior to security@shadowforge.dev.
+Este projeto e todas as pessoas que participam dele são regidos pelo nosso
+[Código de Conduta](CODE_OF_CONDUCT.md). Ao participar, você é esperado para
+cumprir este código. Por favor, relate comportamentos inaceitáveis para security@shadowforge.dev.
 
-## Legal & Ethical Requirements
+## Requisitos Legais e Éticos
 
-**This project is for authorized security testing ONLY.** Before contributing:
+**Este projeto é para testes de segurança autorizados APENAS.** Antes de contribuir:
 
-- Never contribute code that facilitates unauthorized access to systems
-- Never include real API keys, passwords, or credentials in contributions
-- Ensure your contributions respect privacy and data protection laws (LGPD, GDPR)
-- All offensive capabilities must include proper ethical guardrails
-- Contributions that remove or weaken ethical safeguards will be rejected
-- You must have the legal right to submit the code (no proprietary code leaks)
+- Nunca contribua com código que facilite acesso não autorizado a sistemas
+- Nunca inclua chaves de API reais, senhas ou credenciais nas contribuições
+- Certifique-se de que suas contribuições respeitem as leis de privacidade e proteção de dados (LGPD, GDPR)
+- Todas as capacidades ofensivas devem incluir salvaguardas éticas adequadas
+- Contribuições que removam ou enfraqueçam as salvaguardas éticas serão rejeitadas
+- Você deve ter o direito legal de enviar o código (sem vazamentos de código proprietário)
 
-## How Can I Contribute?
+## Como Posso Contribuir?
 
-### Reporting Bugs
+### Relatando Bugs
 
-1. Check if the bug has already been reported in [Issues](../../issues)
-2. If not, create a new issue using the [Bug Report template](.github/ISSUE_TEMPLATE/bug_report.md)
-3. Include:
-   - Clear title and description
-   - Steps to reproduce
-   - Expected vs actual behavior
-   - Your environment (OS, Python version, GPU)
-   - Relevant logs (redact any API keys or sensitive data)
+1. Verifique se o bug já foi relatado em [Issues](../../issues)
+2. Se não, crie uma nova issue usando o [modelo de relatório de bug](.github/ISSUE_TEMPLATE/bug_report.md)
+3. Inclua:
+   - Título e descrição claros
+   - Passos para reproduzir
+   - Comportamento esperado vs atual
+   - Seu ambiente (SO, versão do Python, GPU)
+   - Logs relevantes (redija quaisquer chaves de API ou dados sensíveis)
 
-### Suggesting Enhancements
+### Sugerindo Melhorias
 
-1. Open an issue using the [Feature Request template](.github/ISSUE_TEMPLATE/feature_request.md)
-2. Describe the feature, its use case, and why it would benefit most users
-3. Include any security considerations (does it add attack surface? new guardrails needed?)
+1. Abra uma issue usando o [modelo de solicitação de recurso](.github/ISSUE_TEMPLATE/feature_request.md)
+2. Descreva o recurso, seu caso de uso e por que beneficiaria a maioria dos usuários
+3. Inclua quaisquer considerações de segurança (ele adiciona superfície de ataque? são necessárias novas salvaguardas?)
 
 ### Pull Requests
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes with clear, atomic commits
-4. Add tests covering new functionality
-5. Ensure all tests pass (`python -m pytest tests/ -v`)
-6. Run linting (`ruff check . && ruff format .`)
-7. Run type checking (`mypy core/ models/ planning/`)
-8. Run security scan (`bandit -r core/ models/ planning/ -ll --skip B101,B311`)
-9. Push to your fork and open a Pull Request
+1. Faça um fork do repositório
+2. Crie uma branch de recurso (`git checkout -b feature/recurso-incrivel`)
+3. Faça suas alterações com commits claros e atômicos
+4. Adicione testes que cubram a nova funcionalidade
+5. Certifique-se de que todos os testes passem (`python -m pytest tests/ -v`)
+6. Execute a verificação de linting (`ruff check . && ruff format .`)
+7. Execute a verificação de tipos (`mypy core/ models/ planning/`)
+8. Execute o scan de segurança (`bandit -r core/ models/ planning/ -ll --skip B101,B311`)
+9. Envie para seu fork e abra um Pull Request
 
-#### PR Description Template
+#### Modelo de Descrição do PR
 
 ```markdown
-## Description
-Brief description of changes
+## Descrição
+Breve descrição das alterações
 
-## Type of Change
-- [ ] Bug fix (non-breaking change that fixes an issue)
-- [ ] New feature (non-breaking change that adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to change)
-- [ ] Security improvement
+## Tipo de Alteração
+- [ ] Correção de bug (alteração não disruptiva que corrige um problema)
+- [ ] Novo recurso (alteração não disruptiva que adiciona funcionalidade)
+- [ ] Alteração disruptiva (correção ou recurso que causaria mudança na funcionalidade existente)
+- [ ] Melhoria de segurança
 
-## Ethical Considerations
-- [ ] This change does NOT weaken ethical guardrails
-- [ ] This change does NOT enable unauthorized access
-- [ ] New attack capabilities include appropriate safeguards
+## Considerações Éticas
+- [ ] Esta alteração NÃO enfraquece as salvaguardas éticas
+- [ ] Esta alteração NÃO habilita acesso não autorizado
+- [ ] Novas capacidades de ataque incluem salvaguardas apropriadas
 
-## Testing
-- [ ] Tests added/updated
-- [ ] All existing tests pass
-- [ ] Tested in simulation mode
+## Testes
+- [ ] Testes adicionados/atualizados
+- [ ] Todos os testes existentes passam
+- [ ] Testado em modo de simulação
 
 ## Checklist
-- [ ] Code follows project style guidelines (ruff, mypy)
-- [ ] Self-review of code completed
-- [ ] Comments added for complex logic
-- [ ] Documentation updated if needed
+- [ ] O código segue as diretrizes de estilo do projeto (ruff, mypy)
+- [ ] Revisão automática do código concluída
+- [ ] Comentários adicionados para lógica complexa
+- [ ] Documentação atualizada se necessário
 ```
 
-## Commit Message Conventions
+## Convenções de Mensagem de Commit
 
-We follow [Conventional Commits](https://www.conventionalcommits.org/) specification:
-
-```
-<type>(<scope>): <description>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-### Types
-
-| Type | Description |
-|------|-------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `security` | Security vulnerability fix |
-| `docs` | Documentation only |
-| `style` | Code style (formatting, semicolons) |
-| `refactor` | Code refactoring without feature change |
-| `perf` | Performance improvement |
-| `test` | Adding or updating tests |
-| `build` | Build system or dependencies |
-| `ci` | CI configuration changes |
-| `chore` | Maintenance tasks |
-
-### Examples
+Seguimos a especificação [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
-feat(vision): add YOLOv8 UI element detection
-fix(nim): handle rate limiting with exponential backoff
-security(ethics): prevent bypass of authorization check
-docs(readme): add RAG setup instructions
-test(core): add OODA loop state machine tests
+<tipo>(<escopo>): <descrição>
+
+[corpo opcional]
+
+[rodapé(s) opcional]
 ```
 
-### Breaking Changes
+### Tipos
 
-Indicate breaking changes with `!` after the type or with a `BREAKING CHANGE:`
-footer:
+| Tipo | Descrição |
+|------|-----------|
+| `feat` | Novo recurso |
+| `fix` | Correção de bug |
+| `security` | Correção de vulnerabilidade de segurança |
+| `docs` | Apenas documentação |
+| `style` | Estilo de código (formatação, ponto e vírgula) |
+| `refactor` | Refatoração de código sem alteração de funcionalidade |
+| `perf` | Melhoria de desempenho |
+| `test` | Adição ou atualização de testes |
+| `build` | Sistema de construção ou dependências |
+| `ci` | Alterações na configuração de CI |
+| `chore` | Tarefas de manutenção |
+
+### Exemplos
 
 ```
-feat(api)!: change NIM client interface to async-only
-
-BREAKING CHANGE: NIMClient.query() now requires await
+feat(visão): adicionar detecção de elemento UI YOLOv8
+fix(nim): lidar com limite de taxa com backoff exponencial
+security(ética): prevenir a evasão da verificação de autorização
+docs(readme): adicionar instruções de configuração RAG
+test(core): adicionar testes de máquina de estado do loop OODA
 ```
 
-## Development Setup
+### Alterações Disruptivas
+
+Indique alterações disruptivas com `!` após o tipo ou com um `BREAKING CHANGE:` no rodapé:
+
+```
+feat(api)!: alterar a interface do cliente NIM para assíncrona apenas
+
+BREAKING CHANGE: NIMClient.query() agora requer await
+```
+
+## Configuração de Desenvolvimento
 
 ```bash
-# Clone your fork
-git clone https://github.com/YOUR_USERNAME/NVIDIA-ShadowForge-Agent.git
+# Clone seu fork
+git clone https://github.com/SEU_USUARIO/NVIDIA-ShadowForge-Agent.git
 cd NVIDIA-ShadowForge-Agent
 
-# Create virtual environment
+# Crie ambiente virtual
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-# Install dependencies
+# Instale dependências
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
 
-# Install pre-commit hooks
+# Instale ganchos pré-commit
 pre-commit install
 
-# Copy and configure environment
+# Copie e configure o ambiente
 cp .env.example .env
-# Edit .env with your NVIDIA API key
+# Edite .env com sua chave de API NVIDIA
 
-# Verify environment
+# Verifique o ambiente
 python scripts/health_check.py
 python scripts/validate_env.py
 
-# Run tests
+# Execute os testes
 python -m pytest tests/ -v
 ```
 
-## Coding Standards
+## Padrões de Codificação
 
 ### Python
 
-- **Python 3.10+**: Use modern type hints (`X | Y` instead of `Union`)
-- **Async-first**: All I/O operations should be async
-- **Type hints**: All public functions must have type annotations
-- **Docstrings**: Google-style docstrings for all public APIs
-- **Language**: Code in English; comments/docs may be in Portuguese
-- **Line length**: 100 characters maximum (enforced by ruff)
-- **Imports**: Use `from __future__ import annotations` in all modules
+- **Python 3.10+**: Use dicas de tipo moderno (`X | Y` em vez de `Union`)
+- **Async-first**: Todas as operações de I/O devem ser assíncronas
+- **Dicas de tipo**: Todas as funções públicas devem ter anotações de tipo
+- **Docstrings**: Docstrings no estilo Google para todas as APIs públicas
+- **Linguagem**: Código em inglês; comentários/documentação podem estar em português
+- **Comprimento da linha**: 100 caracteres máximo (implementado pelo ruff)
+- **Importações**: Use `from __future__ import annotations` em todos os módulos
 
-### Example Docstring
+### Exemplo de Docstring
 
 ```python
 from __future__ import annotations
 
 async def scan_target(host: str, ports: str = "1-1000") -> ScanResult:
-    """Perform a port scan on the specified target.
+    """Realiza um escaneamento de porta no alvo especificado.
 
     Args:
-        host: Target IP address or hostname.
-        ports: Port range to scan (default: 1-1000).
+        host: Endereço IP ou hostname do alvo.
+        ports: Intervalo de portas para escanear (padrão: 1-1000).
 
     Returns:
-        ScanResult object with discovered services.
+        Objeto ScanResult com os serviços descobertos.
 
     Raises:
-        AuthorizationError: If target is not in whitelist.
-        ConnectionError: If target is unreachable.
+        AuthorizationError: Se o alvo não estiver na whitelist.
+        ConnectionError: Se o alvo for inacessível.
     """
 ```
 
-### Security Requirements for Code
+### Requisitos de Segurança para Código
 
-1. **Never hardcode credentials** -- use environment variables
-2. **Never log sensitive data** -- API keys, passwords, tokens must be redacted
-3. **Always add ethical guardrails** to new attack capabilities
-4. **Use parameterized queries** -- never string-concatenate SQL or shell commands
-5. **Validate all inputs** -- use Pydantic models for configuration
-6. **Handle errors gracefully** -- never expose stack traces to unauthenticated users
-
-## Project Structure
-
-```
-core/           # Agent engine, config, state, memory
-models/         # NVIDIA NIM, Riva, embeddings, prompts
-vision/         # Screen capture, OCR, detection, understanding
-control/        # Mouse, keyboard, shell, stealth
-planning/       # Orchestrator, RAG (MITRE/OWASP)
-speech/         # ASR, TTS, voice interface
-hacker_tools/   # Recon, exploit, post-exploitation, reporting
-tests/          # Test suite
-scripts/        # Utility scripts
-config/         # YAML configuration
-```
-
-## Release Process
-
-1. Update version in `pyproject.toml` and `config/default.yaml`
-2. Update `CHANGELOG.md` with new entries
-3. Create a git tag (`git tag v1.x.x`)
-4. Push tag to trigger release workflow
-5. Create GitHub Release with changelog excerpt
+1. **Nunca codifique credenciais embutidas** -- use variáveis de ambiente
+2. **Nunca registre dados sensíveis** -- chaves de API, senhas, tokens devem ser redigidos
+3. **Sempre adicione salvaguardas éticas** a novas capacidades de ataque
+4. **Use consultas parametrizadas** -- nunca concatene strings para SQL ou comandos shell
+5. **Valide todas as entradas** -- use modelos Pydantic para configuração
+6. **Trate erros com elegância** -- nunca exponha pilhas de chamada para usuários não autenticados

@@ -1,0 +1,76 @@
+<svg width="260" height="200" viewBox="0 0 260 200" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .editor-bg {
+      fill: #1e1e1e;
+      stroke: #333;
+      stroke-width: 2;
+      rx: 5;
+      ry: 5;
+    }
+    .editor-tab {
+      fill: #2d2d2d;
+      height: 25;
+    }
+    .tab-active {
+      fill: #007acc;
+    }
+    .tab-text {
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 12px;
+      fill: #fff;
+      text-anchor: middle;
+    }
+    .code-line {
+      font-family: 'Consolas', monospace;
+      font-size: 11px;
+      fill: #d4d4d4;
+    }
+    .keyword { fill: #569cd6; }
+    .string { fill: #ce9178; }
+    .comment { fill: #6a9955; font-style: italic; }
+    .function { fill: #dcdcaa; }
+    @keyframes blink {
+      0%, 49% { opacity: 0; }
+      50%, 100% { opacity: 1; }
+    }
+    .cursor {
+      animation: blink 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    .pulse { animation: pulse 1.5s ease-in-out infinite; }
+  </style>
+
+  <!-- Editor background -->
+  <rect class="editor-bg" x="10" y="10" width="240" height="180"/>
+  <rect class="editor-tab" x="10" y="10" width="240" height="25"/>
+
+  <!-- Tabs -->
+  <rect class="tab-active" x="15" y="12" width="80" height="21" rx="3"/>
+  <text x="55" y="28" class="tab-text">plugin.py</text>
+  <rect x="105" y="12" width="80" height="21" rx="3" fill="#2d2d2d"/>
+  <text x="145" y="28" class="tab-text">__init__.py</text>
+  <rect x="195" y="12" width="50" height="21" rx="3" fill="#2d2d2d"/>
+  <text x="220" y="28" class="tab-text">README.md</text>
+
+  <!-- Code content -->
+  <text x="20" y="45" class="code-line"><tspan class="keyword">class</tspan> <tspan class="function">ReconPlugin</tspan>(<tspan class="keyword">ShadowForgePlugin</span>):</text>
+  <text x="20" y="60" class="code-line"><tspan class="keyword">def</tspan> <tspan class="function">on_load</tspan>(self, bus, ctx):</text>
+  <text x="30" y="75" class="code-line"><tspan class="comment"># Plugin initialization logic</tspan></text>
+  <text x="30" y="90" class="code-line"><tspan class="keyword">await</tspan> bus.subscribe(<tspan class="string">"network.scan"</tspan>, self.handle_scan)</text>
+  <text x="20" y="105" class="code-line"><tspan class="keyword">def</tspan> <tspan class="function">handle_scan</tspan>(self, results):</tspan></text>
+  <text x="30" y="120" class="code-line"><tspan class="comment"># Process scan results</tspan></text>
+  <text x="30" y="135" class="code-line"><tspan class="keyword">return</tspan> <tspan class="keyword">self</tspan>.process_data(results)</tspan></text>
+
+  <!-- Cursor blinking -->
+  <rect x="20" y="122" width="2" height="10" class="cursor" fill="#d4d4d4"/>
+
+  <!-- Reload indicator -->
+  <g class="pulse" transform="translate(200,150)">
+    <circle cx="0" cy="0" r="15" fill="#007acc" opacity="0.3"/>
+    <path d="M0,-10 L0,10 M-10,0 L10,0" stroke="#007acc" stroke-width="2"/>
+    <text x="-10" y="5" font-size="10" fill="#fff" text-anchor="middle">🔄</text>
+  </g>
+</svg>

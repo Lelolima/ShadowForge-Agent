@@ -13,11 +13,15 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-json
+      - id: check-toml
       - id: check-added-large-files
         args: [--maxkb=500]
       - id: detect-private-key
+      - id: check-merge-conflict
       - id: no-commit-to-branch
         args: [--branch=main]
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
 
   - repo: https://github.com/PyCQA/bandit
     rev: 1.7.9
@@ -25,3 +29,9 @@ repos:
       - id: bandit
         args: ["-ll", "--skip=B101,B311"]
         files: ^(core|models|planning)/
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']

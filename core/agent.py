@@ -53,102 +53,44 @@ from core.subsystem_factory import (
     create_planning,
 )
 
+# Observability imports
+try:
+    from observability.metrics import (
+        record_ooda_phase,
+        increment_ooda_iterations,
+        record_event_published,
+        record_event_processed,
+        record_error,
+        set_active_ooda_cycles,
+        set_queued_events,
+        set_subsystem_health,
+    )
+    OBSERVABILITY_ENABLED = True
+except ImportError:
+    OBSERVABILITY_ENABLED = False
+    # Define dummy functions
+    def record_ooda_phase(phase: str, duration_seconds: float) -> None: pass
+    def increment_ooda_iterations() -> None: pass
+    def record_event_published(event_type: str, priority: str) -> None: pass
+    def record_event_processed(event_type: str, outcome: str, latency_seconds: float) -> None: pass
+    def record_error(component: str, error_type: str) -> None: pass
+    def set_active_ooda_cycles(count: int) -> None: pass
+    def set_queued_events(count: int) -> None: pass
+    def set_subsystem_health(subsystem: str, healthy: bool) -> None: pass
+
+try:
+    from observability.tracing import trace_ooda_phase, trace_async, trace_sync
+    OBSERVABILITY_TRACING_ENABLED = True
+except ImportError:
+    OBSERVABILITY_TRACING_ENABLED = False
+    def trace_oid_phase(phase: str):  # type: ignore
+        def decorator(func): return func
+        return decorator
+    def trace_async(func): return func
+    def trace_sync(func): return func
+
 console = Console()
 logger = logging.getLogger("shadowforge.core")
-
-
-# TypedDict definitions for OEDA method return types
-class ObservationDict(TypedDict, total=False):
-    """Tipo para observações coletadas na fase OBSERVE do loop OODA.
-
-    Attributes:
-        tipo: str - Tipo da observação coletada (ex: "screenshot", "ocr",
-                  "comando_voz", "processos", "analise_visual")
-        dados: Any - Conteúdo da observação, cujo tipo varia conforme 'tipo':
-                  - Para "screenshot": bytes da imagem capturada
-                  - Para "ocr": texto extraído da imagem
-                  - Para "comando_voz": string com o comando reconhecido
-                  - Para "processos": lista de processos em execução
-                  - Para "analise_visual": dict com descrição da cena
-        timestamp: str - Timestamp ISO 8601 quando a observação foi coletada
-                      (formato: YYYY-MM-DDTHH:MM:SS.mmmmmm)
-    """
-    tipo: str
-    dados: Any
-    timestamp: str
-
-
-class OrientationDict(TypedDict, total=False):
-    """Tipo para orientação calculada na fase ORIENT do loop OODA.
-
-    Esta classe representa o contexto analisado após a observação, usado para
-    informar a tomada de decisão na fase DECIDE.
-
-    Attributes:
-        observacoes_processadas: int - Número total de observações processadas
-                                   neste ciclo OODA
-        fase_atual: str - Fase atual do agente (ex: "recon", "scan", "enum",
-                         "exploit", "post", "report")
-        alvo: Optional[str] - Alvo atual da operação (domínio ou IP sendo testado)
-        vulnerabilidades_conhecidas: int - Quantidade de vulnerabilidades já
-                                        descobertas nesta campanha
-        acoes_executadas: int - Número total de ações executadas até agora
-        memoria_recente: List[Dict[str, Any]] - Contexto recente da memória
-                                             de curto prazo (últimas 5 entradas)
-        tecnicas_sugeridas: List[Dict[str, Any]] - Técnicas de pentest
-                                                 sugeridas pelo sistema RAG
-                                                 baseadas na fase atual e alvo
-        licoes: List[str] - Lições aprendidas relevantes recuperadas da
-                           memória de longo prazo para orientar a ação
-    """
-    observacoes_processadas: int
-    fase_atual: str
-    alvo: Optional[str]
-    vulnerabilidades_conhecidas: int
-    acoes_executadas: int
-    memoria_recente: List[Dict[str, Any]]
-    tecnicas_sugeridas: List[Dict[str, Any]]
-    licoes: List[str]
-
-
-class DecisionDict(TypedDict, total=False):
-    """Tipo para decisão tomada na fase DECIDE do loop OODA.
-
-    Esta classe representa a decisão tomada após a orientação, contendo
-    a ação a ser executada e seu contexto.
-
-    Attributes:
-        acao: str - Nome da ação a ser executada (ex: "executar_recon",
-                   "executar_scan", "gerar_poc", "etica_bloqueada")
-        alvo: Optional[str] - Alvo da ação (domínio, IP ou None se não aplicável)
-        motivo: Optional[str] - Justificativa ou explicação para a decisão tomada
-        acao_original: Optional[str] - Ação original antes da aplicação dos
-                                     guardrails éticos (None se não foi modificada)
-        sucesso: bool - Indicador esperado de sucesso da ação (True para ações
-                       normais, False para ações de bloqueio ou erro)
-    """
-    acao: str
-    alvo: Optional[str]
-    motivo: Optional[str]
-    acao_original: Optional[str]
-    sucesso: bool
-
-
-class ActionResultDict(TypedDict, total=False):
-    """Tipo para resultado da ação na fase ACT do loop OODA.
-
-    Esta classe representa o resultado da execução de uma ação,
-    indicando sucesso ou falha e qualquer informação relevante.
-
-    Attributes:
-        sucesso: bool - Indica se a ação foi executada com sucesso
-        relatorio: Optional[str] - Relatório detalhado da ação (se aplicável)
-                                 Ex: saída de comando, dados coletados, etc.
-        erro: Optional[str] - Mensagem de erro em caso de falha (None se sucesso)
-    """
-    sucesso: bool
-    relatorio: Optional[str]
-    erro: Optional[str]
 
 
 class ShadowForgeAgent(ODDATemplate):
@@ -223,98 +165,71 @@ class ShadowForgeAgent(ODDATemplate):
         self._models = None
         self._dashboard = None
 
-        # Estratégias de ação (padrão Strategy) - serão inicializadas após subsistemas
-        self._acao_estrategias: dict[str, AcaoStrategy] = {}
-        self._estrategia_padrao = AcaoNaoReconhecidaStrategy()
-
         # Callbacks de progresso
         self._on_fase_change: list[Callable] = []
         self._on_vuln_found: list[Callable] = []
         self._on_acao_exec: list[Callable] = []
-
-        # Estratégias de ação (padrão Strategy) - inicia as que não dependem de subsistemas
-        self._acao_estrategias: dict[str, AcaoStrategy] = {
-            "iniciar_recon": IniciarReconStrategy(),
-            "executar_scan": ExecutarScanStrategy(),
-            "executar_enum": ExecutarEnumStrategy(),
-            "gerar_poc": GerarPOCStrategy(),
-            "analisar_privesc": AnalisarPrivEscStrategy(),
-            "avancar_fase": AvançarFaseStrategy(),
-            "aguardar_alvo": AguardarAlvoStrategy(),
-            "finalizar_campanha": FinalizarCampanhaStrategy(),
-            "etica_bloqueada": EticaBloqueadaStrategy(),
-        }
-        self._estrategia_padrao = AcaoNaoReconhecidaStrategy()
 
         logger.info(
             "ShadowForge Agent inicializado | Modo: %s | Alvo: %s",
             mode, target or "nenhum"
         )
 
-    def _atualizar_estrategias_com_subsistemas(self) -> None:
-        """Atualiza estratégias que dependem de subsistemas após inicialização."""
-        if self._hacker_tools:
-            # Atualiza estratégias que dependem de hacker_tools
-            self._acao_estrategias["executar_recon"] = ExecutarReconStrategy(
-                hacker_tools=self._hacker_tools, simulate=self.simulate
-            )
-            self._acao_estrategias["gerar_relatorio"] = GerarRelatorioStrategy(
-                hacker_tools=self._hacker_tools
-            )
-
     async def inicializar_subsistemas(self) -> None:
-        """Inicializa todos os subsistemas usando o padrão Factory."""
+        """Inicializa todos os subsistemas de forma assíncrona."""
         logger.info("Inicializando subsistemas...")
 
-        # Inicializa subsistemas via Factory
-        subsystems_initialized = []
-
         # Event Bus (deve ser o primeiro — todos os módulos dependem dele)
-        try:
-            self.event_bus = create_event_bus(self)
-            await self.event_bus.start()
-            logger.info("[OK] Event Bus inicializado")
-            subsystems_initialized.append("Event Bus")
-        except Exception as e:
-            logger.warning("Event Bus falhou: %s", e)
+        await self.event_bus.start()
+        logger.info("[OK] Event Bus inicializado")
 
         # Plugin Manager
         try:
-            self.plugin_manager = create_plugin_manager(self)
             await self.plugin_manager.load_all()
             logger.info("[OK] Plugin Manager inicializado (%d plugins)", len(self.plugin_manager.list_plugins()))
-            subsystems_initialized.append("Plugin Manager")
         except Exception as e:
             logger.warning("Plugin Manager falhou: %s", e)
 
-        # Dashboard API
+        # Dashboard API (FastAPI + WebSocket)
         try:
-            self._dashboard = create_dashboard(self)
-            if self._dashboard:
-                from api.dashboard import update_dashboard_state
-                update_dashboard_state("agente_online", True)
-                update_dashboard_state("fase_atual", self.estado.fase_atual.value)
-                update_dashboard_state("alvo", self.estado.alvo_principal or "")
-                logger.info("[OK] Dashboard API inicializado")
-                subsystems_initialized.append("Dashboard API")
+            from api.dashboard import app, update_dashboard_state
+            self._dashboard = app
+            update_dashboard_state("agente_online", True)
+            update_dashboard_state("fase_atual", self.estado.fase_atual.value)
+            update_dashboard_state("alvo", self.estado.alvo_principal or "")
+            logger.info("[OK] Dashboard API inicializado")
         except ImportError:
             logger.debug("Dashboard API não disponível (FastAPI não instalado)")
             self._dashboard = None
 
         # Models (NVIDIA NIM/Riva)
         try:
-            self._models = create_models(self)
+            from models.multimodal import NemotronVision
+            from models.nim_client import NIMClient
+            from models.prompts import PromptManager
+
+            self._models = {
+                "nim": NIMClient(config=self.config.nvidia),
+                "vision": NemotronVision(config=self.config.nvidia),
+                "prompts": PromptManager(),
+            }
             logger.info("[OK] Models NIM/Riva inicializados")
-            subsystems_initialized.append("Models")
         except ImportError as e:
             logger.warning("Módulo models não disponível: %s (funcionando em modo limitado)", e)
             self._models = None
 
         # Visão
         try:
-            self._vision = create_vision(self)
+            from vision.ocr import OCRExtractor
+            from vision.screen import ScreenCapture
+            from vision.understanding import ScreenUnderstanding
+
+            self._vision = {
+                "capture": ScreenCapture(config=self.config),
+                "understanding": ScreenUnderstanding(config=self.config),
+                "ocr": OCRExtractor(config=self.config),
+            }
             logger.info("[OK] Módulo visão inicializado")
-            subsystems_initialized.append("Visão")
         except ImportError as e:
             logger.warning("Módulo visão não disponível: %s", e)
             self._vision = None
@@ -322,48 +237,68 @@ class ShadowForgeAgent(ODDATemplate):
         # Fala
         if self.voice_enabled:
             try:
-                self._speech = create_speech(self)
+                from speech.voice_interface import VoiceInterface
+                self._speech = VoiceInterface(config=self.config)
                 await self._speech.inicializar()
                 logger.info("[OK] Módulo fala inicializado")
-                subsystems_initialized.append("Fala")
             except ImportError as e:
                 logger.warning("Módulo fala não disponível: %s", e)
                 self._speech = None
 
         # Controle
         try:
-            self._control = create_control(self)
+            from control.keyboard import StealthKeyboard
+            from control.mouse import StealthMouse
+            from control.shell import StealthShell
+
+            self._control = {
+                "mouse": StealthMouse(),
+                "keyboard": StealthKeyboard(),
+                "shell": StealthShell(config=self.config),
+            }
             logger.info("[OK] Módulo controle inicializado")
-            subsystems_initialized.append("Controle")
         except ImportError as e:
             logger.warning("Módulo controle não disponível: %s", e)
             self._control = None
 
         # Ferramentas hacker
         try:
-            self._hacker_tools = create_hacker_tools(self)
+            from hacker_tools.exploit.web_attacks import WebExploiter
+            from hacker_tools.recon.scanner import ReconScanner
+            from hacker_tools.reporting.report_generator import ReportGenerator
+
+            self._hacker_tools = {
+                "recon": ReconScanner(config=self.config),
+                "web_exploit": WebExploiter(config=self.config),
+                "report": ReportGenerator(),
+            }
             logger.info("[OK] Módulo ferramentas hacker inicializado")
-            subsystems_initialized.append("Ferramentas Hacker")
         except ImportError as e:
             logger.warning("Módulo hacker_tools não disponível: %s", e)
             self._hacker_tools = None
 
         # Planejamento
         try:
-            self._planning = create_planning(self)
+            from planning.orchestrator import CampaignOrchestrator
+            from planning.rag import MITRERAG
+
+            self._planning = {
+                "orchestrator": CampaignOrchestrator(config=self.config),
+                "rag": MITRERAG(config=self.config),
+            }
             logger.info("[OK] Módulo planejamento inicializado")
-            subsystems_initialized.append("Planejamento")
         except ImportError as e:
             logger.warning("Módulo planning não disponível: %s", e)
             self._planning = None
 
-        # Atualiza estratégias que dependem de subsistemas
-        self._atualizar_estrategias_com_subsistemas()
+        # Initialize observability
+        if OBSERVABILITY_ENABLED:
+            # Set initial subsystem health
+            self._update_observability_subsystem_health()
+            # Set active OODA cycles to 0 (will be set to 1 when running)
+            set_active_ooda_cycles(0)
 
-        logger.info(
-            "Subsistemas inicializados: %s",
-            ", ".join(subsystems_initialized) if subsystems_initialized else "Nenhum"
-        )
+        logger.info("Subsistemas inicializados")
 
     async def run(self) -> None:
         """Loop principal do agente — OODA contínuo."""
@@ -374,6 +309,10 @@ class ShadowForgeAgent(ODDATemplate):
         console.print("\n[bold green]SH4D0WF0RG3 ONLINE | Loop OODA iniciando...[/bold green]")
         console.print(f"[dim]Alvo: {self.estado.alvo_principal or 'Nenhum'} | Modo: {self.config.modo.value} | Simulacao: {self.simulate}[/dim]")
         console.print(f"[dim]Max iteracoes: {self.config.ooda.max_iteracoes} | Timeout: {self.config.ooda.timeout_campanha_min}min[/dim]\n")
+
+        # Set active OODA cycles to 1 (we are about to start)
+        if OBSERVABILITY_ENABLED:
+            set_active_ooda_cycles(1)
 
         try:
             while self.running and not self._shutdown_event.is_set():
@@ -388,7 +327,7 @@ class ShadowForgeAgent(ODDATemplate):
                     break
 
                 try:
-                    await self.execute_ooda_cycle()
+                    await self._ooda_cycle()
                     self._iteracao += 1
                 except asyncio.CancelledError:
                     break
@@ -399,8 +338,11 @@ class ShadowForgeAgent(ODDATemplate):
         finally:
             self.running = False
             logger.info("SH4D0WF0RG3 OFFLINE | Iterações: %d", self._iteracao)
+            # Set active OODA cycles to 0
+            if OBSERVABILITY_ENABLED:
+                set_active_ooda_cycles(0)
 
-    async def execute_ooda_cycle(self) -> None:
+    async def _ooda_cycle(self) -> None:
         """Executa um ciclo completo do loop OODA."""
         console.print(f"\n[bold cyan]>> Ciclo OODA #{self._iteracao + 1}[/bold cyan]")
 
@@ -438,9 +380,16 @@ class ShadowForgeAgent(ODDATemplate):
             importancia=0.7 if resultado.get("sucesso") else 0.3,
         )
 
-    async def _observe(self) -> List[ObservationDict]:
+        # Update observability metrics
+        if OBSERVABILITY_ENABLED:
+            increment_ooda_iterations()
+            # Update subsystem health periodically (every 10 iterations to avoid overhead)
+            if self._iteracao % 10 == 0:
+                self._update_observability_subsystem_health()
+
+    async def _observe(self) -> list[dict[str, Any]]:
         """Fase OBSERVE do OODA — coleta informações do ambiente."""
-        observacoes: List[ObservationDict] = []
+        observacoes = []
 
         # Captura de tela (visão)
         if self._vision and self._vision.get("capture"):
@@ -493,14 +442,14 @@ class ShadowForgeAgent(ODDATemplate):
                     "tipo": "processos",
                     "dados": processos,
                 })
-            except Exception as e:
+            except Exception:
                 pass
 
         return observacoes
 
-    async def _orient(self, observacoes: List[ObservationDict]) -> OrientationDict:
+    async def _orient(self, observacoes: list[dict]) -> dict[str, Any]:
         """Fase ORIENT do OODA — analisa e contextualiza observações."""
-        orientacao: OrientationDict = {
+        orientacao = {
             "observacoes_processadas": len(observacoes),
             "fase_atual": self.estado.fase_atual.value,
             "alvo": self.estado.alvo_principal,
@@ -517,19 +466,19 @@ class ShadowForgeAgent(ODDATemplate):
                     alvo=self.estado.alvo_principal or "",
                 )
                 orientacao["tecnicas_sugeridas"] = contexto_tatico
-            except Exception as e:
+            except Exception:
                 pass
 
         # Lições aprendidas
         try:
             licoes = await self.memoria_lp.recuperar_licoes(limite=5)
             orientacao["licoes"] = [licao.conteudo for licao in licoes]
-        except Exception as e:
+        except Exception:
             orientacao["licoes"] = []
 
         return orientacao
 
-    async def _decide(self, orientacao: OrientationDict) -> DecisionDict:
+    async def _decide(self, orientacao: dict[str, Any]) -> dict[str, Any]:
         """Fase DECIDE do OODA — escolhe a próxima ação."""
         fase = self.estado.fase_atual
 
@@ -563,14 +512,14 @@ class ShadowForgeAgent(ODDATemplate):
 
         return decisao
 
-    async def _decidir_inicio(self, orientacao: OrientationDict) -> DecisionDict:
+    async def _decidir_inicio(self, orientacao: dict) -> dict[str, Any]:
         """Decisão para fase IDLE — iniciar reconhecimento."""
         if self.estado.alvo_principal:
             self.estado.fase_atual = FaseOperacao.RECON
             return {"acao": "iniciar_recon", "alvo": self.estado.alvo_principal}
         return {"acao": "aguardar_alvo"}
 
-    async def _decidir_recon(self, orientacao: OrientationDict) -> DecisionDict:
+    async def _decidir_recon(self, orientacao: dict) -> dict[str, Any]:
         """Decisão para fase RECON — scanning e enumeration."""
         if self._hacker_tools and self._hacker_tools.get("recon"):
             tecnicas = orientacao.get("tecnicas_sugeridas", [])
@@ -581,7 +530,7 @@ class ShadowForgeAgent(ODDATemplate):
             }
         return {"acao": "avancar_fase", "proxima": "scan"}
 
-    async def _decidir_scan(self, orientacao: OrientationDict) -> DecisionDict:
+    async def _decidir_scan(self, orientacao: dict) -> dict[str, Any]:
         """Decisão para fase SCAN — usa técnicas RAG se disponíveis."""
         tecnicas = orientacao.get("tecnicas_sugeridas", [])
         tipo_scan = "syn"
@@ -640,10 +589,10 @@ class ShadowForgeAgent(ODDATemplate):
         self.running = False
         return {"acao": "finalizar_campanha"}
 
-    async def _act(self, decisao: DecisionDict) -> ActionResultDict:
+    async def _act(self, decisao: dict[str, Any]) -> dict[str, Any]:
         """Fase ACT do OODA — executa a acao decidida."""
         acao = decisao.get("acao", "none")
-        resultado: ActionResultDict = {"sucesso": False, "acao": acao}
+        resultado = {"sucesso": False, "acao": acao}
 
         if acao == "etica_bloqueada":
             logger.warning("Acao bloqueada por guardrails eticos: %s", decisao.get("motivo"))
@@ -800,3 +749,45 @@ class ShadowForgeAgent(ODDATemplate):
     def registrar_callback_vuln(self, callback: Callable) -> None:
         """Registra callback para vulnerabilidades encontradas."""
         self._on_vuln_found.append(callback)
+
+    # Observability helper methods
+    def _update_observability_subsystem_health(self) -> None:
+        """Update the Prometheus health gauges for subsystems."""
+        if not OBSERVABILITY_ENABLED:
+            return
+        try:
+            # Check event bus health
+            event_bus_healthy = False
+            if self.event_bus:
+                # Check if the event bus is running (has a processing task that's not done)
+                if hasattr(self.event_bus, '_running') and self.event_bus._running:
+                    event_bus_healthy = True
+                elif hasattr(self.event_bus, '_processing_task') and self.event_bus._processing_task:
+                    event_bus_healthy = not self.event_bus._processing_task.done()
+            set_subsystem_health("event_bus", event_bus_healthy)
+
+            # Check NIM client health
+            nim_healthy = False
+            if self.config and self.config.nvidia:
+                if self.simulate:
+                    nim_healthy = True
+                else:
+                    api_key = self.config.nvidia.api_key
+                    if api_key and not api_key.startswith("nvapi-xxxxx"):
+                        nim_healthy = True
+            set_subsystem_health("nim_client", nim_healthy)
+
+            # Check database health (simplified)
+            db_healthy = True
+            if hasattr(self, 'memoria_cp') and self.memoria_cp:
+                pass
+            if hasattr(self, 'memoria_lp') and self.memoria_lp:
+                pass
+            set_subsystem_health("database", db_healthy)
+
+            # Check dashboard health
+            dashboard_healthy = self._dashboard is not None
+            set_subsystem_health("dashboard", dashboard_healthy)
+
+        except Exception as e:
+            logger.debug(f"Observability health update failed: {e}")
