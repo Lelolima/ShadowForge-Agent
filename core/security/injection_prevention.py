@@ -137,14 +137,18 @@ def execute_safe_command(
         CompletedProcess instance
     """
     cmd_list = prevent_command_injection(command, args)
-    return subprocess.run(
-        cmd_list,
-        cwd=cwd,
-        timeout=timeout,
-        capture_output=capture_output,
-        text=True,  # Return strings instead of bytes
-        check=False  # Don't raise exception on non-zero exit
-    )
+    try:
+        return subprocess.run(
+            cmd_list,
+            cwd=cwd,
+            timeout=timeout,
+            capture_output=capture_output,
+            text=True,  # Return strings instead of bytes
+            check=False  # Don't raise exception on non-zero exit
+        )
+    except FileNotFoundError as exc:
+        # Comando inexistente: código 127 (convenção POSIX) em vez de exceção
+        return subprocess.CompletedProcess(cmd_list, 127, stdout="", stderr=str(exc))
 
 
 def sanitize_sql(value: str) -> str:
@@ -197,7 +201,9 @@ def escape_like_pattern(value: str) -> str:
     if not isinstance(value, str):
         value = str(value)
     # Escape wildcard characters and escape character itself
-    return value.replace("%", "\\%").replace("_", "\\_").replace("\\", "\\\\")
+    # A barra invertida deve ser escapada primeiro; senão as barras inseridas
+    # para % e _ seriam escapadas de novo (escape duplo).
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
 def validate_and_sanitize_filename(filename: str) -> str:
@@ -219,8 +225,10 @@ def validate_and_sanitize_filename(filename: str) -> str:
     if not filename or filename.strip() != filename:
         raise ValidationError("Filename cannot be empty or have leading/trailing whitespace")
 
-    # Remove any directory path components - only keep the basename
-    filename = filename.split('/')[-1].split('\\')[-1]
+    # Rejeita componentes de diretório (path traversal / caminho absoluto)
+    # em vez de descartá-los silenciosamente.
+    if '/' in filename or '\\' in filename or filename in ('.', '..'):
+        raise ValidationError(f"Filename must not contain path components: {filename!r}")
 
     # Remove dangerous characters
     # Allow alphanumeric, spaces, dots, hyphens, underscores
