@@ -20,6 +20,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from core.config import ShadowForgeConfig
+from core.scope import EscopoAutorizado, alvo_em_lista_bloqueio, host_corresponde
 
 logger = logging.getLogger("shadowforge.hacker_tools.recon.scanner")
 
@@ -129,57 +130,46 @@ class ReconScanner:
             except ValueError:
                 return False
 
+    def autorizar(self, alvo: str) -> None:
+        """Autoriza explicitamente ``alvo`` nesta sessão (soma-se ao escopo da config)."""
+        self._autorizado = True
+        self._alvo_autorizado = alvo
+
+    def _escopo(self) -> EscopoAutorizado:
+        entradas: list[str] = []
+        if self._config is not None:
+            entradas.extend(self._config.etica.whitelist_hosts)
+        if self._autorizado and self._alvo_autorizado:
+            entradas.append(self._alvo_autorizado)
+        return EscopoAutorizado.de_lista(entradas)
+
     def verificar_autorizacao(self, alvo: str) -> tuple[bool, str]:
         """Verifica se o alvo está autorizado para scanning.
+
+        O alvo precisa estar fora da blacklist e dentro do escopo autorizado
+        (``etica.whitelist_hosts`` da config ou :meth:`autorizar`).
 
         Returns:
             Tupla (autorizado, motivo)
         """
-        # Verifica blacklist básica
-        blacklist = [
-            "0.0.0.0", "127.0.0.1", "localhost",
-            "224.0.0.0", "255.255.255.255",
-        ]
+        bloqueios = (
+            self._config.etica.blacklist_hosts
+            if self._config is not None
+            else ["0.0.0.0/8", "127.0.0.0/8", "localhost", "224.0.0.0/4", "255.255.255.255/32"]
+        )
+        bloqueio = alvo_em_lista_bloqueio(alvo, bloqueios)
+        if bloqueio:
+            return False, f"Alvo {alvo} está na blacklist ({bloqueio}) - não escanear"
 
-        if alvo in blacklist:
-            return False, f"Alvo {alvo} está na blacklist - não escanear"
+        if self._escopo().permite(alvo):
+            return True, "Alvo dentro do escopo autorizado"
 
-        # M-16 FIX: IPs privados requerem confirmação explícita (não auto-autorizam)
-        if self._is_private_ip(alvo):
-            if self._autorizado and self._host_autorizado(alvo, self._alvo_autorizado):
-                return True, "Alvo privado previamente autorizado nesta sessão"
-            logger.info("[RECON] Range privado detectado: %s — requer autorização explícita", alvo)
-            return False, f"Range privado detectado: {alvo} — requisite autorização explícita do operador"
-
-        # Para IPs públicos e hostnames, valida contra escopo autorizado
-        if self._alvo_autorizado and self._host_autorizado(alvo, self._alvo_autorizado):
-            return True, "Alvo previamente autorizado nesta sessão"
-
-        logger.warning("ALVO NÃO VERIFICADO: %s — Requer autorização explícita!", alvo)
-        return False, "ALVO PÚBLICO NÃO AUTORIZADO — Requer confirmação explícita do operador"
+        logger.warning("ALVO FORA DO ESCOPO: %s — requer autorização explícita", alvo)
+        return False, f"Alvo {alvo} fora do escopo autorizado — requer autorização explícita do operador"
 
     def _host_autorizado(self, host: str, host_autorizado: str) -> bool:
-        """Verifica se o host está autorizado (exato ou subdomínio válido).
-
-        Evita bypass de prefixo: exemplo.com autorizado permite www.exemplo.com
-        mas NÃO permite exemplo.com.evil.com
-        """
-        if not host or not host_autorizado:
-            return False
-
-        # Correspondência exata
-        if host == host_autorizado:
-            return True
-
-        # Verificar se é subdomínio válido (host termina com .host_autorizado)
-        # Mas garantir que não seja correspondência parcial de domínio
-        if host.endswith('.' + host_autorizado):
-            # Verificar se há exatamente um ponto extra antes do domínio autorizado
-            # Isso evita que exemplo.com.evil.com passe quando exemplo.com está autorizado
-            prefix = host[:-len(host_autorizado)-1]  # Remove ".host_autorizado" do final
-            return prefix.count('.') == 0 and len(prefix) > 0  # Subdomínio válido (não vazio)
-
-        return False
+        """Host exato ou subdomínio de um nível (mantido por compatibilidade)."""
+        return host_corresponde(host, host_autorizado)
 
     async def executar_full_recon(
         self,
@@ -199,9 +189,11 @@ class ReconScanner:
         Returns:
             Dicionário com resultados estruturados
         """
-        # Verifica autorização
+        # Verifica autorização. Em simulação nada toca o alvo, então um escopo vazio
+        # é tolerado; um escopo definido continua sendo respeitado.
         autorizado, motivo = self.verificar_autorizacao(alvo)
-        if not autorizado:
+        tolerado = simulate and self._escopo().vazio and "blacklist" not in motivo
+        if not autorizado and not tolerado:
             return {"erro": motivo, "autorizado": False}
 
         logger.info("[RECON] Iniciando full recon: %s | Simulate: %s", alvo, simulate)
@@ -349,7 +341,9 @@ class ReconScanner:
         try:
             root = ET.fromstring(xml_output)
             for host_elem in root.findall(".//host"):
-                if host_elem.get("status", {}).get("state") != "up":
+                # <status> é elemento filho, não atributo (antes todo host era descartado)
+                status_elem = host_elem.find("status")
+                if status_elem is None or status_elem.get("state") != "up":
                     continue
 
                 rh = ResultadoHost()

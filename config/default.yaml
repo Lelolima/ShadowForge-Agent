@@ -33,11 +33,13 @@ agente:
     registrar_todas_acoes: true
     recusar_ilegal: true
     modo_simulacao: false          # true = simula sem executar ataques reais
-    whitelist_hosts: []            # Hosts autorizados explicitamente
+    whitelist_hosts: []            # ESCOPO autorizado (IP, CIDR, host, *.dominio). Obrigatório fora do --dry-run; --scope acrescenta
     blacklist_hosts:
-      - "0.0.0.0/0"               # Bloqueia broadcast
-      - "224.0.0.0/4"             # Bloqueia multicast
-      - "127.0.0.1"               # Bloqueia loopback por padrão
+      - "0.0.0.0/8"               # Rede "this host" (antes 0.0.0.0/0 bloqueava TODO IPv4)
+      - "127.0.0.0/8"             # Loopback (laboratório local: use config própria)
+      - "169.254.0.0/16"          # Link-local / metadata de nuvem
+      - "224.0.0.0/4"             # Multicast
+      - "255.255.255.255/32"      # Broadcast
     max_severidade_exploracao: "high"  # low | medium | high | critical
     impedir_destruicao: true       # Nunca destruir dados
     impedir_backdoor: true         # Nunca instalar backdoors reais

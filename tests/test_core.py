@@ -190,18 +190,21 @@ class TestMemoriaCurtoPrazo:
 class TestGuardrailsEticos:
     def test_verificar_etica_acao_segura(self) -> None:
         config = ShadowForgeConfig()
+        config.etica.whitelist_hosts = ["192.168.1.0/24"]
         permitido, motivo = config.verificar_etica("scan", "192.168.1.1")
         assert permitido is True
         assert "reconnaissance" in motivo.lower()
 
     def test_verificar_etica_acao_destrutiva(self) -> None:
         config = ShadowForgeConfig()
+        config.etica.whitelist_hosts = ["192.168.1.0/24"]
         permitido, motivo = config.verificar_etica("delete", "192.168.1.1")
         assert permitido is False
         assert "destrutiva" in motivo.lower()
 
     def test_verificar_etica_backdoor(self) -> None:
         config = ShadowForgeConfig()
+        config.etica.whitelist_hosts = ["192.168.1.0/24"]
         permitido, motivo = config.verificar_etica("implant_persistence", "192.168.1.1")
         assert permitido is False
         assert "backdoor" in motivo.lower()
@@ -221,11 +224,30 @@ class TestGuardrailsEticos:
 
     def test_verificar_etica_whitelist(self) -> None:
         config = ShadowForgeConfig()
-        config.etica.whitelist_hosts = ["192.168."]
-        # 10.0.0.1 não está na whitelist
+        config.etica.whitelist_hosts = ["192.168.0.0/16"]
+        # 10.0.0.1 não está no escopo
         permitido, motivo = config.verificar_etica("scan", "10.0.0.1")
         assert permitido is False
-        assert "whitelist" in motivo.lower()
+        assert "escopo" in motivo.lower()
+
+    def test_escopo_obrigatorio_fora_do_dry_run(self) -> None:
+        config = ShadowForgeConfig()
+        permitido, motivo = config.verificar_etica("scan", "10.0.0.5")
+        assert permitido is False
+        assert "escopo" in motivo.lower()
+        # Em dry-run (nada toca o alvo) o escopo vazio é tolerado
+        permitido, _ = config.verificar_etica("scan", "10.0.0.5", simulado=True)
+        assert permitido is True
+
+    def test_blacklist_padrao_nao_bloqueia_todo_ipv4(self) -> None:
+        """Antes, 0.0.0.0/0 no YAML padrão bloqueava qualquer IP."""
+        from core.config import ShadowForgeConfig as Cfg
+        from pathlib import Path
+        cfg = Cfg.carregar_de_yaml(Path(__file__).parent.parent / "config" / "default.yaml")
+        cfg.etica.whitelist_hosts = ["10.0.0.0/24"]
+        permitido, motivo = cfg.verificar_etica("executar_recon", "10.0.0.5")
+        assert permitido is True, motivo
+        assert cfg.ooda.max_iteracoes == 1000  # bloco ooda do YAML agora é lido
 
 
 # =============================================================================
