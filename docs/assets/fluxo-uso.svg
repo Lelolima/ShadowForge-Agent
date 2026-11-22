@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300" role="img" aria-labelledby="t d">
+  <title id="t">Fluxo de uso recomendado</title>
+  <desc id="d">Cinco passos: 1 revisar a configuração, 2 ensaiar em dry-run, 3 definir o escopo autorizado, 4 executar confirmando ações intrusivas, 5 entregar relatório e trilha de auditoria.</desc>
+  <style>
+    :root { --bg:#ffffff; --fg:#0f172a; --muted:#475569; --box:#f6f8fa; --line:#cbd5e1; --accent:#047857; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9aa4b2; --box:#161b22; --line:#30363d; --accent:#3fb950; }
+    }
+    .bg { fill: var(--bg); }
+    .step rect { fill: var(--box); stroke: var(--line); stroke-width: 1.5; animation: destaque 10s ease-in-out infinite; }
+    .num { fill: var(--accent); font: 800 26px system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .h { fill: var(--fg); font: 700 16px system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .s { fill: var(--muted); font: 400 12.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .trilho { stroke: var(--line); stroke-width: 4; stroke-linecap: round; }
+    .progresso { stroke: var(--accent); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 1060; stroke-dashoffset: 1060; animation: avancar 10s ease-in-out infinite; }
+    .s2 rect { animation-delay: 2s; } .s3 rect { animation-delay: 4s; } .s4 rect { animation-delay: 6s; } .s5 rect { animation-delay: 8s; }
+    @keyframes avancar { 0% { stroke-dashoffset: 1060; } 90%, 100% { stroke-dashoffset: 0; } }
+    @keyframes destaque { 0%, 18%, 100% { stroke: var(--line); } 4%, 14% { stroke: var(--accent); stroke-width: 3; } }
+    @media (prefers-reduced-motion: reduce) {
+      .step rect { animation: none; }
+      .progresso { animation: none; stroke-dashoffset: 0; }
+    }
+  </style>
+  <rect class="bg" width="1200" height="300" rx="16"/>
+  <line class="trilho" x1="70" y1="260" x2="1130" y2="260"/>
+  <line class="progresso" x1="70" y1="260" x2="1130" y2="260"/>
+
+  <g class="step s1"><rect x="20" y="30" width="216" height="200" rx="12"/>
+    <text class="num" x="40" y="72">1</text><text class="h" x="40" y="104">Revisar config</text>
+    <text class="s" x="40" y="134">python main.py</text><text class="s" x="40" y="152">  --check-config</text>
+    <text class="s" x="40" y="186">guardrails, segredos,</text><text class="s" x="40" y="204">blacklist, TLS</text></g>
+
+  <g class="step s2"><rect x="256" y="30" width="216" height="200" rx="12"/>
+    <text class="num" x="276" y="72">2</text><text class="h" x="276" y="104">Ensaiar (dry-run)</text>
+    <text class="s" x="276" y="134">--dry-run</text><text class="s" x="276" y="152">--target &lt;alvo&gt;</text>
+    <text class="s" x="276" y="186">nada toca o alvo;</text><text class="s" x="276" y="204">fases [SIMULADO]</text></g>
+
+  <g class="step s3"><rect x="492" y="30" width="216" height="200" rx="12"/>
+    <text class="num" x="512" y="72">3</text><text class="h" x="512" y="104">Definir escopo</text>
+    <text class="s" x="512" y="134">--scope 10.0.0.0/24</text><text class="s" x="512" y="152">--scope-file e.txt</text>
+    <text class="s" x="512" y="186">só o autorizado</text><text class="s" x="512" y="204">por escrito</text></g>
+
+  <g class="step s4"><rect x="728" y="30" width="216" height="200" rx="12"/>
+    <text class="num" x="748" y="72">4</text><text class="h" x="748" y="104">Executar e confirmar</text>
+    <text class="s" x="748" y="134">prompt [s/N]</text><text class="s" x="748" y="152">ou --yes</text>
+    <text class="s" x="748" y="186">sem resposta:</text><text class="s" x="748" y="204">ação negada</text></g>
+
+  <g class="step s5"><rect x="964" y="30" width="216" height="200" rx="12"/>
+    <text class="num" x="984" y="72">5</text><text class="h" x="984" y="104">Entregar</text>
+    <text class="s" x="984" y="134">data/reports/</text><text class="s" x="984" y="152">data/audit/*.jsonl</text>
+    <text class="s" x="984" y="186">relatório +</text><text class="s" x="984" y="204">trilha verificável</text></g>
+</svg>
