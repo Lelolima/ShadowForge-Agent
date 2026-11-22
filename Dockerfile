@@ -119,7 +119,8 @@ VOLUME ["/opt/shadowforge/data", "/opt/shadowforge/logs", "/opt/shadowforge/conf
 USER shadowforge
 
 # Entrypoint
-ENTRYPOINT ["python3.11", "-m", "core.agent"]
+# core.agent não possui bloco __main__; o ponto de entrada real é main.py
+ENTRYPOINT ["python3.11", "main.py"]
 CMD ["--config", "/opt/shadowforge/config/default.yaml", "--mode", "stealth"]
 
 # ============================================================
