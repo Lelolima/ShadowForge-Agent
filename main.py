@@ -155,6 +155,11 @@ class ShadowForgeLauncher:
             help="Arquivo com um alvo autorizado por linha (# comenta)",
         )
         parser.add_argument(
+            "--check-config",
+            action="store_true",
+            help="Só revisa a configuração (--config) em busca de ajustes inseguros e sai",
+        )
+        parser.add_argument(
             "--yes",
             action="store_true",
             help="Confirma automaticamente ações intrusivas DENTRO do escopo (uso não interativo)",
@@ -276,6 +281,8 @@ class ShadowForgeLauncher:
     async def run(self, argv: list[str] | None = None) -> None:
         """Loop principal assíncrono."""
         self.args = self.parse_args(argv)
+        if self.args.check_config:
+            sys.exit(self.revisar_configuracao())
         self.display_banner()
 
         logger = self.setup_logging()
@@ -362,6 +369,27 @@ class ShadowForgeLauncher:
                 await self.agent.shutdown()
             console.print("[cyan]  SH4D0WF0RG3 OFFLINE | Sessão encerrada[/cyan]")
 
+    def revisar_configuracao(self) -> int:
+        """Revisa o YAML de --config; retorna 1 se houver achado crítico/alto."""
+        from core.revisao_config import revisar_arquivo
+
+        caminho = Path(self.args.config)
+        if not caminho.is_absolute():
+            caminho = ROOT_DIR / caminho
+        if not caminho.is_file():
+            console.print(f"[red]Config não encontrado: {caminho}[/red]")
+            return 2
+        achados = revisar_arquivo(caminho)
+        table = Table(title=f"Revisão de configuração: {caminho.name}")
+        for coluna in ("Severidade", "Chave", "Problema", "Recomendação"):
+            table.add_column(coluna)
+        for achado in achados:
+            table.add_row(achado.severidade.value.upper(), achado.chave, achado.mensagem, achado.recomendacao)
+        console.print(table if achados else "[green]Nenhum ajuste inseguro encontrado.[/green]")
+        graves = sum(1 for a in achados if a.severidade.value in {"critical", "high"})
+        console.print(f"Total: {len(achados)} achado(s), {graves} crítico(s)/alto(s).")
+        return 1 if graves else 0
+
     def _criar_confirmacao(self):
         """Callback de confirmação antes de ações intrusivas.
 
@@ -374,7 +402,10 @@ class ShadowForgeLauncher:
             return None
 
         def perguntar(descricao: str) -> bool:
-            resposta = input(f"\n  [?] Confirmar ação intrusiva: {descricao}? [s/N] ")
+            try:
+                resposta = input(f"\n  [?] Confirmar ação intrusiva: {descricao}? [s/N] ")
+            except EOFError:  # sem entrada disponível: nega (fail-closed)
+                return False
             return resposta.strip().lower() in {"s", "sim", "y", "yes"}
 
         return perguntar

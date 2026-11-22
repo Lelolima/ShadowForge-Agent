@@ -21,6 +21,7 @@ from typing import Any
 
 from core.config import ShadowForgeConfig
 from core.scope import EscopoAutorizado, alvo_em_lista_bloqueio, host_corresponde
+from hacker_tools.recon.web_review import analisar_cabecalhos
 
 logger = logging.getLogger("shadowforge.hacker_tools.recon.scanner")
 
@@ -335,6 +336,10 @@ class ReconScanner:
 
         return self._parsear_nmap_xml(resultado.stdout)
 
+    def parsear_nmap_xml(self, xml_output: str) -> list[ResultadoHost]:
+        """Parseia o XML de um scan Nmap já existente (sem executar nada)."""
+        return self._parsear_nmap_xml(xml_output)
+
     def _parsear_nmap_xml(self, xml_output: str) -> list[ResultadoHost]:
         """Parseia output XML do Nmap."""
         hosts = []
@@ -380,7 +385,10 @@ class ReconScanner:
                             protocolo=port_elem.get("protocol", "tcp"),
                             estado=state.get("state", "unknown") if state is not None else "unknown",
                             servico=service.get("name", "") if service is not None else "",
-                            versao=service.get("version", "") if service is not None else "",
+                            # Produto + versão (ex.: "OpenSSH 7.4"), como o Nmap exibe
+                            versao=" ".join(
+                                filter(None, [service.get("product", ""), service.get("version", "")])
+                            ) if service is not None else "",
                         )
                         rh.portas.append(rp)
 
@@ -443,8 +451,11 @@ class ReconScanner:
             if hostname:
                 try:
                     ip = ipaddress.ip_address(hostname)
+                    # Loopback só é liberado quando o próprio host está no escopo
+                    # autorizado (laboratório local); link-local/metadata nunca.
+                    loopback_autorizado = ip.is_loopback and self._escopo().permite(hostname)
                     for blocked_net in _SSRF_BLOCKED_NETWORKS:
-                        if ip in blocked_net:
+                        if ip in blocked_net and not loopback_autorizado:
                             logger.warning("[SSRF] URL bloqueada: %s (host em rede bloqueada: %s)", url, blocked_net)
                             return {"url": url, "erro": f"Host em rede bloqueada (SSRF protection): {blocked_net}"}
                 except ValueError:
@@ -463,6 +474,10 @@ class ReconScanner:
             ) as resp:
                 resultado["status_code"] = resp.status
                 resultado["headers"] = dict(resp.headers)
+                resultado["analise_seguranca"] = [
+                    a.to_dict()
+                    for a in analisar_cabecalhos(resp.headers, https=url.lower().startswith("https"))
+                ]
 
                 # Tecnologia detection por headers
                 server = resp.headers.get("Server", "")
