@@ -1,0 +1,23 @@
+# Configuração INSEGURA de propósito, para o exemplo de revisão.
+# O valor em nvidia.api_key é fictício (não é uma chave real).
+agente:
+  nome: "ShadowForge-lab"
+  modo: "agressivo"
+  etica:
+    exigir_autorizacao: false
+    verificar_escopo: true
+    registrar_todas_acoes: false
+    impedir_destruicao: true
+    impedir_backdoor: true
+    impedir_exfiltracao_real: true
+    whitelist_hosts:
+      - "10.0.0.0/8"
+    blacklist_hosts:
+      - "0.0.0.0/0"
+      - "224.0.0.0/4"
+
+nvidia:
+  api_key: "valor-ficticio-colado-no-arquivo"
+
+hacker_ferramentas:
+  verify_ssl: false

@@ -32,6 +32,11 @@ except ImportError:
 
 MODULES = [
     "core.config",
+    "core.scope",
+    "core.audit",
+    "core.revisao_config",
+    "hacker_tools.recon.triagem",
+    "hacker_tools.recon.web_review",
     "core.state",
     "core.memory",
     "models.nim_client",
@@ -57,10 +62,6 @@ MODULES = [
     "speech.tts",
     "speech.audio_utils",
     "speech.voice_interface",
-    "examples.pentest_lab",
-    "examples.bug_bounty_simulation",
-    "examples.doom_control",
-    "examples.voice_campaign",
 ]
 
 

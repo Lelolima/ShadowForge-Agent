@@ -51,3 +51,15 @@ def test_confirmacao_interativa(monkeypatch):
     assert _launcher([])._criar_confirmacao()("x") is True
     monkeypatch.setattr("builtins.input", lambda _prompt: "")
     assert _launcher([])._criar_confirmacao()("x") is False
+
+
+def test_check_config_padrao_sem_grave():
+    launcher = _launcher(["--check-config"])
+    assert launcher.revisar_configuracao() == 0
+
+
+def test_check_config_insegura(tmp_path):
+    cfg = tmp_path / "c.yaml"
+    cfg.write_text("etica:\n  exigir_autorizacao: false\n", encoding="utf-8")
+    assert _launcher(["--check-config", "--config", str(cfg)]).revisar_configuracao() == 1
+    assert _launcher(["--check-config", "--config", str(tmp_path / "x.yaml")]).revisar_configuracao() == 2

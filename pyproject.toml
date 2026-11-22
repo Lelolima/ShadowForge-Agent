@@ -72,7 +72,7 @@ include = [
 source = ["api", "control", "core", "hacker_tools", "models", "observability", "planning", "utils"]
 
 [tool.coverage.report]
-fail_under = 55
+fail_under = 57
 skip_empty = true
 
 [tool.ruff]
