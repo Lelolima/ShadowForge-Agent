@@ -4,14 +4,14 @@ Provides retry mechanisms with exponential backoff, jitter, and various backoff 
 """
 
 import asyncio
-import random
-import time
 import functools
 import logging
+import random
+import time
+from collections.abc import Callable
+from dataclasses import dataclass
 from enum import Enum
-from dataclasses import dataclass, field
-from typing import Callable, Any, Optional, TypeVar, Generic, Union, Tuple, List, Type
-from abc import ABC, abstractmethod
+from typing import TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -35,22 +35,14 @@ class RetryConfig:
     backoff_strategy: BackoffStrategy = BackoffStrategy.EXPONENTIAL_JITTER
     retry_exceptions: tuple = (Exception,)  # Exception types to retry on
     jitter_range: float = 0.1             # Jitter range (0.0 to 1.0)
-    timeout: Optional[float] = None         # Timeout per attempt in seconds
+    timeout: float | None = None         # Timeout per attempt in seconds
     name: str = "retry"                     # Name for logging/monitoring
 
 
 class RetryError(Exception):
     """Exception raised when all retry attempts are exhausted."""
 
-    def __init__(self, message: str, last_exception: Optional[Exception] = None):
-        super().__init__(message)
-        self.last_exception = last_exception
-
-
-class RetryError(Exception):
-    """Exception raised when all retry attempts are exhausted."""
-
-    def __init__(self, message: str, last_exception: Optional[Exception] = None):
+    def __init__(self, message: str, last_exception: Exception | None = None):
         super().__init__(message)
         self.last_exception = last_exception
 
@@ -215,9 +207,7 @@ class RetryManager:
             delay = self.config.base_delay
         elif self.config.backoff_strategy == BackoffStrategy.LINEAR:
             delay = self.config.base_delay * (attempt + 1)
-        elif self.config.backoff_strategy == BackoffStrategy.EXPONENTIAL:
-            delay = self.config.base_delay * (2 ** attempt)
-        elif self.config.backoff_strategy == BackoffStrategy.EXPONENTIAL_JITTER:
+        elif self.config.backoff_strategy == BackoffStrategy.EXPONENTIAL or self.config.backoff_strategy == BackoffStrategy.EXPONENTIAL_JITTER:
             delay = self.config.base_delay * (2 ** attempt)
         else:
             delay = self.config.base_delay
@@ -235,7 +225,7 @@ class RetryManager:
         return delay
 
 
-def retry(config: Optional[RetryConfig] = None) -> Callable:
+def retry(config: RetryConfig | None = None) -> Callable:
     """
     Decorator for applying retry logic to functions.
 
@@ -275,7 +265,7 @@ def retry_on_failure(
     max_delay: float = 60.0,
     backoff_strategy: BackoffStrategy = BackoffStrategy.EXPONENTIAL_JITTER,
     retry_exceptions: tuple = (Exception,),
-    timeout: Optional[float] = None
+    timeout: float | None = None
 ) -> Callable:
     """
     Convenience decorator for retry with common parameters.
@@ -307,7 +297,7 @@ def retry_exponential(
     base_delay: float = 1.0,
     max_delay: float = 60.0,
     retry_exceptions: tuple = (Exception,),
-    timeout: Optional[float] = None
+    timeout: float | None = None
 ) -> Callable:
     """
     Convenience decorator for exponential backoff retry.

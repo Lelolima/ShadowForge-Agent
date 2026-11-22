@@ -35,10 +35,14 @@ class PDFExporter:
         try:
             from reportlab.lib import colors
             from reportlab.lib.pagesizes import A4
-            from reportlab.lib.styles import ParagraphStyle, getSampleStyleheet
+            from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
             from reportlab.lib.units import cm
             from reportlab.platypus import (
-                PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle,
+                Paragraph,
+                SimpleDocTemplate,
+                Spacer,
+                Table,
+                TableStyle,
             )
 
             # Document
@@ -46,7 +50,7 @@ class PDFExporter:
                                      rightMargin=2 * cm, leftMargin=2 * cm,
                                      topMargin=2 * cm, bottomMargin=2 * cm)
             elements: list[Any] = []
-            styles = getSampleStyleheet()
+            styles = getSampleStyleSheet()
 
             # Título
             titulo_style = ParagraphStyle(
