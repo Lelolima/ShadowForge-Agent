@@ -4,40 +4,31 @@ Tests circuit breaker, retry, fallback, and chaos engineering implementations.
 """
 
 import asyncio
-import pytest
 import time
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
-from core.resilience.circuit_breaker import (
-    CircuitBreaker,
-    CircuitBreakerConfig,
-    CircuitBreakerState,
-    CircuitBreakerError
-)
-from core.resilience.retry import (
-    RetryManager,
-    RetryConfig,
-    BackoffStrategy,
-    RetryError,
-    retry,
-    retry_on_failure,
-    retry_exponential
-)
-from core.resilience.fallback import (
-    Fallback,
-    FallbackConfig,
-    FallbackTrigger,
-    FallbackError
-)
+import pytest
+
 from core.resilience.chaos import (
     ChaosExperiment,
     ChaosExperimentConfig,
-    ChaosType,
     ChaosState,
-    ChaosError,
-    chaos_experiment,
+    ChaosType,
     latency_chaos,
-    exception_chaos
+)
+from core.resilience.circuit_breaker import (
+    CircuitBreaker,
+    CircuitBreakerConfig,
+    CircuitBreakerError,
+    CircuitBreakerState,
+)
+from core.resilience.fallback import Fallback, FallbackConfig, FallbackError, FallbackTrigger
+from core.resilience.retry import (
+    BackoffStrategy,
+    RetryConfig,
+    RetryError,
+    RetryManager,
+    retry_on_failure,
 )
 
 
@@ -59,7 +50,7 @@ class TestCircuitBreaker:
         breaker = CircuitBreaker(config)
 
         # Simulate failures
-        for i in range(3):
+        for _i in range(3):
             try:
                 def failing_func():
                     raise ValueError("test")
@@ -77,7 +68,7 @@ class TestCircuitBreaker:
         breaker = CircuitBreaker(config)
 
         # Open the circuit breaker
-        for i in range(2):
+        for _i in range(2):
             try:
                 def failing_func():
                     raise ValueError("test")
@@ -103,7 +94,7 @@ class TestCircuitBreaker:
         breaker = CircuitBreaker(config)
 
         # Open the circuit breaker
-        for i in range(2):
+        for _i in range(2):
             try:
                 def failing_func():
                     raise ValueError("test")
@@ -134,7 +125,7 @@ class TestCircuitBreaker:
         breaker = CircuitBreaker(config)
 
         # Open the circuit breaker
-        for i in range(2):
+        for _i in range(2):
             try:
                 def failing_func():
                     raise ValueError("test")
@@ -165,7 +156,7 @@ class TestCircuitBreaker:
         breaker = CircuitBreaker(config)
 
         # Simulate async failures
-        for i in range(2):
+        for _i in range(2):
             try:
                 async def failing_async_func():
                     await asyncio.sleep(0.01)
@@ -433,7 +424,7 @@ class TestChaosEngineering:
         experiment = ChaosExperiment(config)
 
         assert experiment.state == ChaosState.STOPPED
-        assert experiment.is_active == False
+        assert experiment.is_active is False
 
     def test_chaos_experiment_start_stop(self):
         """Test starting and stopping chaos experiment."""
@@ -447,11 +438,11 @@ class TestChaosEngineering:
 
         experiment.start()
         assert experiment.state == ChaosState.RUNNING
-        assert experiment.is_active == True
+        assert experiment.is_active is True
 
         experiment.stop()
         assert experiment.state == ChaosState.STOPPED
-        assert experiment.is_active == False
+        assert experiment.is_active is False
 
     def test_chaos_experiment_pause_resume(self):
         """Test pausing and resuming chaos experiment."""
@@ -466,11 +457,11 @@ class TestChaosEngineering:
 
         experiment.pause()
         assert experiment.state == ChaosState.PAUSED
-        assert experiment.is_active == False
+        assert experiment.is_active is False
 
         experiment.resume()
         assert experiment.state == ChaosState.RUNNING
-        assert experiment.is_active == True
+        assert experiment.is_active is True
 
     def test_chaos_experiment_should_inject(self):
         """Test chaos injection decision logic."""
@@ -486,7 +477,7 @@ class TestChaosEngineering:
         injections = 0
         total_tests = 100
 
-        for i in range(total_tests):
+        for _i in range(total_tests):
             if experiment.should_inject("test_function"):
                 injections += 1
 
@@ -505,10 +496,10 @@ class TestChaosEngineering:
         experiment.start()
 
         # Should inject for allowed function
-        assert experiment.should_inject("allowed_func") == True
+        assert experiment.should_inject("allowed_func") is True
 
         # Should not inject for non-target function
-        assert experiment.should_inject("blocked_func") == False
+        assert experiment.should_inject("blocked_func") is False
 
     def test_chaos_experiment_exclude_functions(self):
         """Test chaos experiment exclude function filtering."""
@@ -522,10 +513,10 @@ class TestChaosEngineering:
         experiment.start()
 
         # Should not inject for blocked function
-        assert experiment.should_inject("blocked_func") == False
+        assert experiment.should_inject("blocked_func") is False
 
         # Should inject for non-blocked function
-        assert experiment.should_inject("allowed_func") == True
+        assert experiment.should_inject("allowed_func") is True
 
     @pytest.mark.asyncio
     async def test_latency_chaos_async(self):
@@ -641,14 +632,14 @@ class TestChaosEngineering:
         experiment.start()
 
         # Simulate some calls
-        for i in range(20):
+        for _i in range(20):
             experiment.should_inject("test_func")
 
         stats = experiment.get_stats()
 
         assert stats['name'] == "test_chaos"
         assert stats['state'] == "running"
-        assert stats['enabled'] == True
+        assert stats['enabled'] is True
         assert stats['total_calls'] == 20
         assert 0 <= stats['injection_rate'] <= 1
 

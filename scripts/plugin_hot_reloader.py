@@ -10,12 +10,11 @@ Monitora alterações nos arquivos de plugin e recarrega automaticamente.
 """
 
 import asyncio
-import blake3
-import os
+import contextlib
 import sys
-import time
 from pathlib import Path
-from typing import Dict, Set
+
+import blake3
 
 # Adiciona raiz ao path
 ROOT_DIR = Path(__file__).parent.parent.resolve()
@@ -23,15 +22,13 @@ sys.path.insert(0, str(ROOT_DIR))
 
 try:
     from rich.console import Console
-    from rich.panel import Panel
-    from rich.text import Text
     HAS_RICH = True
 except ImportError:
     HAS_RICH = False
     print("Aviso: 'rich' não instalado. Instale com: pip install rich")
 
-from core.plugins import PluginManager
-from core.event_bus import EventBus
+from core.event_bus import EventBus  # noqa: E402 - após ajuste de sys.path
+from core.plugins import PluginManager  # noqa: E402
 
 
 class FileChangeHandler:
@@ -69,7 +66,7 @@ class FileChangeHandler:
         try:
             with open(file_path, 'rb') as f:
                 return blake3.blake3(f.read()).hexdigest()
-        except (IOError, OSError):
+        except OSError:
             return ""
 
     def check_changes(self) -> set[Path]:
@@ -248,10 +245,8 @@ class PluginHotReloader:
             # Desativa todos os plugins antes de sair
             self._log("[blue][*] Desativando todos os plugins...[/blue]")
             for plugin_name in list(self.loaded_plugins):
-                try:
+                with contextlib.suppress(Exception):  # ignora erros no desligamento
                     await self.plugin_manager.deactivate(plugin_name)
-                except Exception:
-                    pass  # Ignora erros durante o desligamento
             self._log("[green][+] Hot-relôader finalizado[/green]")
 
 

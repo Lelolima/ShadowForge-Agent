@@ -14,7 +14,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from core.config import ShadowForgeConfig
+    from core.config import ConfigNVIDIA
 
 logger = logging.getLogger("shadowforge.models.multimodal")
 
@@ -42,7 +42,7 @@ class NemotronVision:
         "Seja preciso, técnico e direto. Formate como JSON."
     )
 
-    def __init__(self, config: ShadowForgeConfig | None = None) -> None:
+    def __init__(self, config: ConfigNVIDIA | None = None) -> None:
         self._config = config
         self._modelo = "nvidia/nemotron-3-nano-omni-vl"
         self._nim_client = None  # Será inicializado via lazy init
@@ -155,6 +155,7 @@ class NemotronVision:
             )
             try:
                 import json
+
                 # H-14 FIX: Extrair JSON de forma segura usando regex
                 import re
                 json_match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', resposta, re.DOTALL)

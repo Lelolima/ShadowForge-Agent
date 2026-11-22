@@ -2,35 +2,59 @@
 Unit tests for security module components.
 """
 
+import sqlite3
 import sys
 
 import pytest
-import sqlite3
-from unittest.mock import Mock, patch
+
+from core.security.injection_prevention import (
+    SQLIdentifier,
+    build_safe_select,
+    escape_like_pattern,
+    execute_safe_command,
+    execute_safe_sql,
+    prevent_command_injection,
+    prevent_sql_injection,
+    safe_format_string,
+    safe_sql_identifier,
+    sanitize_shell,
+    sanitize_sql,
+    validate_and_sanitize_filename,
+)
 from core.security.input_validation import (
-    validate_input, ValidationError, ValidationRule, validate_ip_address,
-    validate_hostname, validate_port, validate_email, validate_url
+    ValidationError,
+    ValidationRule,
+    validate_email,
+    validate_hostname,
+    validate_input,
+    validate_ip_address,
+    validate_port,
+    validate_url,
 )
 from core.security.output_encoding import (
-    encode_html, encode_html_attribute, encode_url,
-    encode_javascript, encode_json, encode_css,
-    normalize_path, safe_string_truncate
-)
-from core.security.injection_prevention import (
-    prevent_sql_injection, execute_safe_sql,
-    prevent_command_injection, execute_safe_command,
-    sanitize_sql, sanitize_shell, escape_like_pattern,
-    validate_and_sanitize_filename, safe_format_string,
-    SQLIdentifier, safe_sql_identifier, build_safe_select
-)
-from core.security.security_headers import (
-    SecurityHeaders, get_security_headers, apply_security_headers,
-    get_csp_policy, CSP_POLICIES
+    encode_html,
+    encode_html_attribute,
+    encode_javascript,
+    encode_json,
+    encode_url,
+    normalize_path,
+    safe_string_truncate,
 )
 from core.security.rate_limiting import (
-    RateLimitConfig, RateLimitResult, TokenBucket, RateLimiter,
-    create_ip_rate_limiter, create_api_key_rate_limiter,
-    create_burst_tolerant_limiter, rate_limit
+    RateLimitConfig,
+    RateLimiter,
+    TokenBucket,
+    create_api_key_rate_limiter,
+    create_burst_tolerant_limiter,
+    create_ip_rate_limiter,
+    rate_limit,
+)
+from core.security.security_headers import (
+    CSP_POLICIES,
+    SecurityHeaders,
+    apply_security_headers,
+    get_csp_policy,
+    get_security_headers,
 )
 
 
@@ -391,7 +415,7 @@ class TestInjectionPrevention:
         with pytest.raises(ValueError):
             safe_format_string("Hello {name}", wrong_key="value")
 
-    def test_SQLIdentifier(self):
+    def test_sql_identifier_class(self):
         """Test SQL identifier handling."""
         # Valid identifier
         ident = SQLIdentifier("table_name")
@@ -555,25 +579,27 @@ class TestRateLimiting:
         assert config.burst == 20
         assert config.algorithm == "fixed_window"
 
-    def test_token_bucket(self):
-        """Test TokenBucket implementation."""
+    def test_token_bucket(self, monkeypatch):
+        """Test TokenBucket implementation (relógio controlado: sem dependência de timing)."""
+        relogio = {"agora": 1000.0}
+        monkeypatch.setattr("core.security.rate_limiting.time.time", lambda: relogio["agora"])
         bucket = TokenBucket(capacity=10, refill_rate=5.0)  # 5 tokens per second
 
         # Start with full bucket
         assert bucket.tokens_available() == 10.0
 
         # Consume some tokens
-        assert bucket.consume(3) == True
+        assert bucket.consume(3) is True
         assert bucket.tokens_available() == pytest.approx(7.0, abs=0.01)
 
         # Consume more than available
-        assert bucket.consume(8) == False  # Only 7 available
+        assert bucket.consume(8) is False  # Only 7 available
         assert bucket.tokens_available() == pytest.approx(7.0, abs=0.01)  # Shouldn't change
 
         # Wait and check refill (we'll simulate by manipulating time)
-        import time
-        old_time = bucket.last_updated
-        bucket.last_updated = old_time - 2  # 2 seconds ago
+        relogio["agora"] += 0.2  # 0.2 s -> +1 token
+        assert bucket.tokens_available() == pytest.approx(8.0)
+        relogio["agora"] += 2  # +10 tokens, limitado à capacidade
         # Should have 2 * 5 = 10 more tokens, but capped at capacity
         assert bucket.tokens_available() == 10.0
 
@@ -586,13 +612,13 @@ class TestRateLimiting:
         # First 5 requests should be allowed
         for i in range(5):
             result = limiter.is_allowed(identifier)
-            assert result.allowed == True
+            assert result.allowed is True
             assert result.remaining == 4 - i  # 5, 4, 3, 2, 1
 
         # 6th request should be denied
         result = limiter.is_allowed(identifier)
-        assert result.allowed == False
-        assert result.limited == True
+        assert result.allowed is False
+        assert result.limited is True
         assert result.remaining == 0
 
         # Check retry_after is reasonable
@@ -614,14 +640,14 @@ class TestRateLimiting:
         for i in range(15):  # 10 + 5 burst
             result = limiter.is_allowed(identifier)
             if i < 15:
-                assert result.allowed == True
+                assert result.allowed is True
             else:
-                assert result.allowed == False
+                assert result.allowed is False
                 break
 
         # Next request should be denied
         result = limiter.is_allowed(identifier)
-        assert result.allowed == False
+        assert result.allowed is False
 
     def test_rate_limiter_sliding_window(self):
         """Test RateLimiter with sliding window algorithm."""
@@ -630,14 +656,14 @@ class TestRateLimiting:
         identifier = "test_user"
 
         # First 5 requests should be allowed
-        for i in range(5):
+        for _i in range(5):
             result = limiter.is_allowed(identifier)
-            assert result.allowed == True
+            assert result.allowed is True
 
         # 6th request should be denied
         result = limiter.is_allowed(identifier)
-        assert result.allowed == False
-        assert result.limited == True
+        assert result.allowed is False
+        assert result.limited is True
 
     def test_create_ip_rate_limiter(self):
         """Test factory function for IP rate limiter."""
@@ -679,7 +705,7 @@ class TestRateLimiting:
         # Third call should raise exception
         try:
             test_function()
-            assert False, "Should have raised exception"
+            raise AssertionError("Should have raised exception")
         except Exception as e:
             assert "Rate limit exceeded" in str(e)
 

@@ -7,10 +7,10 @@ __version__ = "1.1.0"
 __codinome__ = "SH4D0WF0RG3"
 
 from core.config import ModoOperacao, ShadowForgeConfig
+from core.event_bus import EventBus, EventoShadowForge, PrioridadeEvento, TipoEvento
 from core.memory import MemoriaCurtoPrazo, MemoriaLongoPrazo
+from core.plugins import PluginInfo, PluginManager, ShadowForgePlugin
 from core.state import EstadoAgente, FaseOperacao, Severidade, TipoVulnerabilidade
-from core.event_bus import EventBus, EventoShadowForge, TipoEvento, PrioridadeEvento
-from core.plugins import PluginManager, ShadowForgePlugin, PluginInfo
 
 try:
     from core.agent import ShadowForgeAgent

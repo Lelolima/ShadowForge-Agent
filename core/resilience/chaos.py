@@ -4,14 +4,15 @@ Provides controlled failure injection for testing system resilience.
 """
 
 import asyncio
-import random
-import time
 import functools
 import logging
-from enum import Enum
+import random
+import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable, Any, Optional, TypeVar, Union, List, Dict
-from datetime import datetime, timedelta
+from datetime import datetime
+from enum import Enum
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -40,13 +41,13 @@ class ChaosExperimentConfig:
     chaos_type: ChaosType
     enabled: bool = True
     probability: float = 0.1              # Probability of injecting chaos (0.0 to 1.0)
-    duration: Optional[float] = None      # Duration of chaos in seconds
+    duration: float | None = None      # Duration of chaos in seconds
     intensity: float = 0.5                # Intensity of chaos (0.0 to 1.0)
-    target_functions: List[str] = field(default_factory=list)  # Function names to target
-    exclude_functions: List[str] = field(default_factory=list) # Function names to exclude
-    start_time: Optional[datetime] = None # When to start chaos
-    end_time: Optional[datetime] = None   # When to stop chaos
-    parameters: Dict[str, Any] = field(default_factory=dict)  # Type-specific parameters
+    target_functions: list[str] = field(default_factory=list)  # Function names to target
+    exclude_functions: list[str] = field(default_factory=list) # Function names to exclude
+    start_time: datetime | None = None # When to start chaos
+    end_time: datetime | None = None   # When to stop chaos
+    parameters: dict[str, Any] = field(default_factory=dict)  # Type-specific parameters
     name: str = "chaos_experiment"        # Name for logging/monitoring
 
 
@@ -66,8 +67,8 @@ class ChaosExperiment:
     def __init__(self, config: ChaosExperimentConfig):
         self.config = config
         self._state = ChaosState.STOPPED
-        self._start_time: Optional[float] = None
-        self._end_time: Optional[float] = None
+        self._start_time: float | None = None
+        self._end_time: float | None = None
         self._injection_count = 0
         self._total_calls = 0
 
@@ -89,10 +90,7 @@ class ChaosExperiment:
         if self._start_time is not None and now < self._start_time:
             return False
 
-        if self._end_time is not None and now > self._end_time:
-            return False
-
-        return True
+        return not (self._end_time is not None and now > self._end_time)
 
     def start(self) -> None:
         """Start the chaos experiment."""
@@ -135,14 +133,12 @@ class ChaosExperiment:
         self._total_calls += 1
 
         # Check target functions filter
-        if self.config.target_functions:
-            if func_name not in self.config.target_functions:
-                return False
+        if self.config.target_functions and func_name not in self.config.target_functions:
+            return False
 
         # Check exclude functions filter
-        if self.config.exclude_functions:
-            if func_name in self.config.exclude_functions:
-                return False
+        if self.config.exclude_functions and func_name in self.config.exclude_functions:
+            return False
 
         # Check probability
         if random.random() > self.config.probability:
@@ -478,7 +474,7 @@ def latency_chaos(
     base_delay: float = 0.1,
     max_delay: float = 5.0,
     intensity: float = 0.5,
-    duration: Optional[float] = None,
+    duration: float | None = None,
     name: str = "latency_chaos"
 ) -> Callable:
     """
@@ -513,7 +509,7 @@ def exception_chaos(
     probability: float = 0.05,
     exception_type: type = RuntimeError,
     message: str = "Chaos engineering: injected exception",
-    duration: Optional[float] = None,
+    duration: float | None = None,
     name: str = "exception_chaos"
 ) -> Callable:
     """

@@ -10,6 +10,7 @@ em SQLite e serialização/deserialização completa.
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import sqlite3
 from dataclasses import asdict, dataclass, field
@@ -143,7 +144,7 @@ class VulnerabilidadeDescoberta:
         return cls(**dados)
 
     @classmethod
-    def builder(cls) -> 'VulnerabilidadeDescobertaBuilder':
+    def builder(cls) -> VulnerabilidadeDescobertaBuilder:
         """Cria um builder para construir instâncias de VulnerabilidadeDescoberta de forma fluente."""
         return VulnerabilidadeDescobertaBuilder()
 
@@ -168,62 +169,62 @@ class VulnerabilidadeDescobertaBuilder:
         if self.timestamp is None:
             self.timestamp = datetime.now().isoformat()
 
-    def com_id(self, vuln_id: str) -> 'VulnerabilidadeDescobertaBuilder':
+    def com_id(self, vuln_id: str) -> VulnerabilidadeDescobertaBuilder:
         """Define o ID da vulnerabilidade."""
         self.id = vuln_id
         return self
 
-    def com_tipo(self, tipo: TipoVulnerabilidade) -> 'VulnerabilidadeDescobertaBuilder':
+    def com_tipo(self, tipo: TipoVulnerabilidade) -> VulnerabilidadeDescobertaBuilder:
         """Define o tipo da vulnerabilidade."""
         self.tipo = tipo
         return self
 
-    def com_severidade(self, severidade: Severidade) -> 'VulnerabilidadeDescobertaBuilder':
+    def com_severidade(self, severidade: Severidade) -> VulnerabilidadeDescobertaBuilder:
         """Define a severidade da vulnerabilidade."""
         self.severidade = severidade
         return self
 
-    def com_titulo(self, titulo: str) -> 'VulnerabilidadeDescobertaBuilder':
+    def com_titulo(self, titulo: str) -> VulnerabilidadeDescobertaBuilder:
         """Define o título da vulnerabilidade."""
         self.titulo = titulo
         return self
 
-    def com_descricao(self, descricao: str) -> 'VulnerabilidadeDescobertaBuilder':
+    def com_descricao(self, descricao: str) -> VulnerabilidadeDescobertaBuilder:
         """Define a descrição da vulnerabilidade."""
         self.descricao = descricao
         return self
 
-    def com_localizacao(self, localizacao: str) -> 'VulnerabilidadeDescobertaBuilder':
+    def com_localizacao(self, localizacao: str) -> VulnerabilidadeDescobertaBuilder:
         """Define a localização da vulnerabilidade."""
         self.localizacao = localizacao
         return self
 
-    def com_prova_conceito(self, poc: str) -> 'VulnerabilidadeDescobertaBuilder':
+    def com_prova_conceito(self, poc: str) -> VulnerabilidadeDescobertaBuilder:
         """Define a prova de conceito da vulnerabilidade."""
         self.prova_conceito = poc
         return self
 
-    def com_cvss_score(self, score: float) -> 'VulnerabilidadeDescobertaBuilder':
+    def com_cvss_score(self, score: float) -> VulnerabilidadeDescobertaBuilder:
         """Define o score CVSS da vulnerabilidade."""
         self.cvss_score = score
         return self
 
-    def com_cve_id(self, cve_id: str) -> 'VulnerabilidadeDescobertaBuilder':
+    def com_cve_id(self, cve_id: str) -> VulnerabilidadeDescobertaBuilder:
         """Define o ID CVE da vulnerabilidade."""
         self.cve_id = cve_id
         return self
 
-    def com_remediacao(self, remediacao: str) -> 'VulnerabilidadeDescobertaBuilder':
+    def com_remediacao(self, remediacao: str) -> VulnerabilidadeDescobertaBuilder:
         """Define a remediação da vulnerabilidade."""
         self.remediacao = remediacao
         return self
 
-    def com_timestamp(self, timestamp: str) -> 'VulnerabilidadeDescobertaBuilder':
+    def com_timestamp(self, timestamp: str) -> VulnerabilidadeDescobertaBuilder:
         """Define o timestamp da vulnerabilidade."""
         self.timestamp = timestamp
         return self
 
-    def com_explorada(self, explorada: bool = True) -> 'VulnerabilidadeDescobertaBuilder':
+    def com_explorada(self, explorada: bool = True) -> VulnerabilidadeDescobertaBuilder:
         """Marca a vulnerabilidade como explorada."""
         self.explorada = explorada
         return self
@@ -266,7 +267,7 @@ class HostAlvo:
         return cls(**dados)
 
     @classmethod
-    def builder(cls) -> 'HostAlvoBuilder':
+    def builder(cls) -> HostAlvoBuilder:
         """Cria um builder para construir instâncias de HostAlvo de forma fluente."""
         return HostAlvoBuilder()
 
@@ -293,56 +294,56 @@ class HostAlvoBuilder:
         if self.timestamp_scan is None:
             self.timestamp_scan = datetime.now().isoformat()
 
-    def com_endereco(self, endereco: str) -> 'HostAlvoBuilder':
+    def com_endereco(self, endereco: str) -> HostAlvoBuilder:
         """Define o endereço IP do host."""
         self.endereco = endereco
         return self
 
-    def com_hostname(self, hostname: str) -> 'HostAlvoBuilder':
+    def com_hostname(self, hostname: str) -> HostAlvoBuilder:
         """Define o hostname do host."""
         self.hostname = hostname
         return self
 
-    def com_portas_abertas(self, portas: list[int]) -> 'HostAlvoBuilder':
+    def com_portas_abertas(self, portas: list[int]) -> HostAlvoBuilder:
         """Define as portas abertas do host."""
         self.portas_abertas = portas
         return self
 
-    def com_servico(self, porta: int, servico: str) -> 'HostAlvoBuilder':
+    def com_servico(self, porta: int, servico: str) -> HostAlvoBuilder:
         """Adiciona um serviço específico em uma porta."""
         if self.servicos is None:
             self.servicos = {}
         self.servicos[porta] = servico
         return self
 
-    def com_servicos(self, servicos: dict[int, str]) -> 'HostAlvoBuilder':
+    def com_servicos(self, servicos: dict[int, str]) -> HostAlvoBuilder:
         """Define todos os serviços do host."""
         self.servicos = servicos
         return self
 
-    def com_os_detectado(self, os_detectado: str) -> 'HostAlvoBuilder':
+    def com_os_detectado(self, os_detectado: str) -> HostAlvoBuilder:
         """Define o sistema operacional detectado."""
         self.os_detectado = os_detectado
         return self
 
-    def com_vulnerabilidade(self, vuln_id: str) -> 'HostAlvoBuilder':
+    def com_vulnerabilidade(self, vuln_id: str) -> HostAlvoBuilder:
         """Adiciona uma vulnerabilidade ao host."""
         if self.vulnerabilidades is None:
             self.vulnerabilidades = []
         self.vulnerabilidades.append(vuln_id)
         return self
 
-    def com_vulnerabilidades(self, vuln_ids: list[str]) -> 'HostAlvoBuilder':
+    def com_vulnerabilidades(self, vuln_ids: list[str]) -> HostAlvoBuilder:
         """Define todas as vulnerabilidades do host."""
         self.vulnerabilidades = vuln_ids
         return self
 
-    def com_autorizado(self, autorizado: bool = True) -> 'HostAlvoBuilder':
+    def com_autorizado(self, autorizado: bool = True) -> HostAlvoBuilder:
         """Define se o host está autorizado para teste."""
         self.autorizado = autorizado
         return self
 
-    def com_timestamp(self, timestamp: str) -> 'HostAlvoBuilder':
+    def com_timestamp(self, timestamp: str) -> HostAlvoBuilder:
         """Define o timestamp do scan."""
         self.timestamp_scan = timestamp
         return self
@@ -354,10 +355,8 @@ class HostAlvoBuilder:
         if self.portas_abertas:
             for porta in self.portas_abertas:
                 if isinstance(porta, str):
-                    try:
+                    with contextlib.suppress(ValueError):  # ignora portas inválidas
                         portas_abertas_int.append(int(porta))
-                    except ValueError:
-                        pass  # Ignora portas inválidas
                 else:
                     portas_abertas_int.append(porta)
 

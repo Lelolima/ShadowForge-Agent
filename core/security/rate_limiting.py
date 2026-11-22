@@ -3,12 +3,11 @@ Rate limiting utilities for ShadowForge Agent.
 Provides rate limiting functionality to prevent abuse and brute force attacks.
 """
 
-import time
-import threading
-from typing import Optional, Dict, Tuple, Callable
-from dataclasses import dataclass, field
-from collections import defaultdict
 import hashlib
+import threading
+import time
+from collections.abc import Callable
+from dataclasses import dataclass
 
 
 @dataclass
@@ -88,13 +87,13 @@ class RateLimiter:
             config: RateLimitConfig object
         """
         self.config = config
-        self._storage: Dict[str, dict] = {}
+        self._storage: dict[str, dict] = {}
         self._lock = threading.RLock()
 
         # Initialize algorithm-specific components
         if config.algorithm == "token_bucket":
             # For token bucket, we create buckets per key
-            self._buckets: Dict[str, TokenBucket] = {}
+            self._buckets: dict[str, TokenBucket] = {}
         else:
             self._buckets = {}
 
@@ -301,10 +300,9 @@ class RateLimiter:
                     # For now, we'll clean if all timestamps are old
                     if timestamps and max(timestamps) < cutoff_time:
                         keys_to_delete.append(key)
-                elif "reset_time" in value:
-                    # Fixed window - check if window is old
-                    if value["reset_time"] < cutoff_time:
-                        keys_to_delete.append(key)
+                elif "reset_time" in value and value["reset_time"] < cutoff_time:
+                    # Fixed window antiga
+                    keys_to_delete.append(key)
 
         for key in keys_to_delete:
             del self._storage[key]
@@ -349,7 +347,7 @@ def rate_limit(
     window: int = 60,
     burst: int = 20,
     algorithm: str = "fixed_window",
-    key_func: Optional[Callable[[], str]] = None
+    key_func: Callable[[], str] | None = None
 ):
     """
     Decorator for rate limiting functions.

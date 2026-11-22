@@ -3,7 +3,6 @@ Security headers utilities for ShadowForge Agent.
 Provides functions to generate and apply security HTTP headers.
 """
 
-from typing import Dict, Optional, List, Union
 from dataclasses import dataclass, field
 
 
@@ -13,30 +12,30 @@ class SecurityHeaders:
     Container for security HTTP headers.
     """
     # Content Security Policy
-    content_security_policy: Optional[str] = None
+    content_security_policy: str | None = None
 
     # HTTP Strict Transport Security (HSTS)
-    strict_transport_security: Optional[str] = None
+    strict_transport_security: str | None = None
 
     # X-Frame-Options (clickjacking protection)
-    x_frame_options: Optional[str] = None
+    x_frame_options: str | None = None
 
     # X-Content-Type-Options (MIME sniffing protection)
-    x_content_type_options: Optional[str] = None
+    x_content_type_options: str | None = None
 
     # X-XSS-Protection (XSS protection)
-    x_xss_protection: Optional[str] = None
+    x_xss_protection: str | None = None
 
     # Referrer-Policy (referrer information)
-    referrer_policy: Optional[str] = None
+    referrer_policy: str | None = None
 
     # Permissions-Policy (formerly Feature-Policy)
-    permissions_policy: Optional[str] = None
+    permissions_policy: str | None = None
 
     # Custom headers
-    custom_headers: Dict[str, str] = field(default_factory=dict)
+    custom_headers: dict[str, str] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         """
         Convert to dictionary format suitable for HTTP headers.
 
@@ -75,16 +74,16 @@ class SecurityHeaders:
 def get_security_headers(
     *,
     # CSP settings
-    csp_default_src: Optional[Union[str, List[str]]] = None,
-    csp_script_src: Optional[Union[str, List[str]]] = None,
-    csp_style_src: Optional[Union[str, List[str]]] = None,
-    csp_img_src: Optional[Union[str, List[str]]] = None,
-    csp_font_src: Optional[Union[str, List[str]]] = None,
-    csp_connect_src: Optional[Union[str, List[str]]] = None,
-    csp_object_src: Optional[Union[str, List[str]]] = None,
-    csp_base_uri: Optional[Union[str, List[str]]] = None,
-    csp_frame_ancestors: Optional[Union[str, List[str]]] = None,
-    csp_form_action: Optional[Union[str, List[str]]] = None,
+    csp_default_src: str | list[str] | None = None,
+    csp_script_src: str | list[str] | None = None,
+    csp_style_src: str | list[str] | None = None,
+    csp_img_src: str | list[str] | None = None,
+    csp_font_src: str | list[str] | None = None,
+    csp_connect_src: str | list[str] | None = None,
+    csp_object_src: str | list[str] | None = None,
+    csp_base_uri: str | list[str] | None = None,
+    csp_frame_ancestors: str | list[str] | None = None,
+    csp_form_action: str | list[str] | None = None,
 
     # HSTS settings
     hsts_max_age: int = 31536000,  # 1 year
@@ -96,10 +95,10 @@ def get_security_headers(
     content_type_nosniff: bool = True,
     xss_protection: str = "1; mode=block",  # 1; mode=block
     referrer_policy: str = "strict-origin-when-cross-origin",
-    permissions_policy: Optional[str] = None,
+    permissions_policy: str | None = None,
 
     # Custom headers
-    custom_headers: Optional[Dict[str, str]] = None,
+    custom_headers: dict[str, str] | None = None,
 ) -> SecurityHeaders:
     """
     Generate security headers based on provided configuration.
@@ -211,7 +210,7 @@ CSP_POLICIES = {
 }
 
 
-def get_csp_policy(policy_name: str) -> Optional[str]:
+def get_csp_policy(policy_name: str) -> str | None:
     """
     Get a predefined CSP policy by name.
 

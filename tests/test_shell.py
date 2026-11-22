@@ -10,14 +10,13 @@ focando em prevenção de injeção de comando e validação de entrada.
 
 from __future__ import annotations
 
-import asyncio
 import sys
 from pathlib import Path
 
 # Adiciona root ao path para import
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
-from control.shell import StealthShell, _safe_quote, _DANGEROUS_COMMANDS, _ENV_VAR_WHITELIST
+from control.shell import _DANGEROUS_COMMANDS, _ENV_VAR_WHITELIST, _safe_quote
 
 
 def test_safe_quote_posix():

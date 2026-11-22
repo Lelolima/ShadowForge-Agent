@@ -14,12 +14,11 @@ from __future__ import annotations
 import asyncio
 import sys
 from pathlib import Path
-from unittest.mock import AsyncMock
 
 # Adiciona root ao path para import
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
-from hacker_tools.exploit.web_attacks import WebExploiter, ResultadoVulnWeb
+from hacker_tools.exploit.web_attacks import ResultadoVulnWeb, WebExploiter
 
 
 def test_resultadovulnweb_creation():

@@ -9,20 +9,20 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Dict, Any, Optional
+from typing import Any
 
 logger = logging.getLogger("shadowforge.observability.health")
 
 # We'll try to import the dashboard app to add routes if available
 try:
-    from api.dashboard import app as dashboard_app, update_dashboard_state
+    from api.dashboard import app as dashboard_app
     HAS_DASHBOARD = True
 except ImportError:
     HAS_DASHBOARD = False
     logger.warning("Dashboard API not available, health endpoints will not be added")
 
 # Health check results cache to avoid over-checking
-_health_cache: Dict[str, Any] = {}
+_health_cache: dict[str, Any] = {}
 _health_cache_timeout = 30  # seconds
 
 
@@ -54,9 +54,7 @@ def check_nim_client_health(agent) -> bool:
             return True  # In simulate mode, we consider it healthy
         # Check if API key is set and not a placeholder
         api_key = agent.config.nvidia.api_key
-        if not api_key or api_key.startswith("nvapi-xxxxx"):
-            return False
-        return True
+        return not (not api_key or api_key.startswith("nvapi-xxxxx"))
     except Exception as e:
         logger.debug(f"NIM client health check failed: {e}")
         return False
@@ -83,7 +81,7 @@ def check_dashboard_health() -> bool:
     return HAS_DASHBOARD
 
 
-def get_subsystem_health(agent) -> Dict[str, bool]:
+def get_subsystem_health(agent) -> dict[str, bool]:
     """Get health status of all subsystems."""
     return {
         "event_bus": check_event_bus_health(agent),
@@ -109,7 +107,6 @@ def register_health_endpoints() -> None:
     if not HAS_DASHBOARD:
         return
 
-    from fastapi import HTTPException
 
     @dashboard_app.get("/health/live")
     async def liveness_probe():

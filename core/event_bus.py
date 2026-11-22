@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import enum
 import logging
 import time
@@ -150,10 +151,8 @@ class EventBus:
         self._running = False
         if self._processing_task:
             self._processing_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._processing_task
-            except asyncio.CancelledError:
-                pass
         logger.info("EventBus parado — %d eventos processados", self._event_count)
 
     async def publish(
@@ -204,9 +203,7 @@ class EventBus:
         # Replay de eventos recentes
         if replay_recente and handler:
             for evt in self._historico:
-                if tipo and evt.tipo == tipo:
-                    await handler(evt)
-                elif pattern and self._match_pattern(pattern, evt.tipo):
+                if tipo and evt.tipo == tipo or pattern and self._match_pattern(pattern, evt.tipo):
                     await handler(evt)
 
     async def unsubscribe(self, tipo: str, handler: HandlerCallback) -> None:

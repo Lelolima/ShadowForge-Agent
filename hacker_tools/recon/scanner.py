@@ -201,7 +201,7 @@ class ReconScanner:
         if simulate:
             return self._simular_recon(alvo)
 
-        resultado = {
+        resultado: dict[str, Any] = {
             "alvo": alvo,
             "autorizado": True,
             "hosts": [],

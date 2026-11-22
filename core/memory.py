@@ -10,6 +10,7 @@ Embeddings para busca semântica de experiências passadas.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 from collections import OrderedDict
@@ -102,10 +103,8 @@ class MemoriaCurtoPrazo:
             # Remover do índice por tipo
             tipo_list = self._indice_por_tipo.get(oldest_entry.tipo)
             if tipo_list:
-                try:
+                with contextlib.suppress(ValueError):
                     tipo_list.remove(oldest_id)
-                except ValueError:
-                    pass
                 if not tipo_list:
                     del self._indice_por_tipo[oldest_entry.tipo]
 

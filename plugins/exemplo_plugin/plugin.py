@@ -3,11 +3,12 @@ Exemplo de Plugin para ShadowForge Agent
 Este plugin demonstra as funcionalidades básicas do sistema de plugins.
 """
 
-from typing import Dict, Any
-from core.plugins import ShadowForgePlugin
-from core.event_bus import EventoShadowForge
 import logging
 from datetime import datetime
+from typing import Any
+
+from core.event_bus import EventoShadowForge
+from core.plugins import ShadowForgePlugin
 
 logger = logging.getLogger(__name__)
 

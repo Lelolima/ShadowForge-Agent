@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Generate animated GIF for Step 4: Scanning & Enumeration."""
-from PIL import Image, ImageDraw, ImageFont
-import math
 import random
+
+from PIL import Image, ImageDraw, ImageFont
+
 random.seed(42)
 
 def main():
@@ -174,7 +175,7 @@ def main():
 
         # Scan speed
         draw.text((620, 360), f"Scan rate: {min(frame * 2, 5000)} pkt/s", fill='#999', font=f11)
-        draw.text((620, 378), f"Timeout: 2s | Threads: 100", fill='#999', font=f9)
+        draw.text((620, 378), "Timeout: 2s | Threads: 100", fill='#999', font=f9)
 
         frames.append(img)
 

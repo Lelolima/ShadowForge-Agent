@@ -4,10 +4,8 @@ Provides functions to encode output for different contexts to prevent XSS and in
 """
 
 import html
-import urllib.parse
-import re
 import json
-from typing import Union
+import urllib.parse
 
 
 def encode_html(text: str) -> str:

@@ -8,17 +8,18 @@
 ============================================================
 """
 
+import string
 import sys
 from pathlib import Path
-from hypothesis import given, strategies as st, settings
-from hypothesis.strategies import text, integers, lists, tuples, sampled_from, none, just, one_of
-import string
+
+from hypothesis import given, settings
+from hypothesis.strategies import integers, just, lists, one_of, sampled_from, text, tuples
 
 # Adiciona a raiz do projeto ao sys.path para importar módulos do core
 ROOT_DIR = Path(__file__).parent.parent.resolve()
 sys.path.insert(0, str(ROOT_DIR))
 
-from core.memory import MemoriaCurtoPrazo, EntradaMemoria
+from core.memory import MemoriaCurtoPrazo  # noqa: E402 - após ajuste de sys.path
 
 
 # Strategies for generating test data
@@ -29,7 +30,7 @@ def random_string(min_size=0, max_size=10, alphabet=string.ascii_letters):
 def random_operation_strategy():
     """Generate a strategy for random operations to apply to MemoriaCurtoPrazo."""
     # We'll generate a tuple indicating the operation and its arguments
-    op_type = sampled_from(['add', 'buscar_por_tipo', 'buscar_recentes', 'limpar'])
+    sampled_from(['add', 'buscar_por_tipo', 'buscar_recentes', 'limpar'])
 
     def make_add():
         tipo = random_string(min_size=1, max_size=5)
@@ -87,7 +88,7 @@ def check_invariants(mem):
         existing_ids = [eid for eid in id_list if eid in mem._entradas]
         # The list in _indice_por_tipo should match the order of these IDs as they appear in _entradas
         # Get the order of these IDs in _entradas (which is insertion order)
-        ids_in_order = [eid for eid in mem._entradas.keys() if mem._entradas[eid].tipo == tipo]
+        ids_in_order = [eid for eid in mem._entradas if mem._entradas[eid].tipo == tipo]
         # The filtered id_list should be exactly ids_in_order
         assert existing_ids == ids_in_order, f"Type index mismatch for tipo {tipo}: {existing_ids} vs {ids_in_order}"
 
@@ -220,9 +221,9 @@ def test_buscar_por_tipo_order():
     mem = MemoriaCurtoPrazo(capacidade=capacidade)
 
     # Adiciona três entradas do tipo X em ordem
-    e1 = mem.adicionar("X", "x1")
-    e2 = mem.adicionar("X", "x2")
-    e3 = mem.adicionar("X", "x3")
+    mem.adicionar("X", "x1")
+    mem.adicionar("X", "x2")
+    mem.adicionar("X", "x3")
     # Também adiciona outros tipos para não afetar o limite por tipo
     mem.adicionar("Y", "y1")
     mem.adicionar("Y", "y2")
@@ -232,8 +233,8 @@ def test_buscar_por_tipo_order():
     assert [e.conteudo for e in result] == ["x2", "x3"]
 
     # Agora adiciona mais duas do tipo X, ultrapassando a capacidade geral, mas vamos ver o índice por tipo
-    e4 = mem.adicionar("X", "x4")
-    e5 = mem.adicionar("X", "x5")
+    mem.adicionar("X", "x4")
+    mem.adicionar("X", "x5")
     # Após adicionar e4 e e5, a memória total excedeu capacidade? Vamos verificar:
     # Após e3: 3 entries, depois y1, y2, y2: 5 entries (capacidade 5). Adicionar e4 -> remove mais antiga (e1)
     # Adicionar e5 -> remove mais antiga (e2)
@@ -248,16 +249,16 @@ def test_buscar_recentes_order():
     capacidade = 4
     mem = MemoriaCurtoPrazo(capacidade=capacidade)
 
-    e1 = mem.adicionar("T1", "c1")
-    e2 = mem.adicionar("T2", "c2")
-    e3 = mem.adicionar("T3", "c3")
-    e4 = mem.adicionar("T4", "c4")
+    mem.adicionar("T1", "c1")
+    mem.adicionar("T2", "c2")
+    mem.adicionar("T3", "c3")
+    mem.adicionar("T4", "c4")
     # Agora a memória está cheia: ordem [e1, e2, e3, e4] (e4 mais recente)
     assert mem.tamanho == capacidade
     assert [e.conteudo for e in mem.buscar_recentes(4)] == ["c1", "c2", "c3", "c4"]
 
     # Adiciona e5, deve remover e1
-    e5 = mem.adicionar("T5", "c5")
+    mem.adicionar("T5", "c5")
     # Ordem agora: [e2, e3, e4, e5]
     assert [e.conteudo for e in mem.buscar_recentes(4)] == ["c2", "c3", "c4", "c5"]
     # Limite 2 deve retornar os dois mais recentes: e4, e5
@@ -269,9 +270,9 @@ def test_buscar_por_tags():
     capacidade = 10
     mem = MemoriaCurtoPrazo(capacidade=capacidade)
 
-    e1 = mem.adicionar("T", "conteudo1", tags=["alpha", "beta"])
-    e2 = mem.adicionar("T", "conteudo2", tags=["gamma"])
-    e3 = mem.adicionar("T", "conteudo3", tags=["beta", "delta"])
+    mem.adicionar("T", "conteudo1", tags=["alpha", "beta"])
+    mem.adicionar("T", "conteudo2", tags=["gamma"])
+    mem.adicionar("T", "conteudo3", tags=["beta", "delta"])
 
     # Busca por tags que existem
     result = mem.buscar_por_tags(["beta"], limite=10)

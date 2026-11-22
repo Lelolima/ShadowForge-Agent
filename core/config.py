@@ -15,7 +15,7 @@ from enum import Enum
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from core.scope import EscopoAutorizado, alvo_em_lista_bloqueio
 
@@ -226,12 +226,10 @@ class ShadowForgeConfig(BaseModel):
     data_dir: Path = Field(default_factory=lambda: Path.cwd() / "data")
     logs_dir: Path = Field(default_factory=lambda: Path.cwd() / "logs")
 
-    model_config = {
-        "env_prefix": "SHADOWFORGE",
-        "env_nested_delimiter": "__",
-        # Aceita tanto o nome do campo (modo=) quanto o alias (mode=)
-        "populate_by_name": True,
-    }
+    # Aceita tanto o nome do campo (modo=) quanto o alias (mode=).
+    # (env_prefix/env_nested_delimiter foram removidos: só valem em BaseSettings e
+    # nunca tiveram efeito aqui; variáveis de ambiente são lidas em carregar_de_env.)
+    model_config = ConfigDict(populate_by_name=True)
 
     @classmethod
     def carregar_de_yaml(cls, caminho: str | Path) -> ShadowForgeConfig:

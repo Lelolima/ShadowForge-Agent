@@ -97,3 +97,7 @@ ehthumbs.db
 bandit-report.json
 safety-report.json
 .gitnexus
+
+# Estado de ferramentas de IDE/assistentes
+.refact/
+*.backup

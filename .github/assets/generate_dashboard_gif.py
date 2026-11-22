@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Generate optimized animated GIF of the ShadowForge dashboard."""
-from PIL import Image, ImageDraw, ImageFont
 import math
+
+from PIL import Image, ImageDraw, ImageFont
+
 
 def main():
     W, H = 1280, 580

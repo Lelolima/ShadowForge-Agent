@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import abc
 import asyncio
-from typing import Any, Dict, List
+from typing import Any
 
 from rich.console import Console
 
@@ -66,22 +66,22 @@ class ODDATemplate(abc.ABC):
 
     # Métodos abstratos que devem ser implementados pelas subclasses
     @abc.abstractmethod
-    async def _observe(self) -> List[Dict[str, Any]]:
+    async def _observe(self) -> list[dict[str, Any]]:
         """Fase OBSERVE: coleta informações do ambiente."""
         pass
 
     @abc.abstractmethod
-    async def _orient(self, observacoes: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _orient(self, observacoes: list[dict[str, Any]]) -> dict[str, Any]:
         """Fase ORIENT: analisa e contextualiza observações."""
         pass
 
     @abc.abstractmethod
-    async def _decide(self, orientacao: Dict[str, Any]) -> Dict[str, Any]:
+    async def _decide(self, orientacao: dict[str, Any]) -> dict[str, Any]:
         """Fase DECIDE: escolhe a próxima ação."""
         pass
 
     @abc.abstractmethod
-    async def _act(self, decisao: Dict[str, Any]) -> Dict[str, Any]:
+    async def _act(self, decisao: dict[str, Any]) -> dict[str, Any]:
         """Fase ACT: executa a ação decidida."""
         pass
 
@@ -98,11 +98,11 @@ class ODDATemplate(abc.ABC):
         """Delay após a fase DECIDE - pode ser sobrescrito."""
         await asyncio.sleep(0.1)  # Delay padrão, será substituído por config
 
-    async def _pos_processamento(
+    async def _pos_processamento(  # noqa: B027 - hook opcional
         self,
-        observacoes: List[Dict[str, Any]],
-        decisao: Dict[str, Any],
-        resultado: Dict[str, Any],
+        observacoes: list[dict[str, Any]],
+        decisao: dict[str, Any],
+        resultado: dict[str, Any],
     ) -> None:
         """Processamento pós-ciclo - pode ser sobrescrito para logging, métricas, etc."""
         pass
