@@ -1,23 +1,23 @@
-import pytest
 from observability.metrics import (
+    ACTIVE_OODA_CYCLES,
+    ERRORS_TOTAL,
+    EVENT_PROCESSING_LATENCY_SECONDS,
+    EVENTS_PROCESSED_TOTAL,
+    EVENTS_PUBLISHED_TOTAL,
     OODA_DURATION_SECONDS,
     OODA_ITERATIONS_TOTAL,
-    EVENTS_PUBLISHED_TOTAL,
-    EVENTS_PROCESSED_TOTAL,
-    EVENT_PROCESSING_LATENCY_SECONDS,
-    ERRORS_TOTAL,
-    ACTIVE_OODA_CYCLES,
     QUEUED_EVENTS,
     SUBSYSTEM_HEALTH,
-    record_ooda_phase,
     increment_ooda_iterations,
-    record_event_published,
-    record_event_processed,
     record_error,
+    record_event_processed,
+    record_event_published,
+    record_ooda_phase,
     set_active_ooda_cycles,
     set_queued_events,
-    set_subsystem_health
+    set_subsystem_health,
 )
+
 
 def test_metrics_import():
     """Test that the metrics module imports successfully."""

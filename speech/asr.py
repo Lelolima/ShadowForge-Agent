@@ -15,7 +15,6 @@ import logging
 import queue
 import time
 from collections.abc import Callable
-from typing import Any
 
 from core.config import ShadowForgeConfig
 

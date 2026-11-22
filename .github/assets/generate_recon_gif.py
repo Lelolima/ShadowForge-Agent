@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Generate animated GIF for Step 3: Reconnaissance (RECON)."""
-from PIL import Image, ImageDraw, ImageFont
 import math
 import random
+
+from PIL import Image, ImageDraw, ImageFont
+
 
 def main():
     W, H = 1000, 550
@@ -13,9 +15,9 @@ def main():
         f11 = ImageFont.truetype("cour.ttf", 11)
         f9 = ImageFont.truetype("cour.ttf", 9)
         f14 = ImageFont.truetype("courbd.ttf", 14)
-        f16 = ImageFont.truetype("courbd.ttf", 16)
+        ImageFont.truetype("courbd.ttf", 16)
     except OSError:
-        f11 = f9 = f14 = f16 = ImageFont.load_default()
+        f11 = f9 = f14 = ImageFont.load_default()
 
     # Network nodes for visualization
     random.seed(42)
@@ -52,8 +54,8 @@ def main():
         for i, (nx, ny) in enumerate(nodes):
             if i < discovered:
                 # Line from center
-                alpha = int(100 + 155 * (i / len(nodes)))
-                color = '#76B9008'[:7]  # Use fixed color
+                int(100 + 155 * (i / len(nodes)))
+                '#76B9008'[:7]  # Use fixed color
                 draw.line([(center[0] - 240 + nx * 0.3, 200 + ny * 0.4), (center[0] - 100 + i * 15, 180 + i * 10)], fill='#76B900' if i < discovered else '#333', width=1)
 
         # Draw discovered nodes
@@ -61,7 +63,7 @@ def main():
         for i in range(discovered):
             x = 40 + i * 25
             y = 100 + (i % 3) * 60
-            pulse = 3 + int(abs(math.sin(frame * 0.2 + i)) * 4)
+            3 + int(abs(math.sin(frame * 0.2 + i)) * 4)
             draw.ellipse([x-4, y-4, x+4, y+4], fill='#76B900')
             draw.text((x+8, y-4), f"{host}{i+1}", fill='#999', font=f9)
             draw.text((x+8, y+6), f"Host {i+1}", fill='#444', font=f9)

@@ -9,16 +9,15 @@ Testes para: Agent (loop OODA, state machine, integracao de componentes).
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
-
 import sys
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 # Adiciona root ao path para import
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
 from core.agent import ShadowForgeAgent
-from core.config import ShadowForgeConfig, ModoOperacao
+from core.config import ShadowForgeConfig
 from core.state import EstadoAgente, FaseOperacao
 
 

@@ -37,6 +37,7 @@ class RivaClient:
         """
         try:
             import asyncio as _asyncio
+
             import grpc
 
             self._channel = grpc.insecure_channel(self._servidor)

@@ -1,6 +1,5 @@
-import pytest
-from pathlib import Path
-from core.config import ShadowForgeConfig, ModoOperacao, NivelLog
+from core.config import ModoOperacao, NivelLog, ShadowForgeConfig
+
 
 def test_config_defaults():
     cfg = ShadowForgeConfig()
@@ -9,7 +8,7 @@ def test_config_defaults():
     assert cfg.codinome == "SH4D0WF0RG3"
     assert cfg.modo == ModoOperacao.STEALTH
     assert cfg.idioma == "pt-BR"
-    assert cfg.leetspeak_logs == True
+    assert cfg.leetspeak_logs is True
     assert cfg.tema == "matrix"
     assert cfg.log_nivel == NivelLog.INFO
 
@@ -38,7 +37,7 @@ nvidia:
     assert cfg.codinome == "TEST"
     assert cfg.modo == ModoOperacao.AGRESSIVO
     assert cfg.idioma == "en-US"
-    assert cfg.leetspeak_logs == False
+    assert cfg.leetspeak_logs is False
     assert cfg.tema == "dark"
     assert cfg.log_nivel == NivelLog.DEBUG
     assert cfg.nvidia.api_key == "test-key"

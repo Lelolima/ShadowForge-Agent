@@ -5,13 +5,13 @@ Provides functions to prevent SQL injection, command injection, and other inject
 
 import re
 import shlex
-import subprocess
 import sqlite3
-from typing import Any, List, Optional, Tuple, Union
-from .input_validation import ValidationError, validate_input
+import subprocess
+
+from .input_validation import ValidationError
 
 
-def prevent_sql_injection(query: str, params: Optional[tuple] = None) -> Tuple[str, tuple]:
+def prevent_sql_injection(query: str, params: tuple | None = None) -> tuple[str, tuple]:
     """
     Prepare a SQL query with parameters to prevent SQL injection.
     Uses parameterized queries (the safest approach).
@@ -55,7 +55,7 @@ def prevent_sql_injection(query: str, params: Optional[tuple] = None) -> Tuple[s
     return query, tuple(params)
 
 
-def execute_safe_sql(connection: sqlite3.Connection, query: str, params: Optional[tuple] = None) -> sqlite3.Cursor:
+def execute_safe_sql(connection: sqlite3.Connection, query: str, params: tuple | None = None) -> sqlite3.Cursor:
     """
     Safely execute a SQL query using parameterization.
 
@@ -71,7 +71,7 @@ def execute_safe_sql(connection: sqlite3.Connection, query: str, params: Optiona
     return connection.execute(query, params)
 
 
-def prevent_command_injection(command: str, args: Optional[List[str]] = None) -> List[str]:
+def prevent_command_injection(command: str, args: list[str] | None = None) -> list[str]:
     """
     Safely construct a command and arguments for subprocess execution.
     Prevents command injection by properly escaping arguments.
@@ -118,8 +118,8 @@ def prevent_command_injection(command: str, args: Optional[List[str]] = None) ->
 
 def execute_safe_command(
     command: str,
-    args: Optional[List[str]] = None,
-    cwd: Optional[str] = None,
+    args: list[str] | None = None,
+    cwd: str | None = None,
     timeout: int = 30,
     capture_output: bool = True
 ) -> subprocess.CompletedProcess:
@@ -288,7 +288,7 @@ def safe_format_string(template: str, **kwargs) -> str:
     try:
         return template.format(**sanitized_kwargs)
     except (KeyError, IndexError, ValueError) as e:
-        raise ValueError(f"Template formatting error: {e}")
+        raise ValueError(f"Template formatting error: {e}") from e
 
 
 class SQLIdentifier:
@@ -328,13 +328,13 @@ def safe_sql_identifier(name: str) -> SQLIdentifier:
 
 
 def build_safe_select(
-    table: Union[str, SQLIdentifier],
-    columns: Optional[List[str]] = None,
-    where: Optional[str] = None,
-    params: Optional[tuple] = None,
-    order_by: Optional[str] = None,
-    limit: Optional[int] = None
-) -> Tuple[str, tuple]:
+    table: str | SQLIdentifier,
+    columns: list[str] | None = None,
+    where: str | None = None,
+    params: tuple | None = None,
+    order_by: str | None = None,
+    limit: int | None = None
+) -> tuple[str, tuple]:
     """
     Build a safe SELECT query with proper escaping of identifiers.
 
@@ -396,8 +396,8 @@ def build_safe_select(
             if limit_int < 0:
                 raise ValueError("LIMIT must be non-negative")
             query += f" LIMIT {limit_int}"
-        except (ValueError, TypeError):
-            raise ValueError("LIMIT must be a valid integer")
+        except (ValueError, TypeError) as e:
+            raise ValueError("LIMIT must be a valid integer") from e
 
     # Handle parameters
     if params is None:

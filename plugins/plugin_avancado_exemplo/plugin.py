@@ -3,12 +3,14 @@ Plugin Avançado de Exemplo para ShadowForge Agent
 Demonstra recursos avançados como tratamento de eventos, dependências e configuração.
 """
 
-from typing import Dict, Any, List
-from core.plugins import ShadowForgePlugin
-from core.event_bus import EventoShadowForge
-import logging
 import asyncio
+import contextlib
+import logging
 from datetime import datetime, timedelta
+from typing import Any
+
+from core.event_bus import EventoShadowForge
+from core.plugins import ShadowForgePlugin
 
 logger = logging.getLogger(__name__)
 
@@ -100,10 +102,8 @@ class PluginAvancadoExemplo(ShadowForgePlugin):
         self._executando = False
         if hasattr(self, '_task_background'):
             self._task_background.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._task_background
-            except asyncio.CancelledError:
-                pass
 
         # Cancelar inscrições (se o seu event_bus suportar)
         # await self._desinscrever_de_eventos()
@@ -164,9 +164,8 @@ class PluginAvancadoExemplo(ShadowForgePlugin):
             "plugin.carregado"
         ]
 
-        # Em uma implementação real, você faria:
-        # for evento in eventos_sistema:
-        #     await self._bus.subscribe(evento, self.on_event)
+        for evento in eventos_sistema:
+            await self._bus.subscribe(tipo=evento, handler=self.on_event)
 
         logger.debug(f"Plugin {self.nome} inscrito em eventos do sistema")
 

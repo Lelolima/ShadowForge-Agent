@@ -7,13 +7,12 @@ Exposes metrics via HTTP endpoint if prometheus_client is available.
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 logger = logging.getLogger("shadowforge.observability.metrics")
 
 # Try to import prometheus_client
 try:
-    from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+    from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
     HAS_PROMETHEUS = True
 except ImportError:
     HAS_PROMETHEUS = False

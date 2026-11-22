@@ -9,16 +9,16 @@ from __future__ import annotations
 import asyncio
 import functools
 import logging
-from typing import Callable, Any
+from collections.abc import Callable
 
 logger = logging.getLogger("shadowforge.observability.tracing")
 
 # Try to import OpenTelemetry
 try:
     from opentelemetry import trace
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
     from opentelemetry.sdk.trace import TracerProvider
     from opentelemetry.sdk.trace.export import BatchSpanProcessor
-    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
     HAS_OPENTELEMETRY = True
 except ImportError:
     HAS_OPENTELEMETRY = False

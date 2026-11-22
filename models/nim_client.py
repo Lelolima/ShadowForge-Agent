@@ -17,9 +17,9 @@ import time
 from collections.abc import AsyncIterator
 from typing import Any
 
-from core.config import ShadowForgeConfig
-
 import aiohttp
+
+from core.config import ConfigNVIDIA
 
 logger = logging.getLogger("shadowforge.models.nim")
 
@@ -47,7 +47,7 @@ class NIMClient:
         "google/gemma-2-2b-it",
     ]
 
-    def __init__(self, config: ShadowForgeConfig | None = None) -> None:
+    def __init__(self, config: ConfigNVIDIA | None = None) -> None:
         import os
         self._api_key = ""
         self._base_url = "https://integrate.api.nvidia.com/v1"

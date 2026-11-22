@@ -40,10 +40,7 @@ def _is_host_allowed(host: str) -> bool:
         # Tenta como IP único
         ip = ipaddress.ip_address(host)
         # Verifica se o IP está em alguma rede bloqueada
-        for blocked_net in _SSRF_BLOCKED_NETWORKS:
-            if ip in blocked_net:
-                return False
-        return True
+        return all(ip not in blocked_net for blocked_net in _SSRF_BLOCKED_NETWORKS)
     except ValueError:
         # Não é um IP, pode ser um hostname - permitir por enquanto
         # Em uma implementação mais segura, faríamos resolução DNS aqui

@@ -39,7 +39,8 @@ except ImportError:
     HAS_RICH = False
 
 
-import pytest
+import pytest  # noqa: E402 - após carregar .env e sys.path
+
 
 # Teste de integração: faz requisições HTTP reais à API NVIDIA NIM.
 # Fica desativado por padrão (CI e execução local) e só roda com opt-in explícito.

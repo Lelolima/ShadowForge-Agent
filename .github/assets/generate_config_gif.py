@@ -98,18 +98,16 @@ def main():
         # Render left column events
         y = 65
         for text, color, start, end, col_idx in all_events:
-            if start <= frame < end and col_idx == 0:
-                if text:
-                    draw.text((15, y), f"$ {text}" if not text.startswith("[") and not text.startswith("✓") and not text.startswith("#") else text, fill=color, font=f11)
-                    y += 18
+            if start <= frame < end and col_idx == 0 and text:
+                draw.text((15, y), f"$ {text}" if not text.startswith("[") and not text.startswith("✓") and not text.startswith("#") else text, fill=color, font=f11)
+                y += 18
 
         # Render right column (.env preview)
         y2 = 65
         for text, color, start, end, col_idx in all_events:
-            if start <= frame < end and col_idx == 1:
-                if text:
-                    draw.text((25 + col_w, y2), text, fill=color, font=f9)
-                    y2 += 16
+            if start <= frame < end and col_idx == 1 and text:
+                draw.text((25 + col_w, y2), text, fill=color, font=f9)
+                y2 += 16
 
         # Progress bar
         progress = min(frame / TOTAL, 1.0)

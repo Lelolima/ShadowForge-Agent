@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Generate animated GIF for Step 1: Installation."""
+
 from PIL import Image, ImageDraw, ImageFont
-import math
+
 
 def main():
     W, H = 900, 500
@@ -52,7 +53,6 @@ def main():
 
         # Build current active lines based on frame
         active_lines = []
-        prompt = "root@shadowforge:~$ "
         for text, color, start, dur, mode in all_lines:
             if frame >= start:
                 elapsed = frame - start
@@ -78,7 +78,7 @@ def main():
         # Render visible lines
         y = 40
         for text, color in visible_lines:
-            draw.text((10, y), f"$ ", fill='#76B900', font=f11)
+            draw.text((10, y), "$ ", fill='#76B900', font=f11)
             # Handle multi-line (like done.\n)
             for subline in text.split('\n'):
                 if subline.strip():

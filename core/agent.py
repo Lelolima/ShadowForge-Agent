@@ -16,52 +16,26 @@ import contextlib
 import logging
 from collections.abc import Callable
 from datetime import datetime
-from typing import Any, TypedDict, Optional, List, TypedDict, List, Optional, Dict
+from typing import Any
 
 from rich.console import Console
 
 from core.audit import TrilhaAuditoria
 from core.config import ModoOperacao, ShadowForgeConfig
+from core.event_bus import EventBus
 from core.memory import MemoriaCurtoPrazo, MemoriaLongoPrazo
-from core.state import EstadoAgente, FaseOperacao
-from core.event_bus import EventBus, EventoShadowForge, TipoEvento, PrioridadeEvento
-from core.plugins import PluginManager
-from core.action_strategies import (
-    AcaoStrategy,
-    ExecutarReconStrategy,
-    ExecutarScanStrategy,
-    ExecutarEnumStrategy,
-    GerarPOCStrategy,
-    AnalisarPrivEscStrategy,
-    GerarRelatorioStrategy,
-    IniciarReconStrategy,
-    AguardarAlvoStrategy,
-    AvançarFaseStrategy,
-    FinalizarCampanhaStrategy,
-    EticaBloqueadaStrategy,
-    AcaoNaoReconhecidaStrategy,
-)
 from core.ooda_template import ODDATemplate
-from core.subsystem_factory import (
-    create_event_bus,
-    create_plugin_manager,
-    create_dashboard,
-    create_models,
-    create_vision,
-    create_speech,
-    create_control,
-    create_hacker_tools,
-    create_planning,
-)
+from core.plugins import PluginManager
+from core.state import EstadoAgente, FaseOperacao
 
 # Observability imports
 try:
     from observability.metrics import (
-        record_ooda_phase,
         increment_ooda_iterations,
-        record_event_published,
-        record_event_processed,
         record_error,
+        record_event_processed,
+        record_event_published,
+        record_ooda_phase,
         set_active_ooda_cycles,
         set_queued_events,
         set_subsystem_health,
@@ -80,15 +54,16 @@ except ImportError:
     def set_subsystem_health(subsystem: str, healthy: bool) -> None: pass
 
 try:
-    from observability.tracing import trace_ooda_phase, trace_async, trace_sync
+    from observability.tracing import trace_async, trace_sync
     OBSERVABILITY_TRACING_ENABLED = True
 except ImportError:
     OBSERVABILITY_TRACING_ENABLED = False
-    def trace_oid_phase(phase: str):  # type: ignore
-        def decorator(func): return func
-        return decorator
-    def trace_async(func): return func
-    def trace_sync(func): return func
+
+    def trace_async(func: Callable[..., Any]) -> Callable[..., Any]:
+        return func
+
+    def trace_sync(func: Callable[..., Any]) -> Callable[..., Any]:
+        return func
 
 console = Console()
 logger = logging.getLogger("shadowforge.core")
@@ -181,13 +156,13 @@ class ShadowForgeAgent(ODDATemplate):
         self.plugin_manager = PluginManager(self.event_bus)
 
         # Subsistemas (lazy init)
-        self._vision = None
-        self._speech = None
-        self._control = None
-        self._hacker_tools = None
-        self._planning = None
-        self._models = None
-        self._dashboard = None
+        self._vision: dict[str, Any] | None = None
+        self._speech: Any = None
+        self._control: dict[str, Any] | None = None
+        self._hacker_tools: dict[str, Any] | None = None
+        self._planning: dict[str, Any] | None = None
+        self._models: dict[str, Any] | None = None
+        self._dashboard: Any = None
 
         # Callbacks de progresso
         self._on_fase_change: list[Callable] = []
@@ -440,7 +415,7 @@ class ShadowForgeAgent(ODDATemplate):
 
     async def _observe(self) -> list[dict[str, Any]]:
         """Fase OBSERVE do OODA — coleta informações do ambiente."""
-        observacoes = []
+        observacoes: list[dict[str, Any]] = []
 
         # Captura de tela (visão)
         if self._vision and self._vision.get("capture"):
@@ -500,7 +475,7 @@ class ShadowForgeAgent(ODDATemplate):
 
     async def _orient(self, observacoes: list[dict]) -> dict[str, Any]:
         """Fase ORIENT do OODA — analisa e contextualiza observações."""
-        orientacao = {
+        orientacao: dict[str, Any] = {
             "observacoes_processadas": len(observacoes),
             "fase_atual": self.estado.fase_atual.value,
             "alvo": self.estado.alvo_principal,

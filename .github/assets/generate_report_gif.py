@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate animated GIF for Step 6: Report Generation."""
+
 from PIL import Image, ImageDraw, ImageFont
-import math
 
 
 def main():
@@ -12,11 +12,11 @@ def main():
     try:
         f11 = ImageFont.truetype("cour.ttf", 11)
         f9 = ImageFont.truetype("cour.ttf", 9)
-        f13 = ImageFont.truetype("courbd.ttf", 13)
+        ImageFont.truetype("courbd.ttf", 13)
         f16 = ImageFont.truetype("courbd.ttf", 16)
         f20 = ImageFont.truetype("courbd.ttf", 20)
     except OSError:
-        f11 = f9 = f13 = f16 = f20 = ImageFont.load_default()
+        f11 = f9 = f16 = f20 = ImageFont.load_default()
 
     frames = []
 

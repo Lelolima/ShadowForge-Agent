@@ -11,8 +11,9 @@ import json
 import logging
 import os
 import time
-from typing import Dict, Any, Optional, Callable
-from urllib import request, error
+from collections.abc import Callable
+from typing import Any
+from urllib import error, request
 
 logger = logging.getLogger("shadowforge.observability.alerting")
 
@@ -86,7 +87,7 @@ def _get_metric_value(rule_name: str, value: float) -> str:
     return messages.get(rule_name, f"Metric {rule_name} has value {value}")
 
 
-def evaluate_alert_rules(get_metric_fn: Optional[callable] = None) -> None:
+def evaluate_alert_rules(get_metric_fn: Callable[..., Any] | None = None) -> None:
     """
     Evaluate all alert rules and send notifications if thresholds are exceeded.
 

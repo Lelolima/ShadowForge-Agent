@@ -38,7 +38,7 @@ def _get_file_hash(file_path: Path) -> str:
     try:
         with open(file_path, 'rb') as f:
             return blake3.blake3(f.read()).hexdigest()
-    except (IOError, OSError):
+    except OSError:
         return ""
 
 
@@ -71,15 +71,15 @@ class ShadowForgePlugin(ABC):
     def ativo(self) -> bool:
         return True
 
-    async def on_load(self, bus: EventBus, ctx: dict[str, Any]) -> None:
+    async def on_load(self, bus: EventBus, ctx: dict[str, Any]) -> None:  # noqa: B027 - hook opcional
         """Chamado quando o plugin é ativado."""
         pass
 
-    async def on_unload(self, bus: EventBus) -> None:
+    async def on_unload(self, bus: EventBus) -> None:  # noqa: B027 - hook opcional
         """Chamado quando o plugin é desativado."""
         pass
 
-    async def on_event(self, evento: EventoShadowForge) -> None:
+    async def on_event(self, evento: EventoShadowForge) -> None:  # noqa: B027 - hook opcional
         """Hook genérico para todos os eventos."""
         pass
 
@@ -239,4 +239,3 @@ class PluginManager:
                 logger.error("Hook %s falhou no plugin %s: %s", hook, nome, e)
         return results
 
-    

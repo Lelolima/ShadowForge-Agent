@@ -13,7 +13,6 @@ from __future__ import annotations
 import logging
 import queue
 from collections.abc import Callable
-from typing import Any
 
 from core.config import ShadowForgeConfig
 

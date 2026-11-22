@@ -4,8 +4,10 @@ Provides functions to validate and sanitize user inputs.
 """
 
 import re
-from typing import Any, Optional, Pattern, Union
+from collections.abc import Callable
 from dataclasses import dataclass
+from re import Pattern
+from typing import Any
 
 
 class ValidationError(ValueError):
@@ -16,18 +18,18 @@ class ValidationError(ValueError):
 @dataclass
 class ValidationRule:
     """Defines a validation rule for input fields."""
-    pattern: Optional[Pattern[str]] = None
+    pattern: Pattern[str] | None = None
     min_length: int = 0
     max_length: int = float('inf')
-    allowed_chars: Optional[str] = None
-    forbidden_chars: Optional[str] = None
-    custom_validator: Optional[callable] = None
+    allowed_chars: str | None = None
+    forbidden_chars: str | None = None
+    custom_validator: Callable[..., Any] | None = None
 
 
 def validate_input(
     value: Any,
     field_name: str = "input",
-    rules: Optional[ValidationRule] = None,
+    rules: ValidationRule | None = None,
     required: bool = True
 ) -> Any:
     """
@@ -85,18 +87,16 @@ def validate_input(
                 )
 
         # Check regex pattern
-        if rules.pattern is not None:
-            if not re.match(rules.pattern, str_value):
-                raise ValidationError(
-                    f"{field_name} does not match required pattern"
-                )
+        if rules.pattern is not None and not re.match(rules.pattern, str_value):
+            raise ValidationError(
+                f"{field_name} does not match required pattern"
+            )
 
         # Run custom validator
-        if rules.custom_validator is not None:
-            if not rules.custom_validator(value):
-                raise ValidationError(
-                    f"{field_name} failed custom validation"
-                )
+        if rules.custom_validator is not None and not rules.custom_validator(value):
+            raise ValidationError(
+                f"{field_name} failed custom validation"
+            )
 
     return value
 
@@ -211,7 +211,7 @@ def validate_hostname(hostname: str) -> str:
     return hostname
 
 
-def validate_port(port: Union[str, int]) -> int:
+def validate_port(port: str | int) -> int:
     """
     Validate a port number.
 
@@ -226,8 +226,8 @@ def validate_port(port: Union[str, int]) -> int:
     """
     try:
         port_num = int(port)
-    except (ValueError, TypeError):
-        raise ValidationError(f"Port must be an integer: {port}")
+    except (ValueError, TypeError) as e:
+        raise ValidationError(f"Port must be an integer: {port}") from e
 
     if port_num < 1 or port_num > 65535:
         raise ValidationError(f"Port must be between 1 and 65535: {port}")

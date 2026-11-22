@@ -1,13 +1,16 @@
+import contextlib
+from unittest.mock import MagicMock
+
 from observability.health import (
+    check_dashboard_health,
+    check_database_health,
     check_event_bus_health,
     check_nim_client_health,
-    check_database_health,
-    check_dashboard_health,
     get_subsystem_health,
+    register_health_endpoints,
     update_observability_subsystem_health,
-    register_health_endpoints
 )
-from unittest.mock import MagicMock
+
 
 def test_health_check_imports():
     """Test that health check functions are importable."""
@@ -30,22 +33,15 @@ def test_health_checks_return_tuple():
 
     # For the ones that require agent, we'll test they can be called without error
     # We don't care about the return value since it depends on the mock
-    try:
+    # Pode falhar por atributos ausentes no mock; o teste só garante que é chamável
+    with contextlib.suppress(Exception):
         check_event_bus_health(mock_agent)
-    except Exception as e:
-        # We expect it might fail due to missing attributes on the mock, but that's ok
-        # for this is just testing it can be called
-        pass
 
-    try:
+    with contextlib.suppress(Exception):
         check_nim_client_health(mock_agent)
-    except Exception as e:
-        pass
 
-    try:
+    with contextlib.suppress(Exception):
         check_database_health(mock_agent)
-    except Exception as e:
-        pass
 
 def test_get_subsystem_health():
     """Test get_subsystem_health function."""

@@ -6,8 +6,8 @@ Script de build e desenvolvimento para ShadowForge Agent
 import argparse
 import subprocess
 import sys
-import os
 from pathlib import Path
+
 
 def run_command(cmd, cwd=None, check=True):
     """Execute um comando e retorna o resultado"""
@@ -102,25 +102,25 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Comandos disponíveis")
 
     # Comando lint
-    lint_parser = subparsers.add_parser("lint", help="Executa linting no código")
+    subparsers.add_parser("lint", help="Executa linting no código")
 
     # Comando test
-    test_parser = subparsers.add_parser("test", help="Executa os testes")
+    subparsers.add_parser("test", help="Executa os testes")
 
     # Comando format
-    format_parser = subparsers.add_parser("format", help="Formata o código")
+    subparsers.add_parser("format", help="Formata o código")
 
     # Comando typecheck
-    typecheck_parser = subparsers.add_parser("typecheck", help="Executa verificação de tipos")
+    subparsers.add_parser("typecheck", help="Executa verificação de tipos")
 
     # Comando clean
-    clean_parser = subparsers.add_parser("clean", help="Limpa arquivos temporários")
+    subparsers.add_parser("clean", help="Limpa arquivos temporários")
 
     # Comando dev
-    dev_parser = subparsers.add_parser("dev", help="Inicia o servidor de desenvolvimento")
+    subparsers.add_parser("dev", help="Inicia o servidor de desenvolvimento")
 
     # Comando all (executa tudo)
-    all_parser = subparsers.add_parser("all", help="Executa lint, teste, typecheck e format")
+    subparsers.add_parser("all", help="Executa lint, teste, typecheck e format")
 
     args = parser.parse_args()
 

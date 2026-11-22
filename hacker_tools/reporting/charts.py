@@ -56,7 +56,6 @@ class ChartEngine:
             valores = list(severidades.values())
 
             # Close the radar
-            categorias_plot = categorias + [categorias[0]]
             valores_plot = valores + [valores[0]]
 
             fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
@@ -111,7 +110,7 @@ class ChartEngine:
 
             fig, ax = plt.subplots(figsize=(10, 4))
             pos = np.arange(len(fases))
-            bars = ax.bar(pos, counts, color=["#0ff", "#00ff41", "#ffd700", "#ff6600", "#ff0040", "#8800ff"])
+            ax.bar(pos, counts, color=["#0ff", "#00ff41", "#ffd700", "#ff6600", "#ff0040", "#8800ff"])
             ax.set_xticks(pos)
             ax.set_xticklabels(fases, rotation=0)
             ax.set_ylabel("Ações", color="white")
@@ -139,8 +138,9 @@ class ChartEngine:
             return ""
 
         try:
-            import numpy as np
             from collections import defaultdict
+
+            import numpy as np
 
             por_tipo: dict[str, list[float]] = defaultdict(list)
             for v in vulns:
@@ -157,7 +157,7 @@ class ChartEngine:
 
             fig, ax = plt.subplots(figsize=(10, 3))
             colors = plt.cm.YlOrRd(np.array(medias) / 10.0)
-            bars = ax.barh(range(len(tipos)), medias, color=colors)
+            ax.barh(range(len(tipos)), medias, color=colors)
             ax.set_yticks(range(len(tipos)))
             ax.set_yticklabels(tipos)
             ax.set_xlabel("CVSS Médio", color="white")

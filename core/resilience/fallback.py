@@ -6,9 +6,10 @@ Provides fallback strategies when primary operations fail.
 import asyncio
 import functools
 import logging
-from typing import Callable, Any, Optional, TypeVar, Union, List, Tuple
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -28,12 +29,12 @@ class FallbackTrigger(Enum):
 class FallbackConfig:
     """Configuration for fallback mechanism."""
     trigger: FallbackTrigger = FallbackTrigger.ON_EXCEPTION
-    fallback_func: Optional[Callable[..., T]] = None
+    fallback_func: Callable[..., T] | None = None
     fallback_args: tuple = field(default_factory=tuple)
     fallback_kwargs: dict = field(default_factory=dict)
     exception_types: tuple = (Exception,)  # Exception types that trigger fallback
-    result_condition: Optional[Callable[[Any], bool]] = None  # Condition for ON_RESULT
-    timeout: Optional[float] = None        # Timeout for primary operation
+    result_condition: Callable[[Any], bool] | None = None  # Condition for ON_RESULT
+    timeout: float | None = None        # Timeout for primary operation
     name: str = "fallback"                 # Name for logging/monitoring
 
 
@@ -43,8 +44,8 @@ class FallbackError(Exception):
     def __init__(
         self,
         message: str,
-        primary_exception: Optional[Exception] = None,
-        fallback_exception: Optional[Exception] = None
+        primary_exception: Exception | None = None,
+        fallback_exception: Exception | None = None
     ):
         super().__init__(message)
         self.primary_exception = primary_exception
@@ -245,9 +246,8 @@ class Fallback:
                             **self.config.fallback_kwargs
                         )
                     )
-        except Exception as e:
-            fallback_exception = e
-            raise e
+        except Exception:
+            raise
 
     def _execute_fallback_sync(self) -> any:
         """Execute fallback function synchronously."""
@@ -256,14 +256,13 @@ class Fallback:
                 *self.config.fallback_args,
                 **self.config.fallback_kwargs
             )
-        except Exception as e:
-            fallback_exception = e
-            raise e
+        except Exception:
+            raise
 
     async def _execute_fallback_with_tracking(
         self,
         primary_exception: Exception,
-        fallback_exception: Optional[Exception]
+        fallback_exception: Exception | None
     ) -> any:
         """Execute fallback and track exceptions."""
         try:
@@ -275,12 +274,12 @@ class Fallback:
                 f"Both primary and fallback functions failed for '{self.config.name}'",
                 primary_exception,
                 fallback_exception
-            )
+            ) from e
 
     def _execute_fallback_sync_with_tracking(
         self,
         primary_exception: Exception,
-        fallback_exception: Optional[Exception]
+        fallback_exception: Exception | None
     ) -> any:
         """Execute fallback synchronously and track exceptions."""
         try:
@@ -292,7 +291,7 @@ class Fallback:
                 f"Both primary and fallback functions failed for '{self.config.name}'",
                 primary_exception,
                 fallback_exception
-            )
+            ) from e
 
     def _should_fallback_on_result(self, result: any) -> bool:
         """Check if fallback should be triggered based on result."""
@@ -323,8 +322,8 @@ def fallback(
     def decorator(
         trigger: FallbackTrigger = FallbackTrigger.ON_EXCEPTION,
         exception_types: tuple = (Exception,),
-        result_condition: Optional[Callable[[Any], bool]] = None,
-        timeout: Optional[float] = None,
+        result_condition: Callable[[Any], bool] | None = None,
+        timeout: float | None = None,
         name: str = "fallback"
     ) -> Callable:
         config = FallbackConfig(

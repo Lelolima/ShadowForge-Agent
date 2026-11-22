@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import logging
 import random
-import shlex
 import time
 from typing import TYPE_CHECKING
 
@@ -149,8 +148,6 @@ class StealthManager:
         try:
             import subprocess
             if self._is_linux():
-                safe_iface = shlex.quote(interface)
-                safe_mac = shlex.quote(mac_original)
                 cmds = [
                     ["ip", "link", "set", "dev", interface, "down"],
                     ["ip", "link", "set", "dev", interface, "address", mac_original],

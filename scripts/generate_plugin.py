@@ -9,10 +9,8 @@ Script para gerar estrutura básica de plugins para ShadowForge Agent.
 """
 
 import argparse
-import os
 import sys
 from pathlib import Path
-from datetime import datetime
 
 # Adiciona raiz ao path
 ROOT_DIR = Path(__file__).parent.parent.resolve()
@@ -174,15 +172,15 @@ class {plugin_class_name}(ShadowForgePlugin):
 
     print(f"[+] Plugin '{plugin_name}' created successfully!")
     print(f"    Location: {plugin_dir.absolute()}")
-    print(f"    Files created:")
+    print("    Files created:")
     print(f"      - {init_file}")
     print(f"      - {plugin_file}")
     print()
     print("Next steps:")
     print(f"  1. Edit {plugin_file} to implement your plugin's functionality")
     print(f"  2. Update metadata in {init_file} if needed")
-    print(f"  3. Add dependencies to plugin.py if you need other plugins")
-    print(f"  4. Test the agent with: python main.py")
+    print("  3. Add dependencies to plugin.py if you need other plugins")
+    print("  4. Test the agent with: python main.py")
 
 def main():
     parser = argparse.ArgumentParser(

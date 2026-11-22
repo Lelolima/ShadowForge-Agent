@@ -10,10 +10,8 @@
 
 from __future__ import annotations
 
-import base64
 import logging
 import re
-import base64
 from typing import Any
 
 from core.config import ShadowForgeConfig
@@ -258,7 +256,6 @@ class OCRExtractor:
         resultado: dict[str, Any] = {"hosts": []}
 
         # Padrão para detectar novo host no output
-        host_pattern = re.compile(r"Nmap scan report for\s+(.+?)(?:\s|\n)")
         porta_pattern = re.compile(
             r"(\d+)/tcp\s+open\s+(\S+)(?:\s+(.+))?"
         )

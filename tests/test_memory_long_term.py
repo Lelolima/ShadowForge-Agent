@@ -10,32 +10,31 @@ Testes para: MemoriaLongoPrazo (memoria persistente com embeddings).
 from __future__ import annotations
 
 import asyncio
-import tempfile
-from pathlib import Path
+import contextlib
 
 # Adiciona root ao path para import
 import sys
+import tempfile
+from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
-from core.memory import MemoriaLongoPrazo, EntradaMemoria
+from core.memory import EntradaMemoria, MemoriaLongoPrazo
 
 
 class TestMemoriaLongoPrazo:
     def setup_method(self) -> None:
         """Cria um banco temporario para cada teste."""
-        self.temp_file = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
-        self.db_path = self.temp_file.name
-        self.temp_file.close()
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as temp_file:
+            self.db_path = temp_file.name
         self.mem_lp = MemoriaLongoPrazo(db_path=self.db_path)
 
     def teardown_method(self) -> None:
         """Remove o banco temporario apos o teste."""
         # Fecha a conexao assincrona se existir
         if self.mem_lp:
-            try:
+            with contextlib.suppress(Exception):
                 asyncio.run(self.mem_lp.close())
-            except Exception:
-                pass  # Ignora erros durante o fechamento
         # Remove o arquivo
         Path(self.db_path).unlink(missing_ok=True)
 
@@ -124,7 +123,7 @@ class TestMemoriaLongoPrazo:
 
             liccoes = await self.mem_lp.recuperar_licoes(limite=5)
             assert len(liccoes) == 2
-            assert all(l.tipo == "licao" for l in liccoes)
+            assert all(item.tipo == "licao" for item in liccoes)
             # Verifica que estao ordenadas por importancia (maior primeiro)
             assert liccoes[0].importancia >= liccoes[1].importancia
 

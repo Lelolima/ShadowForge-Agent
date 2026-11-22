@@ -17,9 +17,12 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, TypedDict, List
+from typing import Any, TypedDict
 
-from core.state import EstadoAgente, VulnerabilidadeDescoberta  # L-08 FIX: Tipo específico em vez de Any
+from core.state import (  # L-08 FIX: Tipo específico em vez de Any
+    EstadoAgente,
+    VulnerabilidadeDescoberta,
+)
 
 try:
     from hacker_tools.reporting.charts import ChartEngine
@@ -52,22 +55,22 @@ class ResumoExecutivo(TypedDict):
     criticas: int
     altas: int
     nivel_risco: str
-    top_3: List[Top3Item]
+    top_3: list[Top3Item]
     conclusao: str
 
 
 class Escopo(TypedDict):
     alvo_principal: str | None
     total_hosts: int
-    hosts: List[HostItem]
+    hosts: list[HostItem]
     tipo_teste: str
     restricoes: str
 
 
 class Metodologia(TypedDict):
-    frameworks: List[str]
-    fases: List[dict[str, str]]
-    ferramentas: List[str]
+    frameworks: list[str]
+    fases: list[dict[str, str]]
+    ferramentas: list[str]
 
 
 class VulnerabilidadeDetalhe(TypedDict):
@@ -83,13 +86,13 @@ class VulnerabilidadeDetalhe(TypedDict):
     prova_de_conceito: str
     impacto: ImpactoCIA
     remediacao: str
-    referencias: List[str]
+    referencias: list[str]
     explorada: bool
     timestamp: str
 
 
 class Apendices(TypedDict):
-    ferramentas: List[str]
+    ferramentas: list[str]
     total_acoes: int
     duracao_min: int
 
@@ -115,7 +118,7 @@ class HostItem(TypedDict):
 
 class RiscoResidual(TypedDict):
     pos_remediacao: str
-    recomendacoes_adicionais: List[str]
+    recomendacoes_adicionais: list[str]
 
 
 class RelatorioCompleto(TypedDict):
@@ -123,9 +126,9 @@ class RelatorioCompleto(TypedDict):
     resumo_executivo: ResumoExecutivo
     escopo: Escopo
     metodologia: Metodologia
-    vulnerabilidades: List[VulnerabilidadeDetalhe]
+    vulnerabilidades: list[VulnerabilidadeDetalhe]
     score_geral: float
-    recomendacoes: List[str]
+    recomendacoes: list[str]
     risco_residual: RiscoResidual
     apendices: Apendices
 
@@ -272,7 +275,7 @@ class ReportGenerator:
             ],
         }
 
-    def _detalhar_vulnerabilidades(self, estado: EstadoAgente) -> List[VulnerabilidadeDetalhe]:
+    def _detalhar_vulnerabilidades(self, estado: EstadoAgente) -> list[VulnerabilidadeDetalhe]:
         """Detalha cada vulnerabilidade encontrada."""
         detalhes = []
         for vuln in estado.vulnerabilidades:
@@ -366,7 +369,7 @@ class ReportGenerator:
         }
         return recomendacoes.get(vuln.tipo.value, "1. Investigue a vulnerabilidade\n2. Aplique correções específicas\n3. Valide a remediação")
 
-    def _gerar_referencias(self, vuln: VulnerabilidadeDescoberta) -> List[str]:
+    def _gerar_referencias(self, vuln: VulnerabilidadeDescoberta) -> list[str]:
         """Gera referências CWE/CVE/OWASP para a vulnerabilidade."""
         refs_por_tipo = {
             "sql_injection": ["CWE-89", "OWASP A03:2021", "MITRE T1190"],
@@ -383,7 +386,7 @@ class ReportGenerator:
             refs.append(vuln.cve_id)
         return refs
 
-    def _calcular_score_geral(self, vulnerabilidades: List[VulnerabilidadeDescoberta]) -> float:
+    def _calcular_score_geral(self, vulnerabilidades: list[VulnerabilidadeDescoberta]) -> float:
         """Calcula score geral de risco (0-10).
 
         Baseado em CVSS médio ponderado com peso
@@ -407,7 +410,7 @@ class ReportGenerator:
         score_medio = score_total / peso_total
         return round(min(10.0, score_medio), 1)
 
-    def _gerar_recomendacoes_gerais(self, estado: EstadoAgente) -> List[str]:
+    def _gerar_recomendacoes_gerais(self, estado: EstadoAgente) -> list[str]:
         """Gera recomendações gerais de segurança."""
         recs = [
             "Implementar programa de segurança contínuo (não apenas pentest puntual)",

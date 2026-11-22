@@ -4,13 +4,13 @@ Provides fault tolerance for external service calls by preventing cascading fail
 """
 
 import asyncio
-import time
 import functools
 import logging
+import time
+from collections.abc import Callable
+from dataclasses import dataclass
 from enum import Enum
-from dataclasses import dataclass, field
-from typing import Callable, Any, Optional, TypeVar, Generic, Union
-from abc import ABC, abstractmethod
+from typing import Generic, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class CircuitBreakerConfig:
     recovery_timeout: float = 60.0          # Seconds before trying half-open
     expected_exception: type = Exception    # Exception type that counts as failure
     success_threshold: int = 3              # Successes needed to close from half-open
-    timeout: Optional[float] = None         # Request timeout in seconds
+    timeout: float | None = None         # Request timeout in seconds
     name: str = "circuit_breaker"           # Name for logging/monitoring
 
 
@@ -52,7 +52,7 @@ class CircuitBreaker(Generic[T]):
         self._state = CircuitBreakerState.CLOSED
         self._failure_count = 0
         self._success_count = 0
-        self._last_failure_time: Optional[float] = None
+        self._last_failure_time: float | None = None
         self._lock = asyncio.Lock()  # For thread-safe state transitions
 
     @property
@@ -180,13 +180,14 @@ class CircuitBreaker(Generic[T]):
         if self._state == CircuitBreakerState.HALF_OPEN:
             # Failure in half-open -> go back to open
             self._set_open()
-        elif self._state == CircuitBreakerState.CLOSED:
-            # Check if we should open the circuit
-            if self._failure_count >= self.config.failure_threshold:
-                self._set_open()
+        elif (
+            self._state == CircuitBreakerState.CLOSED
+            and self._failure_count >= self.config.failure_threshold
+        ):
+            self._set_open()
 
 
-def circuit_breaker(config: Optional[CircuitBreakerConfig] = None) -> Callable:
+def circuit_breaker(config: CircuitBreakerConfig | None = None) -> Callable:
     """
     Decorator for applying circuit breaker pattern to functions.
 

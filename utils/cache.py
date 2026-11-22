@@ -13,11 +13,12 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
+import logging
 import time
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
+from collections.abc import Callable
 from functools import wraps
-import logging
+from typing import Any, TypeVar
 
 logger = logging.getLogger("shadowforge.utils.cache")
 
@@ -42,7 +43,7 @@ class LRUCache:
         self.maxsize = maxsize
         self.ttl_seconds = ttl_seconds
         self._cache: OrderedDict = OrderedDict()
-        self._timestamps: Dict[str, float] = {}
+        self._timestamps: dict[str, float] = {}
         self._lock = asyncio.Lock()
         self._hits = 0
         self._misses = 0
@@ -65,7 +66,7 @@ class LRUCache:
         key_json = json.dumps(key_data, sort_keys=True, default=str)
         return hashlib.sha256(key_json.encode()).hexdigest()
 
-    async def get(self, key: str) -> Optional[Any]:
+    async def get(self, key: str) -> Any | None:
         """
         Obtem valor do cache se existir e não estiver expirado.
 

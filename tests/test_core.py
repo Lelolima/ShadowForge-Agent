@@ -10,23 +10,23 @@ Testes para: EstadoAgente, Memoria, Guardrails Eticos, OODA.
 from __future__ import annotations
 
 import asyncio
-import tempfile
-from pathlib import Path
 
 # Adiciona root ao path para import
 import sys
+import tempfile
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
+from core.config import ShadowForgeConfig
+from core.memory import EntradaMemoria, MemoriaCurtoPrazo
 from core.state import (
     EstadoAgente,
     FaseOperacao,
+    HostAlvo,
     Severidade,
     TipoVulnerabilidade,
-    HostAlvo,
 )
-from core.memory import MemoriaCurtoPrazo, EntradaMemoria
-from core.config import ShadowForgeConfig, ModoOperacao
 
 # =============================================================================
 # L-09 FIX: Testes unitarios para EstadoAgente (state)
@@ -132,7 +132,7 @@ class TestEstadoAgente:
                     time.sleep(0.1)
             else:
                 import warnings
-                warnings.warn(f"Could not delete temporary file {db_path} after multiple attempts.")
+                warnings.warn(f"Could not delete temporary file {db_path} after multiple attempts.", stacklevel=2)
 
 
 # =============================================================================
@@ -241,8 +241,9 @@ class TestGuardrailsEticos:
 
     def test_blacklist_padrao_nao_bloqueia_todo_ipv4(self) -> None:
         """Antes, 0.0.0.0/0 no YAML padrão bloqueava qualquer IP."""
-        from core.config import ShadowForgeConfig as Cfg
         from pathlib import Path
+
+        from core.config import ShadowForgeConfig as Cfg
         cfg = Cfg.carregar_de_yaml(Path(__file__).parent.parent / "config" / "default.yaml")
         cfg.etica.whitelist_hosts = ["10.0.0.0/24"]
         permitido, motivo = cfg.verificar_etica("executar_recon", "10.0.0.5")
