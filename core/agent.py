@@ -20,6 +20,7 @@ from typing import Any, TypedDict, Optional, List, TypedDict, List, Optional, Di
 
 from rich.console import Console
 
+from core.audit import TrilhaAuditoria
 from core.config import ModoOperacao, ShadowForgeConfig
 from core.memory import MemoriaCurtoPrazo, MemoriaLongoPrazo
 from core.state import EstadoAgente, FaseOperacao
@@ -95,6 +96,8 @@ logger = logging.getLogger("shadowforge.core")
 
 class ShadowForgeAgent(ODDATemplate):
     MAX_BLOQUEIOS_CONSECUTIVOS = 3
+    # Ações que tocam o alvo de verdade e exigem confirmação fora do dry-run
+    ACOES_INTRUSIVAS = frozenset({"executar_recon"})
 
     """Motor agentic principal do ShadowForge.
 
@@ -122,6 +125,7 @@ class ShadowForgeAgent(ODDATemplate):
         scope: list[str] | None = None,
         vision_enabled: bool = False,
         max_iteracoes: int | None = None,
+        confirmar: Callable[[str], bool] | None = None,
     ) -> None:
         # Configuração
         try:
@@ -146,6 +150,13 @@ class ShadowForgeAgent(ODDATemplate):
         self.estado.alvo_principal = target
         if campaign:
             self.estado.campanha_id = campaign
+
+        # Confirmação do operador antes de ações intrusivas (fora do dry-run).
+        # Sem callback, ações intrusivas são negadas (fail-closed).
+        self._confirmar = confirmar
+
+        # Trilha de auditoria encadeada por hash (data/audit/<campanha>.jsonl)
+        self.auditoria = TrilhaAuditoria(self.config.data_dir / "audit", self.estado.campanha_id)
 
         self.memoria_cp = MemoriaCurtoPrazo(capacidade=500)
         self.memoria_lp = MemoriaLongoPrazo(
@@ -317,8 +328,28 @@ class ShadowForgeAgent(ODDATemplate):
 
         logger.info("Subsistemas inicializados")
 
+    def _operador_confirmou(self, acao: str, alvo: str) -> bool:
+        """Pede confirmação explícita ao operador e registra a resposta."""
+        descricao = f"{acao} contra {alvo}"
+        confirmado = False
+        if self._confirmar is not None:
+            try:
+                confirmado = bool(self._confirmar(descricao))
+            except Exception as e:  # callback quebrado nunca libera a ação
+                logger.error("Falha ao obter confirmação: %s", e)
+        self.auditoria.registrar("confirmacao", acao=acao, alvo=alvo, confirmado=confirmado)
+        return confirmado
+
     async def run(self) -> None:
         """Loop principal do agente — OODA contínuo."""
+        self.auditoria.registrar(
+            "campanha_iniciada",
+            alvo=self.estado.alvo_principal,
+            modo=self.config.modo.value,
+            simulado=self.simulate,
+            escopo=list(self.config.etica.whitelist_hosts),
+            visao=self.vision_enabled,
+        )
         self.running = True
         await self.inicializar_subsistemas()
 
@@ -354,6 +385,9 @@ class ShadowForgeAgent(ODDATemplate):
 
         finally:
             self.running = False
+            self.auditoria.registrar(
+                "campanha_encerrada", iteracoes=self._iteracao, fase=self.estado.fase_atual.value
+            )
             logger.info("SH4D0WF0RG3 OFFLINE | Iterações: %d", self._iteracao)
             # Set active OODA cycles to 0
             if OBSERVABILITY_ENABLED:
@@ -612,7 +646,27 @@ class ShadowForgeAgent(ODDATemplate):
         acao = decisao.get("acao", "none")
         resultado = {"sucesso": False, "acao": acao}
 
+        alvo_acao = decisao.get("alvo", self.estado.alvo_principal or "")
+        if (
+            acao in self.ACOES_INTRUSIVAS
+            and not self.simulate
+            and not self._operador_confirmou(acao, alvo_acao)
+        ):
+            decisao = {
+                "acao": "etica_bloqueada",
+                "motivo": "operador não confirmou a ação intrusiva",
+                "acao_original": acao,
+            }
+            acao = "etica_bloqueada"
+
         if acao == "etica_bloqueada":
+            self.auditoria.registrar(
+                "acao_bloqueada",
+                acao=decisao.get("acao_original"),
+                alvo=alvo_acao,
+                motivo=decisao.get("motivo"),
+                simulado=self.simulate,
+            )
             logger.warning("Acao bloqueada por guardrails eticos: %s", decisao.get("motivo"))
             self._bloqueios_consecutivos += 1
             if self._bloqueios_consecutivos >= self.MAX_BLOQUEIOS_CONSECUTIVOS:
@@ -740,6 +794,15 @@ class ShadowForgeAgent(ODDATemplate):
         # registrar_acao acontece DEPOIS de avancar_fase(), então fase_atual já avançou.
         # Usamos fase_anterior para registrar a ação na fase em que foi executada.
         fase_registro = self.estado.fase_anterior.value if self.estado.fase_anterior else self.estado.fase_atual.value
+        self.auditoria.registrar(
+            "acao_executada",
+            acao=acao,
+            alvo=alvo_acao,
+            fase=fase_registro,
+            sucesso=resultado.get("sucesso", False),
+            simulado=self.simulate or bool(resultado.get("simulado")),
+            erro=resultado.get("erro") or (resultado.get("dados") or {}).get("erro"),
+        )
         self.estado.registrar_acao(
             fase=fase_registro,
             tipo=acao,

@@ -155,6 +155,11 @@ class ShadowForgeLauncher:
             help="Arquivo com um alvo autorizado por linha (# comenta)",
         )
         parser.add_argument(
+            "--yes",
+            action="store_true",
+            help="Confirma automaticamente ações intrusivas DENTRO do escopo (uso não interativo)",
+        )
+        parser.add_argument(
             "--vision",
             action="store_true",
             help="Habilita captura de tela (imagens podem ser enviadas à API NVIDIA)",
@@ -314,7 +319,9 @@ class ShadowForgeLauncher:
                 scope=self.args.scope,
                 vision_enabled=self.args.vision,
                 max_iteracoes=self.args.max_iteracoes,
+                confirmar=self._criar_confirmacao(),
             )
+            console.print(f"[dim]  Trilha de auditoria: {self.agent.auditoria.caminho}[/dim]")
 
             console.print("[green]  [+] Core agent.............. OK[/green]")
             if self.args.vision:
@@ -354,6 +361,23 @@ class ShadowForgeLauncher:
             if self.agent:
                 await self.agent.shutdown()
             console.print("[cyan]  SH4D0WF0RG3 OFFLINE | Sessão encerrada[/cyan]")
+
+    def _criar_confirmacao(self):
+        """Callback de confirmação antes de ações intrusivas.
+
+        ``--yes`` confirma automaticamente; em terminal interativo pergunta ao
+        operador; sem terminal e sem ``--yes`` nega (fail-closed).
+        """
+        if self.args.yes:
+            return lambda _descricao: True
+        if not sys.stdin.isatty():
+            return None
+
+        def perguntar(descricao: str) -> bool:
+            resposta = input(f"\n  [?] Confirmar ação intrusiva: {descricao}? [s/N] ")
+            return resposta.strip().lower() in {"s", "sim", "y", "yes"}
+
+        return perguntar
 
     def _handle_shutdown(self, sig: signal.Signals) -> None:
         """Handler graceful de shutdown."""
