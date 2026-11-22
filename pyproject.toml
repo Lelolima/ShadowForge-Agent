@@ -68,6 +68,13 @@ include = [
     "planning*", "speech*", "utils*", "vision*",
 ]
 
+[tool.coverage.run]
+source = ["api", "control", "core", "hacker_tools", "models", "observability", "planning", "utils"]
+
+[tool.coverage.report]
+fail_under = 55
+skip_empty = true
+
 [tool.ruff]
 target-version = "py310"
 line-length = 100
@@ -76,8 +83,13 @@ line-length = 100
 select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM"]
 ignore = ["E501", "B008", "SIM108"]
 
+[tool.ruff.lint.per-file-ignores]
+# Scripts que desenham GIFs usam W/H/FPS em maiúsculas como constantes locais
+".github/assets/*.py" = ["N806"]
+
 [tool.mypy]
 python_version = "3.10"
+plugins = ["pydantic.mypy"]
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
