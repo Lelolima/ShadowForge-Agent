@@ -14,10 +14,13 @@ import asyncio
 import io
 import logging
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from PIL import Image
+
+if TYPE_CHECKING:
+    from core.config import ShadowForgeConfig
 
 # L-05 FIX: Usar import logging padrão em vez de __import__
 logger = logging.getLogger("shadowforge.vision.screen")

@@ -11,7 +11,7 @@ de imagens de tela e chain-of-thought visual-tático.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from core.config import ShadowForgeConfig

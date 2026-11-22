@@ -2,6 +2,8 @@
 Unit tests for security module components.
 """
 
+import sys
+
 import pytest
 import sqlite3
 from unittest.mock import Mock, patch
@@ -28,7 +30,7 @@ from core.security.security_headers import (
 from core.security.rate_limiting import (
     RateLimitConfig, RateLimitResult, TokenBucket, RateLimiter,
     create_ip_rate_limiter, create_api_key_rate_limiter,
-    create_burst_tolerant_limiter
+    create_burst_tolerant_limiter, rate_limit
 )
 
 
@@ -196,12 +198,12 @@ class TestOutputEncoding:
 
     def test_encode_html(self):
         """Test HTML encoding."""
-        assert encode_html("<script>alert('xss')</script>") == "<script>alert('xss')</script>"
-        assert encode_html("&") == "&"
-        assert encode_html("<") == "<"
-        assert encode_html(">") == ">"
-        assert encode_html('"') == '"'
-        assert encode_html("'") == "'"
+        assert encode_html("<script>alert('xss')</script>") == "&lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt;"
+        assert encode_html("&") == "&amp;"
+        assert encode_html("<") == "&lt;"
+        assert encode_html(">") == "&gt;"
+        assert encode_html('"') == "&quot;"
+        assert encode_html("'") == "&#x27;"
 
     def test_encode_html_attribute(self):
         """Test HTML attribute encoding."""
@@ -252,13 +254,13 @@ class TestOutputEncoding:
         assert normalize_path("path/../../../etc/passwd") == "etc/passwd"  # goes to root then up
         assert normalize_path("") == "."
         assert normalize_path(".") == "."
-        assert normalize_path("..") == ".."  # Our implementation allows going above root for simplicity
+        assert normalize_path("..") == "."  # nunca sobe acima da raiz
 
     def test_safe_string_truncate(self):
         """Test string truncation."""
         assert safe_string_truncate("short", 10) == "short"
         assert safe_string_truncate("this is a long string", 10) == "this is..."
-        assert safe_string_truncate("exactly ten chars", 10) == "exactly t..."
+        assert safe_string_truncate("exactly ten chars", 10) == "exactly..."
         assert safe_string_truncate("test", 3, "") == "tes"
 
 
@@ -317,10 +319,11 @@ class TestInjectionPrevention:
 
     def test_execute_safe_command(self):
         """Test safe command execution."""
-        # Simple echo command
-        result = execute_safe_command("echo", ["hello"])
-        assert result.returncode == 0
-        assert "hello" in result.stdout
+        # Simple echo command (echo é builtin do shell no Windows, não executável)
+        if sys.platform != "win32":
+            result = execute_safe_command("echo", ["hello"])
+            assert result.returncode == 0
+            assert "hello" in result.stdout
 
         # Invalid command
         result = execute_safe_command("nonexistentcommand12345", [])
@@ -329,16 +332,16 @@ class TestInjectionPrevention:
     def test_sanitize_sql(self):
         """Test SQL sanitization (legacy)."""
         assert sanitize_sql("O'Reilly") == "O''Reilly"
-        assert sanitize_sql('He said "Hello"') == 'He said ""Hello""'
+        assert sanitize_sql('He said "Hello"') == 'He said "Hello"'  # aspas duplas não delimitam literais SQL
         assert sanitize_sql(r"C:\Users\Name") == r"C:\\Users\\Name"
         assert sanitize_sql("100%") == "100\\%"
         assert sanitize_sql("hello_world") == "hello\\_world"
 
     def test_sanitize_shell(self):
         """Test shell sanitization (legacy)."""
-        assert sanitize_shell("hello") == "'hello'"
+        assert sanitize_shell("hello") == "hello"  # shlex.quote não cita strings seguras
         assert sanitize_shell("hello'world") == "'hello'\"'\"'world'"
-        assert sanitize_shell('hello"world') == "'hello\"'\"'world'"
+        assert sanitize_shell('hello"world') == "'hello\"world'"
 
     def test_escape_like_pattern(self):
         """Test LIKE pattern escaping."""
@@ -414,27 +417,27 @@ class TestInjectionPrevention:
         """Test building safe SELECT queries."""
         # Simple select
         query, params = build_safe_select("users")
-        assert query == "SELECT * FROM users"
+        assert query == 'SELECT * FROM "users"'  # identificadores são citados
         assert params == ()
 
         # With columns
         query, params = build_safe_select("users", ["id", "name"])
-        assert query == "SELECT id, name FROM users"
+        assert query == 'SELECT "id", "name" FROM "users"'
         assert params == ()
 
         # With WHERE
         query, params = build_safe_select("users", where="id = ?", params=(1,))
-        assert query == "SELECT * FROM users WHERE id = ?"
+        assert query == 'SELECT * FROM "users" WHERE id = ?'
         assert params == (1,)
 
         # With ORDER BY
         query, params = build_safe_select("users", order_by="name DESC")
-        assert query == "SELECT * FROM users ORDER BY name DESC"
+        assert query == 'SELECT * FROM "users" ORDER BY name DESC'
         assert params == ()
 
         # With LIMIT
         query, params = build_safe_select("users", limit=10)
-        assert query == "SELECT * FROM users LIMIT 10"
+        assert query == 'SELECT * FROM "users" LIMIT 10'
         assert params == ()
 
         # Complex query
@@ -446,7 +449,7 @@ class TestInjectionPrevention:
             order_by="name ASC",
             limit=5
         )
-        assert query == "SELECT id, name, email FROM users WHERE age > ? AND status = ? ORDER BY name ASC LIMIT 5"
+        assert query == 'SELECT "id", "name", "email" FROM "users" WHERE age > ? AND status = ? ORDER BY name ASC LIMIT 5'
         assert params == (18, "active")
 
         # Test SQLIdentifier for table name
@@ -485,7 +488,7 @@ class TestSecurityHeaders:
         headers = get_security_headers()
 
         assert headers.content_security_policy is None  # No defaults
-        assert headers.strict_transport_security == "max-age=31536000"
+        assert headers.strict_transport_security == "max-age=31536000; includeSubDomains"
         assert headers.x_frame_options == "DENY"
         assert headers.x_content_type_options == "nosniff"
         assert headers.x_xss_protection == "1; mode=block"
@@ -502,7 +505,7 @@ class TestSecurityHeaders:
         )
 
         assert headers.content_security_policy == "default-src 'self'; script-src 'self' 'unsafe-inline'"
-        assert headers.strict_transport_security == "max-age=86400"
+        assert headers.strict_transport_security == "max-age=86400; includeSubDomains"
         assert headers.x_frame_options == "SAMEORIGIN"
         assert headers.permissions_policy == "geolocation=()"
 
@@ -511,7 +514,7 @@ class TestSecurityHeaders:
         existing_headers = {"User-Agent": "Test-Agent"}
         security_headers = get_security_headers(
             frame_options="DENY",
-            x_content_type_options=True
+            content_type_nosniff=True
         )
 
         result = apply_security_headers(existing_headers, security_headers)
@@ -561,11 +564,11 @@ class TestRateLimiting:
 
         # Consume some tokens
         assert bucket.consume(3) == True
-        assert bucket.tokens_available() == 7.0
+        assert bucket.tokens_available() == pytest.approx(7.0, abs=0.01)
 
         # Consume more than available
         assert bucket.consume(8) == False  # Only 7 available
-        assert bucket.tokens_available() == 7.0  # Shouldn't change
+        assert bucket.tokens_available() == pytest.approx(7.0, abs=0.01)  # Shouldn't change
 
         # Wait and check refill (we'll simulate by manipulating time)
         import time

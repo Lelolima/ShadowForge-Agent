@@ -35,6 +35,10 @@ O **ShadowForge Agent** é um agente autônomo de hacking ético que combina a s
 
 ---
 
+> **Nota sobre as demonstrações:** as animações (GIF/SVG) abaixo são ilustrações geradas
+> pelos scripts `.github/assets/generate_*.py` com dados fictícios. Elas **não** são
+> gravações de execuções reais da ferramenta.
+
 ## <span style="color:#0f0">&#62;</span> Demonstração em Tempo Real: Reconhecimento (RECON)
 
 <p align="center">
@@ -201,6 +205,40 @@ $ pip install -r requirements.txt
 $ cp .env.example .env
 # Edite .env e adicione sua chave
 ```
+
+Extras opcionais (dependências pesadas, não usadas nos testes/CI):
+`requirements-vision.txt`, `requirements-speech.txt`, `requirements-rag.txt`,
+`requirements-hacker.txt`. Requer Python 3.10+.
+
+### Variáveis de ambiente
+
+Veja `.env.example` (somente placeholders, nunca commite `.env`). Principais:
+
+| Variável | Uso |
+|----------|-----|
+| `NVIDIA_API_KEY` | Chave da API NVIDIA NIM (chamadas reais à nuvem; podem ter custo) |
+| `SHADOWFORGE__NVIDIA__API_KEY` | Alternativa lida por `ShadowForgeConfig.carregar_de_env()` |
+| `SHADOWFORGE_MODE` | `stealth` (padrão), `agressivo`, `recon_only`, `debug` |
+| `SHADOWFORGE_CONFIG` | Caminho do YAML (padrão `config/default.yaml`) |
+| `RIVA_SERVER` | Servidor Riva (apenas interface de voz) |
+| `SHODAN_API_KEY`, `CENSYS_API_ID`, `CENSYS_API_SECRET` | OSINT opcional |
+| `*_WEBHOOK_URL` | Webhooks de alertas em `observability/alerting.py` |
+
+---
+
+## <span style="color:#0f0">&#62;</span> Testes
+
+```bash
+$ pip install -r requirements.txt -r requirements-dev.txt
+$ python tests/test_imports.py      # valida importação de todos os módulos
+$ pytest tests -q                   # testes unitários (sem rede, sem alvos reais)
+```
+
+`tests/test_api_nvidia.py` faz chamadas HTTP reais à NVIDIA e fica **desativado** por padrão.
+Para rodá-lo: `SHADOWFORGE_RUN_INTEGRATION=1` e `NVIDIA_API_KEY` definidos.
+
+O CI (`.github/workflows/ci.yml`) roda lint (erros fatais do ruff), testes em Python 3.10 e 3.13,
+`pip-audit` e build do pacote (`python -m build`). Não há deploy nem push de imagem Docker.
 
 ---
 

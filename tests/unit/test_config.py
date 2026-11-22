@@ -49,3 +49,16 @@ def test_config_from_env(monkeypatch):
     cfg = ShadowForgeConfig.carregar_de_env()
     assert cfg.modo == ModoOperacao.DEBUG
     assert cfg.nvidia.api_key == "env-key"
+
+def test_modo_aceita_nome_do_campo_e_alias():
+    assert ShadowForgeConfig(modo=ModoOperacao.DEBUG).modo == ModoOperacao.DEBUG
+    assert ShadowForgeConfig(mode="agressivo").modo == ModoOperacao.AGRESSIVO
+
+
+def test_carregar_de_env_nao_imprime_api_key(monkeypatch, capsys):
+    monkeypatch.setenv("SHADOWFORGE__NVIDIA__API_KEY", "valor-sensivel-de-teste")
+    monkeypatch.setenv("SHADOWFORGE_MODE", "debug")
+    cfg = ShadowForgeConfig.carregar_de_env()
+    saida = capsys.readouterr()
+    assert "valor-sensivel-de-teste" not in saida.out + saida.err
+    assert cfg.modo == ModoOperacao.DEBUG
