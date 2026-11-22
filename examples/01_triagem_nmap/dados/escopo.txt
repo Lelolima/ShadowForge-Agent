@@ -1,0 +1,2 @@
+# Escopo autorizado do laboratório (contrato fictício LAB-2026-01)
+10.10.10.0/24

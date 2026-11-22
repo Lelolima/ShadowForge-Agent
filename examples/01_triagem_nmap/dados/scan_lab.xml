@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Scan SINTÉTICO de um laboratório fictício (10.10.10.0/24). Não corresponde a hosts reais. -->
+<nmaprun scanner="nmap" args="nmap -sV -oX scan_lab.xml 10.10.10.0/24" version="7.94">
+  <host>
+    <status state="up"/>
+    <address addr="10.10.10.5" addrtype="ipv4"/>
+    <hostnames><hostname name="web01.lab.local"/></hostnames>
+    <ports>
+      <port protocol="tcp" portid="22"><state state="open"/><service name="ssh" product="OpenSSH" version="7.4"/></port>
+      <port protocol="tcp" portid="80"><state state="open"/><service name="http" product="Apache httpd" version="2.4.41"/></port>
+      <port protocol="tcp" portid="443"><state state="open"/><service name="https" version="1.24.0"/></port>
+    </ports>
+  </host>
+  <host>
+    <status state="up"/>
+    <address addr="10.10.10.12" addrtype="ipv4"/>
+    <hostnames><hostname name="db01.lab.local"/></hostnames>
+    <ports>
+      <port protocol="tcp" portid="3306"><state state="open"/><service name="mysql" version="5.7.38"/></port>
+      <port protocol="tcp" portid="6379"><state state="open"/><service name="redis" version="6.0.9"/></port>
+      <port protocol="tcp" portid="8081"><state state="closed"/><service name="http"/></port>
+    </ports>
+  </host>
+  <host>
+    <status state="up"/>
+    <address addr="10.10.10.20" addrtype="ipv4"/>
+    <ports>
+      <port protocol="tcp" portid="21"><state state="open"/><service name="ftp" version="3.0.3"/></port>
+      <port protocol="tcp" portid="23"><state state="open"/><service name="telnet"/></port>
+      <port protocol="tcp" portid="445"><state state="open"/><service name="microsoft-ds"/></port>
+    </ports>
+  </host>
+  <host>
+    <status state="down"/>
+    <address addr="10.10.10.30" addrtype="ipv4"/>
+  </host>
+  <host>
+    <status state="up"/>
+    <address addr="10.10.20.7" addrtype="ipv4"/>
+    <ports>
+      <port protocol="tcp" portid="3389"><state state="open"/><service name="ms-wbt-server"/></port>
+    </ports>
+  </host>
+</nmaprun>

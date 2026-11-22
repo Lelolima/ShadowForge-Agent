@@ -101,3 +101,6 @@ safety-report.json
 # Estado de ferramentas de IDE/assistentes
 .refact/
 *.backup
+
+# Saída dos exemplos
+saida/

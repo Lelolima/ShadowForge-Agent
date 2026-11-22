@@ -1,0 +1,40 @@
+{
+  "_aviso": "Achados FICTÍCIOS de um teste autorizado contra a aplicação de laboratório loja-lab.local (não existe).",
+  "campanha": "LAB-2026-01",
+  "alvo": "loja-lab.local",
+  "achados": [
+    {
+      "tipo": "sql_injection",
+      "severidade": "critical",
+      "titulo": "SQL Injection no parâmetro de busca",
+      "descricao": "O parâmetro q de /produtos é concatenado na consulta SQL; erro de sintaxe do banco é refletido na resposta.",
+      "localizacao": "https://loja-lab.local/produtos?q=",
+      "cvss_score": 9.1,
+      "cve_id": null
+    },
+    {
+      "tipo": "xss_reflected",
+      "severidade": "high",
+      "titulo": "XSS refletido na página de erro",
+      "descricao": "O caminho solicitado é exibido sem escape na página 404.",
+      "localizacao": "https://loja-lab.local/404",
+      "cvss_score": 7.1
+    },
+    {
+      "tipo": "security_misconfiguration",
+      "severidade": "medium",
+      "titulo": "Listagem de diretório habilitada em /backup/",
+      "descricao": "O servidor web lista o conteúdo de /backup/, incluindo arquivos .sql antigos.",
+      "localizacao": "https://loja-lab.local/backup/",
+      "cvss_score": 5.3
+    },
+    {
+      "tipo": "sensitive_data_exposure",
+      "severidade": "low",
+      "titulo": "Cabeçalho Server expõe versão",
+      "descricao": "Resposta inclui Server: Apache/2.4.41 (Ubuntu).",
+      "localizacao": "https://loja-lab.local/",
+      "cvss_score": 3.1
+    }
+  ]
+}
