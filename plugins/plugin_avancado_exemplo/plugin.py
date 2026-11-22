@@ -283,13 +283,13 @@ class PluginAvancadoExemplo(ShadowForgePlugin):
     async def _executar_tarefa_periodica(self) -> None:
         """Executa tarefas de manutenção periódica."""
         agora = datetime.now()
-        logger.debug(f"Executando tarefa periodica às {agosto.isoformat()}")
+        logger.debug(f"Executando tarefa periodica às {agora.isoformat()}")
 
         # Exemplo: limpar dados antigos
         if self._ultimo_evento:
             tempo_desde_ultimo_evento = agora - self._ultimo_evento.timestamp
             if tempo_desde_ultimo_evento > timedelta(hours=1):
-                logger informando("Nenhum evento recebido na última hora")
+                logger.info("Nenhum evento recebido na última hora")
 
         # Exemplo: reportar estatísticas
         await self._bus.publish(EventoShadowForge(

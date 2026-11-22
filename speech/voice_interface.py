@@ -13,10 +13,13 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections.abc import Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from speech.asr import RivaASR
 from speech.tts import RivaTTS
+
+if TYPE_CHECKING:
+    from core.config import ShadowForgeConfig
 
 logger = logging.getLogger("shadowforge.speech.interface")
 
