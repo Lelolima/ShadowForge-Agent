@@ -99,7 +99,7 @@ class ShadowForgeLauncher:
         self.agent: object | None = None
         self._shutdown_event: asyncio.Event = asyncio.Event()
 
-    def parse_args(self) -> argparse.Namespace:
+    def parse_args(self, argv: list[str] | None = None) -> argparse.Namespace:
         """Parseia argumentos da linha de comando."""
         parser = argparse.ArgumentParser(
             prog="shadowforge",
@@ -136,9 +136,34 @@ class ShadowForgeLauncher:
             help="Modo always-listening (sem push-to-talk)",
         )
         parser.add_argument(
-            "--simulate",
+            "--simulate", "--dry-run",
+            dest="simulate",
             action="store_true",
-            help="Modo simulação - não executa ataques reais",
+            help="Dry-run: nada é executado contra o alvo (escopo vazio é tolerado)",
+        )
+        parser.add_argument(
+            "--scope",
+            action="append",
+            default=[],
+            metavar="ALVO",
+            help="Alvo autorizado (IP, CIDR, host ou *.dominio). Repetível. Obrigatório fora do dry-run",
+        )
+        parser.add_argument(
+            "--scope-file",
+            type=str,
+            default=None,
+            help="Arquivo com um alvo autorizado por linha (# comenta)",
+        )
+        parser.add_argument(
+            "--vision",
+            action="store_true",
+            help="Habilita captura de tela (imagens podem ser enviadas à API NVIDIA)",
+        )
+        parser.add_argument(
+            "--max-iteracoes",
+            type=int,
+            default=None,
+            help="Limite de ciclos OODA (sobrepõe a config)",
         )
         parser.add_argument(
             "--gpu",
@@ -169,7 +194,13 @@ class ShadowForgeLauncher:
             help="Output ASCII puro (sem Rich)",
         )
 
-        return parser.parse_args()
+        args = parser.parse_args(argv)
+        if args.scope_file:
+            caminho = Path(args.scope_file)
+            if not caminho.is_file():
+                parser.error(f"--scope-file não encontrado: {caminho}")
+            args.scope.extend(caminho.read_text(encoding="utf-8").splitlines())
+        return args
 
     def display_banner(self) -> None:
         """Exibe banner cyberpunk."""
@@ -237,9 +268,9 @@ class ShadowForgeLauncher:
 
         return logger
 
-    async def run(self) -> None:
+    async def run(self, argv: list[str] | None = None) -> None:
         """Loop principal assíncrono."""
-        self.args = self.parse_args()
+        self.args = self.parse_args(argv)
         self.display_banner()
 
         logger = self.setup_logging()
@@ -280,10 +311,16 @@ class ShadowForgeLauncher:
                 simulate=self.args.simulate,
                 gpu_id=self.args.gpu if not self.args.no_gpu else -1,
                 campaign=self.args.campaign,
+                scope=self.args.scope,
+                vision_enabled=self.args.vision,
+                max_iteracoes=self.args.max_iteracoes,
             )
 
             console.print("[green]  [+] Core agent.............. OK[/green]")
-            console.print("[green]  [+] Módulo visão............ OK[/green]")
+            if self.args.vision:
+                console.print("[green]  [+] Módulo visão............ HABILITADO[/green]")
+            else:
+                console.print("[dim]  [ ] Módulo visão............ DESATIVADO (--vision)[/dim]")
             console.print("[green]  [+] Módulo controle......... OK[/green]")
             console.print("[green]  [+] Módulo planejamento..... OK[/green]")
 

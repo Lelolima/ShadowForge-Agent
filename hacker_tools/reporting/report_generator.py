@@ -187,7 +187,28 @@ class ReportGenerator:
         crit_count = sum(1 for v in vulns if v.severidade.value == "critical")
         high_count = sum(1 for v in vulns if v.severidade.value == "high")
 
-        nivel_risco = "CRÍTICO" if crit_count > 0 else "ALTO" if high_count > 0 else "MODERADO"
+        medium_count = sum(1 for v in vulns if v.severidade.value == "medium")
+        if crit_count:
+            nivel_risco = "CRÍTICO"
+        elif high_count:
+            nivel_risco = "ALTO"
+        elif medium_count:
+            nivel_risco = "MODERADO"
+        else:
+            nivel_risco = "BAIXO"
+
+        if not vulns:
+            conclusao = (
+                "Nenhuma vulnerabilidade foi registrada nesta campanha. Isso não comprova "
+                "ausência de falhas: considere a cobertura dos testes executados."
+            )
+        else:
+            conclusao = (
+                f"Foram identificadas {len(vulns)} vulnerabilidades, sendo {crit_count} críticas "
+                f"e {high_count} de alta severidade. O nível de risco geral é {nivel_risco}."
+            )
+            if crit_count or high_count:
+                conclusao += " Recomenda-se remediação imediata das vulnerabilidades críticas e altas."
 
         return {
             "objetivo": f"Teste de intrusão autorizado em {estado.alvo_principal or 'escopo definido'}",
@@ -204,11 +225,7 @@ class ReportGenerator:
                 }
                 for v in sorted(vulns, key=lambda x: x.cvss_score, reverse=True)[:3]
             ],
-            "conclusao": (
-                f"Foram identificadas {len(vulns)} vulnerabilidades, sendo {crit_count} críticas "
-                f"e {high_count} de alta severidade. O nível de risco geral é {nivel_risco}. "
-                f"Recomenda-se remediação imediata das vulnerabilidades críticas."
-            ),
+            "conclusao": conclusao,
         }
 
     def _gerar_escopo(self, estado: EstadoAgente) -> Escopo:
@@ -419,7 +436,7 @@ class ReportGenerator:
 
     def exportar_markdown(self, relatorio: RelatorioCompleto) -> str:
         """Exporta relatório em Markdown."""
-        md = "# Relatório de Teste de Intrusão\n\n"
+        md = f"# {relatorio['meta'].get('titulo', 'Relatório de Teste de Intrusão')}\n\n"
         md += f"**Agente:** {relatorio['meta']['agente']}\n"
         md += f"**Data:** {relatorio['meta']['data']}\n"
         md += f"**Campanha:** {relatorio['meta']['campanha_id']}\n\n"
@@ -504,8 +521,9 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #333; color:
 </head>
 <body>
 <div class="container">
-<h1>&#x1F4CB; Relatório de Teste de Intrusão</h1>
 """
+        titulo = relatorio["meta"].get("titulo", "Relatório de Teste de Intrusão")
+        html += f"<h1>&#x1F4CB; {self._esc(titulo)}</h1>\n"
         # Resumo
         resumo_exec = relatorio["resumo_executivo"]  # M-12 FIX: Renomeado de 're' para não sombrear módulo re
         html += f"""<div class="card">

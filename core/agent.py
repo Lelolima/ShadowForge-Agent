@@ -94,6 +94,8 @@ logger = logging.getLogger("shadowforge.core")
 
 
 class ShadowForgeAgent(ODDATemplate):
+    MAX_BLOQUEIOS_CONSECUTIVOS = 3
+
     """Motor agentic principal do ShadowForge.
 
     Implementa loop OODA contínuo com state machine para
@@ -117,6 +119,9 @@ class ShadowForgeAgent(ODDATemplate):
         simulate: bool = False,
         gpu_id: int = 0,
         campaign: str | None = None,
+        scope: list[str] | None = None,
+        vision_enabled: bool = False,
+        max_iteracoes: int | None = None,
     ) -> None:
         # Configuração
         try:
@@ -128,6 +133,11 @@ class ShadowForgeAgent(ODDATemplate):
         self.config.modo = ModoOperacao(mode)
         if target:
             self.config.alvo_inicial = target
+        if scope:
+            # Escopo informado na linha de comando soma-se ao da configuração
+            self.config.etica.whitelist_hosts = [*self.config.etica.whitelist_hosts, *scope]
+        if max_iteracoes is not None:
+            self.config.ooda.max_iteracoes = max_iteracoes
 
         # Estado e memória
         db_path = self.config.data_dir / "state" / "shadowforge.db"
@@ -145,7 +155,10 @@ class ShadowForgeAgent(ODDATemplate):
         # Flags
         self.running = False
         self.voice_enabled = voice_enabled
+        # Captura de tela é opt-in: envia imagens da tela do operador ao modelo NIM
+        self.vision_enabled = vision_enabled
         self.simulate = simulate
+        self._bloqueios_consecutivos = 0
         self.gpu_id = gpu_id
         self._iteracao = 0
         self._shutdown_event = asyncio.Event()
@@ -218,21 +231,25 @@ class ShadowForgeAgent(ODDATemplate):
             logger.warning("Módulo models não disponível: %s (funcionando em modo limitado)", e)
             self._models = None
 
-        # Visão
-        try:
-            from vision.ocr import OCRExtractor
-            from vision.screen import ScreenCapture
-            from vision.understanding import ScreenUnderstanding
-
-            self._vision = {
-                "capture": ScreenCapture(config=self.config),
-                "understanding": ScreenUnderstanding(config=self.config),
-                "ocr": OCRExtractor(config=self.config),
-            }
-            logger.info("[OK] Módulo visão inicializado")
-        except ImportError as e:
-            logger.warning("Módulo visão não disponível: %s", e)
+        # Visão (opt-in: captura a tela real do operador)
+        if not self.vision_enabled:
+            logger.info("Módulo visão desativado (use --vision para habilitar)")
             self._vision = None
+        else:
+            try:
+                from vision.ocr import OCRExtractor
+                from vision.screen import ScreenCapture
+                from vision.understanding import ScreenUnderstanding
+
+                self._vision = {
+                    "capture": ScreenCapture(config=self.config),
+                    "understanding": ScreenUnderstanding(config=self.config),
+                    "ocr": OCRExtractor(config=self.config),
+                }
+                logger.info("[OK] Módulo visão inicializado")
+            except ImportError as e:
+                logger.warning("Módulo visão não disponível: %s", e)
+                self._vision = None
 
         # Fala
         if self.voice_enabled:
@@ -500,7 +517,7 @@ class ShadowForgeAgent(ODDATemplate):
         # Guardrail ético
         acao_nome = decisao.get("acao", "")
         alvo = decisao.get("alvo", self.estado.alvo_principal or "")
-        permitido, motivo = self.config.verificar_etica(acao_nome, alvo)
+        permitido, motivo = self.config.verificar_etica(acao_nome, alvo, simulado=self.simulate)
 
         if not permitido:
             logger.warning("AÇÃO BLOQUEADA: %s | Motivo: %s", acao_nome, motivo)
@@ -515,7 +532,8 @@ class ShadowForgeAgent(ODDATemplate):
     async def _decidir_inicio(self, orientacao: dict) -> dict[str, Any]:
         """Decisão para fase IDLE — iniciar reconhecimento."""
         if self.estado.alvo_principal:
-            self.estado.fase_atual = FaseOperacao.RECON
+            # A transição IDLE -> RECON acontece no ACT (avancar_fase); mudar a fase aqui
+            # fazia o ACT avançar de novo e a fase de reconhecimento era pulada.
             return {"acao": "iniciar_recon", "alvo": self.estado.alvo_principal}
         return {"acao": "aguardar_alvo"}
 
@@ -596,6 +614,13 @@ class ShadowForgeAgent(ODDATemplate):
 
         if acao == "etica_bloqueada":
             logger.warning("Acao bloqueada por guardrails eticos: %s", decisao.get("motivo"))
+            self._bloqueios_consecutivos += 1
+            if self._bloqueios_consecutivos >= self.MAX_BLOQUEIOS_CONSECUTIVOS:
+                console.print(
+                    "    [bold red]Campanha interrompida: ação bloqueada pelos guardrails "
+                    f"{self._bloqueios_consecutivos}x seguidas. Revise alvo/escopo.[/bold red]"
+                )
+                self.running = False
             self.estado.registrar_acao(
                 fase=self.estado.fase_atual.value,
                 tipo="etica_bloqueada",
@@ -605,6 +630,8 @@ class ShadowForgeAgent(ODDATemplate):
                 motivo_etico=decisao.get("motivo", ""),
             )
             return {"sucesso": False, "motivo": "etica_bloqueada"}
+
+        self._bloqueios_consecutivos = 0
 
         if acao == "iniciar_recon":
             console.print(f"    [dim]Iniciando reconhecimento em {self.estado.alvo_principal}[/dim]")
@@ -619,7 +646,10 @@ class ShadowForgeAgent(ODDATemplate):
                         alvo=self.estado.alvo_principal,
                         simulate=self.simulate,
                     )
-                    resultado = {"sucesso": True, "dados": recon_result}
+                    sucesso = not recon_result.get("erro")
+                    if not sucesso:
+                        console.print(f"    [red]Recon não executado: {recon_result.get('erro')}[/red]")
+                    resultado = {"sucesso": sucesso, "dados": recon_result}
                 except Exception as e:
                     logger.error("Erro no recon: %s", e)
                     resultado = {"sucesso": False, "erro": str(e)}
@@ -628,43 +658,52 @@ class ShadowForgeAgent(ODDATemplate):
             self.estado.avancar_fase()
 
         elif acao == "executar_scan":
-            console.print("    [dim]Executando port scan (simulado)...[/dim]")
+            # Fase sem implementação real no loop autônomo: dados ilustrativos, sempre rotulados
+            console.print("    [yellow][SIMULADO][/yellow] [dim]Port scan ilustrativo (sem execução real)[/dim]")
             await asyncio.sleep(0.5)
-            resultado = {"sucesso": True, "portas": [22, 80, 443, 3306, 8080]}
+            resultado = {"sucesso": True, "simulado": True, "portas": [22, 80, 443, 3306, 8080]}
             self.estado.avancar_fase()
 
         elif acao == "executar_enum":
-            console.print("    [dim]Enumerando servicos (simulado)...[/dim]")
+            console.print("    [yellow][SIMULADO][/yellow] [dim]Enumeração ilustrativa (sem execução real)[/dim]")
             await asyncio.sleep(0.3)
-            resultado = {"sucesso": True, "servicos": ["SSH", "HTTP", "MySQL"]}
+            resultado = {"sucesso": True, "simulado": True, "servicos": ["SSH", "HTTP", "MySQL"]}
             self.estado.avancar_fase()
 
         elif acao == "gerar_poc":
-            console.print("    [dim]Gerando PoC para vulnerabilidade...[/dim]")
+            console.print("    [yellow][SIMULADO][/yellow] [dim]Registro de PoC (texto ilustrativo, nada é executado)[/dim]")
             await asyncio.sleep(0.3)
             vuln_id = decisao.get("vulnerabilidade", "unknown")
-            resultado = {"sucesso": True, "poc": f"PoC para {vuln_id}"}
+            resultado = {"sucesso": True, "simulado": True, "poc": f"PoC para {vuln_id}"}
             self.estado.avancar_fase()
 
         elif acao == "analisar_privesc":
-            console.print("    [dim]Analisando privilege escalation...[/dim]")
+            console.print("    [yellow][SIMULADO][/yellow] [dim]Análise de privesc ilustrativa (sem execução real)[/dim]")
             await asyncio.sleep(0.3)
-            resultado = {"sucesso": True, "vetores": ["SUID binary", "kernel exploit"]}
+            resultado = {"sucesso": True, "simulado": True, "vetores": ["SUID binary", "kernel exploit"]}
             self.estado.avancar_fase()
 
         elif acao == "gerar_relatorio":
             console.print("    [dim]Gerando relatorio final...[/dim]")
             if self._hacker_tools and self._hacker_tools.get("report"):
                 try:
-                    report = await self._hacker_tools["report"].gerar(
-                        estado=self.estado,
+                    gerador = self._hacker_tools["report"]
+                    report = await gerador.gerar(estado=self.estado)
+                    if self.simulate:
+                        report["meta"]["titulo"] += " [DRY-RUN: dados ilustrativos, nada foi executado]"
+                    arquivos = await gerador.salvar_em_arquivo(
+                        report,
+                        diretorio=str(self.config.data_dir / "reports"),
+                        formatos=["md", "json", "html"],
                     )
-                    resultado = {"sucesso": True, "relatorio": report}
+                    for formato, caminho in arquivos.items():
+                        console.print(f"    [green]Relatório {formato}: {caminho}[/green]")
+                    resultado = {"sucesso": True, "relatorio": report, "arquivos": arquivos}
                 except Exception as e:
-                    logger.error("Erro no relatorio: %s", e)
-                    resultado = {"sucesso": True, "relatorio": "Relatorio simulado"}
+                    logger.exception("Erro no relatorio: %s", e)
+                    resultado = {"sucesso": False, "erro": str(e)}
             else:
-                resultado = {"sucesso": True, "relatorio": "Relatorio simulado"}
+                resultado = {"sucesso": False, "erro": "gerador de relatório indisponível"}
             self.estado.avancar_fase()
 
         elif acao == "avancar_fase":
