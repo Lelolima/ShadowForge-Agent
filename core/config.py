@@ -10,13 +10,14 @@
 
 from __future__ import annotations
 
-import ipaddress
 import os
 from enum import Enum
 from pathlib import Path
 
 import yaml
 from pydantic import BaseModel, Field, field_validator, model_validator
+
+from core.scope import EscopoAutorizado, alvo_em_lista_bloqueio
 
 
 class ModoOperacao(str, Enum):
@@ -138,7 +139,9 @@ class ConfigEtica(BaseModel):
     modo_simulacao: bool = False
     whitelist_hosts: list[str] = Field(default_factory=list)
     blacklist_hosts: list[str] = Field(
-        default_factory=lambda: ["224.0.0.0/4", "127.0.0.0/8", "169.254.0.0/16"]
+        default_factory=lambda: [
+            "0.0.0.0/8", "127.0.0.0/8", "169.254.0.0/16", "224.0.0.0/4", "255.255.255.255/32",
+        ]
     )
     max_severidade_exploracao: str = "high"
     impedir_destruicao: bool = True
@@ -238,12 +241,13 @@ class ShadowForgeConfig(BaseModel):
             raise FileNotFoundError(f"Arquivo de configuração não encontrado: {caminho}")
 
         with open(caminho, encoding="utf-8") as f:
-            dados = yaml.safe_load(f)
+            dados = yaml.safe_load(f) or {}
 
         # Flatten seções aninhadas do YAML
         agente = dados.get("agente", {})
         nvidia = dados.get("nvidia", {})
-        etica = dados.get("etica", dados.get("agente", {}).get("etica", {}))
+        etica = dados.get("etica", agente.get("etica", {}))
+        ooda = dados.get("ooda", agente.get("ooda", {}))
 
         config_dict = {
             "nome": agente.get("nome", "ShadowForge"),
@@ -255,6 +259,7 @@ class ShadowForgeConfig(BaseModel):
             "tema": agente.get("tema", "matrix"),
             "log_nivel": agente.get("log_nivel", "INFO"),
             "etica": etica,
+            "ooda": ooda,
             "nvidia": nvidia,
         }
 
@@ -270,8 +275,19 @@ class ShadowForgeConfig(BaseModel):
             mode=ModoOperacao(modo),
         )
 
-    def verificar_etica(self, acao: str, alvo: str = "") -> tuple[bool, str]:
+    @property
+    def escopo(self) -> EscopoAutorizado:
+        """Escopo de alvos autorizados (``etica.whitelist_hosts``)."""
+        return EscopoAutorizado.de_lista(self.etica.whitelist_hosts)
+
+    def verificar_etica(self, acao: str, alvo: str = "", simulado: bool = False) -> tuple[bool, str]:
         """Verifica se uma ação é ética e permitida.
+
+        Args:
+            acao: Nome da ação decidida pelo agente.
+            alvo: Alvo da ação (IP, CIDR, hostname ou URL).
+            simulado: True quando a ação não toca o alvo (dry-run). Nesse caso um
+                escopo vazio é tolerado; em execução real o escopo é obrigatório.
 
         Returns:
             Tupla (permitido, motivo) indicando se a ação pode prosseguir.
@@ -279,46 +295,21 @@ class ShadowForgeConfig(BaseModel):
         if not self.etica.exigir_autorizacao:
             return True, "Verificação de autorização desativada (modo desenvolvimento)"
 
-        # Verifica blacklist primeiro
         if alvo:
-            for bloqueado in self.etica.blacklist_hosts:
-                try:
-                    # Suporta tanto IPs simples quanto ranges CIDR
-                    if "/" in bloqueado:
-                        # Verifica se alvo cai dentro da rede CIDR
-                        rede = ipaddress.ip_network(bloqueado, strict=False)
-                        try:
-                            alvo_ip = ipaddress.ip_address(alvo)
-                            if alvo_ip in rede:
-                                return False, f"Alvo {alvo} está na blacklist: {bloqueado}"
-                        except ValueError:
-                            # alvo não é um IP válido (hostname), ignora verificação CIDR
-                            pass
-                    else:
-                        if alvo == bloqueado:
-                            return False, f"Alvo {alvo} está na blacklist: {bloqueado}"
-                except ValueError:
-                    # Entrada de blacklist inválida, pula
-                    continue
+            bloqueio = alvo_em_lista_bloqueio(alvo, self.etica.blacklist_hosts)
+            if bloqueio:
+                return False, f"Alvo {alvo} está na blacklist: {bloqueio}"
 
-        # Verifica whitelist (se definida)
-        if self.etica.whitelist_hosts and alvo:
-            autorizado = False
-            for whitelisted in self.etica.whitelist_hosts:
-                # Verificação exata
-                if alvo == whitelisted:
-                    autorizado = True
-                    break
-                # Verificação de subdomínio válido (ex: www.example.com para example.com)
-                # Evita bypass como example.com.evil.com quando example.com está na whitelist
-                if alvo.endswith('.' + whitelisted):
-                    # Garantir que há exatamente um ponto extra antes do domínio whitelisted
-                    prefix = alvo[:-len(whitelisted)-1]  # Remove ".whitelisted" do final
-                    if prefix.count('.') == 0 and len(prefix) > 0:  # Subdomínio válido (não vazio)
-                        autorizado = True
-                        break
-            if not autorizado:
-                return False, f"Alvo {alvo} não está na whitelist"
+            if self.etica.verificar_escopo:
+                escopo = self.escopo
+                if escopo.vazio:
+                    if not simulado:
+                        return False, (
+                            "Escopo de alvos autorizado não definido: informe --scope "
+                            "(ou etica.whitelist_hosts) ou use --dry-run"
+                        )
+                elif not escopo.permite(alvo):
+                    return False, f"Alvo {alvo} fora do escopo autorizado"
 
         # Ações de reconnaissance são geralmente seguras (após passar blacklist/whitelist)
         acoes_seguras = {"scan", "recon", "enumerate", "crawl", "screenshot", "ocr"}
