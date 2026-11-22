@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" width="1200" height="560" role="img" aria-labelledby="t d">
+  <title id="t">Arquitetura do ShadowForge Agent</title>
+  <desc id="d">Fluxo de dados: CLI main.py carrega configuração e escopo; o agente executa o loop OODA; cada ação passa pelos guardrails (blacklist, escopo, confirmação) antes das ferramentas; resultados vão para estado e relatórios; todos os eventos vão para a trilha de auditoria.</desc>
+  <style>
+    :root { --bg:#ffffff; --fg:#0f172a; --muted:#475569; --box:#f6f8fa; --line:#94a3b8; --flow:#047857; --guard:#b91c1c; --opt:#7c3aed; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9aa4b2; --box:#161b22; --line:#30363d; --flow:#3fb950; --guard:#f85149; --opt:#a371f7; }
+    }
+    .bg { fill: var(--bg); }
+    .box { fill: var(--box); stroke: var(--line); stroke-width: 1.5; }
+    .guard { stroke: var(--guard); stroke-width: 2.5; }
+    .opt { stroke: var(--opt); stroke-dasharray: 6 4; }
+    .h { fill: var(--fg); font: 700 17px system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .s { fill: var(--muted); font: 400 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .lbl { fill: var(--muted); font: 600 12px system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .edge { fill: none; stroke: var(--line); stroke-width: 2; }
+    .flow { fill: none; stroke: var(--flow); stroke-width: 3; stroke-dasharray: 10 14; animation: fluir 1.6s linear infinite; }
+    .flow.audit { stroke: var(--muted); stroke-width: 2; }
+    .ooda circle { fill: var(--box); stroke: var(--flow); stroke-width: 2; }
+    .ooda text { fill: var(--fg); font: 700 13px system-ui, sans-serif; }
+    .pulse { fill: none; stroke: var(--flow); stroke-width: 3; transform-origin: 600px 205px; animation: girar 8s linear infinite; }
+    .ah { fill: var(--line); }
+    @keyframes fluir { to { stroke-dashoffset: -24; } }
+    @keyframes girar { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .flow, .pulse { animation: none; } }
+  </style>
+  <defs>
+    <marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path class="ah" d="M0 0L10 5L0 10z"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1200" height="560" rx="16"/>
+
+  <!-- Entrada -->
+  <rect class="box" x="30" y="60" width="230" height="110" rx="12"/>
+  <text class="h" x="50" y="92">CLI · main.py</text>
+  <text class="s" x="50" y="118">--target --scope</text>
+  <text class="s" x="50" y="138">--dry-run --yes</text>
+  <text class="s" x="50" y="158">--check-config</text>
+
+  <rect class="box" x="30" y="230" width="230" height="110" rx="12"/>
+  <text class="h" x="50" y="262">Config + Escopo</text>
+  <text class="s" x="50" y="288">core/config.py</text>
+  <text class="s" x="50" y="308">core/scope.py</text>
+  <text class="s" x="50" y="328">config/default.yaml</text>
+
+  <!-- Agente OODA -->
+  <rect class="box" x="440" y="60" width="320" height="290" rx="12"/>
+  <text class="h" x="460" y="92">Agente · core/agent.py</text>
+  <circle class="pulse" cx="600" cy="205" r="88" stroke-dasharray="40 513"/>
+  <g class="ooda">
+    <circle cx="600" cy="140" r="30"/><text x="600" y="145" text-anchor="middle">Observe</text>
+    <circle cx="665" cy="205" r="30"/><text x="665" y="210" text-anchor="middle">Orient</text>
+    <circle cx="600" cy="270" r="30"/><text x="600" y="275" text-anchor="middle">Decide</text>
+    <circle cx="535" cy="205" r="30"/><text x="535" y="210" text-anchor="middle">Act</text>
+  </g>
+  <text class="s" x="460" y="335">estado + memória (SQLite)</text>
+
+  <!-- Guardrails -->
+  <rect class="box guard" x="440" y="400" width="320" height="130" rx="12"/>
+  <text class="h" x="460" y="432">Guardrails</text>
+  <text class="s" x="460" y="458">1. blacklist (loopback, metadata)</text>
+  <text class="s" x="460" y="478">2. escopo autorizado obrigatório</text>
+  <text class="s" x="460" y="498">3. confirmação do operador</text>
+  <text class="s" x="460" y="518">4. bloqueios seguidos encerram</text>
+
+  <!-- Ferramentas -->
+  <rect class="box" x="900" y="60" width="270" height="130" rx="12"/>
+  <text class="h" x="920" y="92">Ferramentas (hacker_tools)</text>
+  <text class="s" x="920" y="118">recon/scanner.py · nmap</text>
+  <text class="s" x="920" y="138">recon/triagem.py</text>
+  <text class="s" x="920" y="158">recon/web_review.py</text>
+
+  <rect class="box" x="900" y="230" width="270" height="110" rx="12"/>
+  <text class="h" x="920" y="262">Relatórios</text>
+  <text class="s" x="920" y="288">reporting/report_generator</text>
+  <text class="s" x="920" y="308">data/reports/*.md|json|html</text>
+
+  <rect class="box" x="900" y="400" width="270" height="130" rx="12"/>
+  <text class="h" x="920" y="432">Trilha de auditoria</text>
+  <text class="s" x="920" y="458">core/audit.py</text>
+  <text class="s" x="920" y="478">data/audit/&lt;campanha&gt;.jsonl</text>
+  <text class="s" x="920" y="498">SHA-256 encadeado</text>
+
+  <rect class="box opt" x="30" y="400" width="230" height="130" rx="12"/>
+  <text class="h" x="50" y="432">Opcionais</text>
+  <text class="s" x="50" y="458">NVIDIA NIM (API key)</text>
+  <text class="s" x="50" y="478">visão: --vision</text>
+  <text class="s" x="50" y="498">voz: Riva --voice</text>
+
+  <!-- Arestas: base + fluxo animado -->
+  <g marker-end="url(#seta)">
+    <path class="edge" d="M145 170V228"/>
+    <path class="edge" d="M260 285H438"/>
+    <path class="edge" d="M600 352V398"/>
+    <path class="edge" d="M760 440C830 440 830 125 898 125"/>
+    <path class="edge" d="M1035 190V228"/>
+    <path class="edge" d="M762 500H898"/>
+    <path class="edge" d="M260 465C350 465 350 300 438 300"/>
+  </g>
+  <path class="flow" d="M145 170V228"/>
+  <path class="flow" d="M260 285H438"/>
+  <path class="flow" d="M600 352V398"/>
+  <path class="flow" d="M760 440C830 440 830 125 898 125"/>
+  <path class="flow" d="M1035 190V228"/>
+  <path class="flow audit" d="M762 500H898"/>
+
+  <text class="lbl" x="290" y="275">config + escopo</text>
+  <text class="lbl" x="612" y="382">cada ação</text>
+  <text class="lbl" x="790" y="300">permitida + confirmada</text>
+  <text class="lbl" x="790" y="492">todos os eventos</text>
+  <text class="lbl" x="300" y="390">opcional</text>
+</svg>
