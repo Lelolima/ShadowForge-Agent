@@ -223,7 +223,12 @@ class ShadowForgeConfig(BaseModel):
     data_dir: Path = Field(default_factory=lambda: Path.cwd() / "data")
     logs_dir: Path = Field(default_factory=lambda: Path.cwd() / "logs")
 
-    model_config = {"env_prefix": "SHADOWFORGE", "env_nested_delimiter": "__"}
+    model_config = {
+        "env_prefix": "SHADOWFORGE",
+        "env_nested_delimiter": "__",
+        # Aceita tanto o nome do campo (modo=) quanto o alias (mode=)
+        "populate_by_name": True,
+    }
 
     @classmethod
     def carregar_de_yaml(cls, caminho: str | Path) -> ShadowForgeConfig:
@@ -260,7 +265,6 @@ class ShadowForgeConfig(BaseModel):
         """Carrega configuração de variáveis de ambiente."""
         api_key = os.environ.get("SHADOWFORGE__NVIDIA__API_KEY", "")
         modo = os.environ.get("SHADOWFORGE_MODE", "stealth")
-        print(f"[DEBUG] carregar_de_env: SHADOWFORGE_MODE={os.environ.get('SHADOWFORGE_MODE')!r}, modo={modo!r}, SHADOWFORGE__NVIDIA__API_KEY={os.environ.get('SHADOWFORGE__NVIDIA__API_KEY')!r}, api_key={api_key!r}")
         return cls(
             nvidia=ConfigNVIDIA(api_key=api_key),
             mode=ModoOperacao(modo),

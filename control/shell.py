@@ -14,6 +14,7 @@ import asyncio
 import logging
 import platform
 import shlex
+import subprocess
 import time
 from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING

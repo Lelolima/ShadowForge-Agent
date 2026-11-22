@@ -39,6 +39,14 @@ except ImportError:
     HAS_RICH = False
 
 
+import pytest
+
+# Teste de integração: faz requisições HTTP reais à API NVIDIA NIM.
+# Fica desativado por padrão (CI e execução local) e só roda com opt-in explícito.
+@pytest.mark.skipif(
+    os.environ.get("SHADOWFORGE_RUN_INTEGRATION") != "1" or not os.environ.get("NVIDIA_API_KEY"),
+    reason="integração NVIDIA desativada (defina SHADOWFORGE_RUN_INTEGRATION=1 e NVIDIA_API_KEY)",
+)
 async def test_nim_connection():
     import aiohttp
 

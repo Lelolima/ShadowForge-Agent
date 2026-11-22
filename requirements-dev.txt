@@ -6,6 +6,7 @@
 pytest>=7.4.3
 pytest-asyncio>=0.23.2
 pytest-cov>=4.1.0
+hypothesis>=6.0
 
 # Linting & Formatting
 ruff>=0.1.8
@@ -20,3 +21,5 @@ blake3>=0.2.0
 
 # Pre-commit
 pre-commit>=3.6.0
+# Transitiva (pre-commit/virtualenv): versões < 4.2.1 têm CVEs reportados pelo pip-audit
+filelock>=4.2.1; python_version >= "3.11"  # 4.2.1+ exige Python 3.11 (em 3.10 fica a versão vulnerável, só ferramenta de dev)

@@ -6,6 +6,7 @@ Evaluates alert rules based on metrics and sends notifications via webhook.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -117,7 +118,7 @@ def evaluate_alert_rules(get_metric_fn: Optional[callable] = None) -> None:
             if rule.get("quantile"):
                 # For histogram metrics, we might need to query a specific quantile.
                 # This is a simplification; we assume get_metric_fn returns the quantile if specified.
-                pass
+                exceeds_threshold = value > rule["threshold"]
             else:
                 # For counters and gauges, we compare the value directly
                 if rule["name"] == "subsystem_unhealthy":
@@ -129,7 +130,7 @@ def evaluate_alert_rules(get_metric_fn: Optional[callable] = None) -> None:
             if exceeds_threshold:
                 if not _alert_state.get(rule_name, False):
                     # First time triggering this alert
-                    message = _(rule_name, value)
+                    message = _get_metric_value(rule_name, value)
                     payload = {
                         "alert": rule_name,
                         "message": message,
