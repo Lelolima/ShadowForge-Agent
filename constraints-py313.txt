@@ -63,7 +63,7 @@ requests==2.34.2
 rich==15.0.0
 ruamel.yaml==0.19.1
 ruff==0.17.6
-safety==3.2.3
+safety==3.8.1
 safety-schemas==0.0.21
 setuptools==84.2.1
 shellingham==1.5.4
